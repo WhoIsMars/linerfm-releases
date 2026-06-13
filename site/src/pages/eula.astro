@@ -1,0 +1,20 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+---
+<BaseLayout title="LinerFM — License Agreement" description="LinerFM end-user license agreement.">
+  <Nav />
+  <main class="max-w-3xl mx-auto px-5 py-16">
+    <h1 class="text-3xl font-bold">End-User License Agreement</h1>
+    <ul class="mt-6 space-y-3 text-white/70 text-sm list-disc pl-5">
+      <li>A LinerFM license grants one user a personal, non-transferable right to use the app on up to two Macs.</li>
+      <li>The license may not be resold, shared, or redistributed.</li>
+      <li>Minor updates are included; a future major version may be a separate, discounted purchase for existing customers.</li>
+      <li>The software is provided "as is", without warranty. LinerFM is not affiliated with Spotify.</li>
+      <li>Purchases are final given the free trial, save for genuine edge cases handled at our discretion.</li>
+    </ul>
+    <p class="mt-8 text-xs text-white/40">Last updated: 2026-06-13.</p>
+  </main>
+  <Footer />
+</BaseLayout>
