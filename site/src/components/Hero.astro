@@ -1,6 +1,6 @@
 ---
 import MacWindow from "./MacWindow.astro";
-const checkout = "https://linerfm.lemonsqueezy.com/checkout/buy/df7c9dab-84b4-49ee-a973-31aaaf42d369?embed=1";
+import { CHECKOUT_URL } from "../config/links";
 ---
 <section id="top" class="relative overflow-hidden">
   <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_360px_at_78%_-12%,rgba(29,185,84,.28),transparent_60%),radial-gradient(600px_300px_at_8%_110%,rgba(20,145,68,.18),transparent_60%)]"></div>
@@ -18,7 +18,7 @@ const checkout = "https://linerfm.lemonsqueezy.com/checkout/buy/df7c9dab-84b4-49
         and AI playlist tools. All running locally on your Mac.
       </p>
       <div class="mt-7 flex flex-wrap gap-3">
-        <a href={checkout} class="lemonsqueezy-button btn-primary font-semibold px-6 py-3 rounded-xl">Buy · 10€</a>
+        <a href={CHECKOUT_URL} class="lemonsqueezy-button btn-primary font-semibold px-6 py-3 rounded-xl">Buy · 10€</a>
         <a href="#download" class="btn-ghost font-semibold px-6 py-3 rounded-xl">Try free · 5 days</a>
       </div>
       <p class="mt-4 text-xs text-white/40 tracking-wide">macOS (Apple Silicon) · 100% local · no account · no telemetry</p>

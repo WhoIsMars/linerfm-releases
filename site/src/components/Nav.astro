@@ -1,9 +1,9 @@
 ---
-const checkout = "https://linerfm.lemonsqueezy.com/checkout/buy/df7c9dab-84b4-49ee-a973-31aaaf42d369?embed=1";
+import { CHECKOUT_URL } from "../config/links";
 ---
 <header class="sticky top-0 z-40 backdrop-blur-md bg-ink-950/70 border-b border-white/5">
-  <nav class="max-w-6xl mx-auto flex items-center justify-between px-5 h-14">
-    <a href="#top" class="font-semibold tracking-tight">Liner<span class="text-green-500">FM</span></a>
+  <nav class="max-w-6xl mx-auto flex items-center justify-between px-5 h-14" aria-label="Main">
+    <a href="#top" class="font-semibold tracking-tight" aria-label="LinerFM home">Liner<span class="text-green-500">FM</span></a>
     <div class="hidden sm:flex items-center gap-6 text-sm text-white/70">
       <a href="#how" class="hover:text-white">How it works</a>
       <a href="#features" class="hover:text-white">Features</a>
@@ -12,7 +12,7 @@ const checkout = "https://linerfm.lemonsqueezy.com/checkout/buy/df7c9dab-84b4-49
     </div>
     <div class="flex items-center gap-2">
       <a href="#download" class="btn-ghost text-sm font-semibold px-4 py-2 rounded-lg">Try free</a>
-      <a href={checkout} class="lemonsqueezy-button btn-primary text-sm font-semibold px-4 py-2 rounded-lg">Buy · 10€</a>
+      <a href={CHECKOUT_URL} class="lemonsqueezy-button btn-primary text-sm font-semibold px-4 py-2 rounded-lg">Buy · 10€</a>
     </div>
   </nav>
 </header>
