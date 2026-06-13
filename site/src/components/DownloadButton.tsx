@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { pickDmgAsset, formatBytes, type DmgInfo } from "../lib/release";
+import { pickDmgAsset, formatBytes, type DmgInfo, type GithubRelease } from "../lib/release";
 import { RELEASES_API_URL, RELEASES_LATEST_URL } from "../config/links";
 
 export default function DownloadButton() {
@@ -10,7 +10,7 @@ export default function DownloadButton() {
     let alive = true;
     fetch(RELEASES_API_URL, { headers: { Accept: "application/vnd.github+json" } })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((data) => { if (alive) setInfo(pickDmgAsset(data)); })
+      .then((data: GithubRelease) => { if (alive) setInfo(pickDmgAsset(data)); })
       .catch(() => { if (alive) setFailed(true); });
     return () => { alive = false; };
   }, []);

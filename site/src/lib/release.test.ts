@@ -29,6 +29,17 @@ describe("pickDmgAsset", () => {
   it("strips a leading v from the tag", () => {
     expect(pickDmgAsset(release)?.version).toBe("0.5.3");
   });
+
+  it("prefers the aarch64 dmg over a generic dmg regardless of order", () => {
+    const r = pickDmgAsset({
+      ...release,
+      assets: [
+        { name: "LinerFM_0.5.3_universal.dmg", size: 1, browser_download_url: "https://x/universal.dmg" },
+        { name: "LinerFM_0.5.3_aarch64.dmg", size: 2, browser_download_url: "https://x/aarch64.dmg" },
+      ],
+    });
+    expect(r?.url).toBe("https://x/aarch64.dmg");
+  });
 });
 
 describe("formatBytes", () => {

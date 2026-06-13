@@ -3,7 +3,11 @@ export interface GithubRelease { tag_name: string; html_url: string; assets: Git
 export interface DmgInfo { version: string; url: string; size: number; pageUrl: string; }
 
 export function pickDmgAsset(release: GithubRelease): DmgInfo | null {
-  const dmg = release.assets.find((a) => /_aarch64\.dmg$/i.test(a.name) || /\.dmg$/i.test(a.name));
+  // Prefer the aarch64 dmg; fall back to any dmg (find returns the FIRST match,
+  // so two separate lookups are needed to actually prefer aarch64).
+  const dmg =
+    release.assets.find((a) => /_aarch64\.dmg$/i.test(a.name)) ??
+    release.assets.find((a) => /\.dmg$/i.test(a.name));
   if (!dmg) return null;
   return {
     version: release.tag_name.replace(/^v/, ""),
