@@ -1,0 +1,35 @@
+---
+import "../styles/global.css";
+const {
+  title = "LinerFM — AI playlist curator for Spotify, on your Mac",
+  description = "A desktop widget and AI playlist curator for Spotify. Smart recommendations, AI playlist tools, 100% local on your Mac. No account, no telemetry.",
+  ogImage = "/og-image.png",
+} = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? "http://localhost").href;
+const og = new URL(ogImage, Astro.site ?? "http://localhost").href;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={og} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={og} />
+    <link rel="preconnect" href="https://rsms.me/" />
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+    <script src="https://assets.lemonsqueezy.com/lemon.js" defer is:inline></script>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
