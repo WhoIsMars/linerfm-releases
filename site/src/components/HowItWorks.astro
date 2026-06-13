@@ -1,9 +1,10 @@
 ---
 import MacWindow from "./MacWindow.astro";
+const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
 const steps = [
-  { n: "1", t: "Connect", d: "Add your own Spotify key with a guided wizard, or import your Spotify data export. No middleman." },
-  { n: "2", t: "Curate with AI", d: "Describe a vibe and let the AI build or extend a playlist; every track is verified on Spotify before you commit." },
-  { n: "3", t: "Apply", d: "Push changes straight to your playlist, or copy the track URIs and paste them in the Spotify client." },
+  { n: "1", t: "Connect", img: "connect.png", d: "Add your own Spotify key with a guided wizard, or import your Spotify data export. No middleman." },
+  { n: "2", t: "Curate with AI", img: "ai.png", d: "Describe a vibe and let the AI build or extend a playlist; every track is verified on Spotify before you commit." },
+  { n: "3", t: "Apply", img: "apply.png", d: "Push changes straight to your playlist, or copy the track URIs and paste them in the Spotify client." },
 ];
 ---
 <section id="how" class="max-w-6xl mx-auto px-5 py-20">
@@ -16,7 +17,7 @@ const steps = [
         <h3 class="mt-4 text-lg font-semibold">{s.t}</h3>
         <p class="mt-2 text-sm text-white/60 leading-relaxed">{s.d}</p>
         <MacWindow class="mt-5" glow={false}>
-          <div class="aspect-[16/10] grid place-items-center text-white/25 text-xs">screenshot</div>
+          <img src={`${base}screenshots/${s.img}`} alt={`${s.t} screen`} loading="lazy" class="block w-full aspect-[16/10] object-cover object-top" />
         </MacWindow>
       </div>
     ))}
