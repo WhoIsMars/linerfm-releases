@@ -1,9 +1,10 @@
 ---
 import DownloadButton from "./DownloadButton.tsx";
+const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
 const steps = [
-  { t: "Open the .dmg and drag LinerFM to Applications.", img: "/screenshots/gatekeeper-1.png" },
-  { t: "First launch shows a security warning — that's expected (not yet notarized).", img: "/screenshots/gatekeeper-2.png" },
-  { t: "Go to System Settings → Privacy & Security → click \"Open Anyway\".", img: "/screenshots/gatekeeper-3.png" },
+  { t: "Open the .dmg and drag LinerFM to Applications.", img: `${base}screenshots/gatekeeper-1.png` },
+  { t: "First launch shows a security warning — that's expected (not yet notarized).", img: `${base}screenshots/gatekeeper-2.png` },
+  { t: "Go to System Settings → Privacy & Security → click \"Open Anyway\".", img: `${base}screenshots/gatekeeper-3.png` },
 ];
 ---
 <section id="download" class="max-w-4xl mx-auto px-5 py-20 text-center">
