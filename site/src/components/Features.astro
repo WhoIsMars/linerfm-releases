@@ -1,0 +1,22 @@
+---
+const features = [
+  { t: "AI playlist tools", d: "Create or extend playlists from a prompt, powered by your own free Groq key." },
+  { t: "Desktop widget", d: "A transparent, always-on now-playing widget that lives on your desktop." },
+  { t: "Smart curator", d: "A local ML curator surfaces recommendations and a personal feed from your listening." },
+  { t: "100% local", d: "No account, no telemetry, no server. Your listening data never leaves your Mac." },
+  { t: "History import", d: "Import your Spotify GDPR data export to train the curator on your full history." },
+  { t: "Cinematic canvas", d: "Looping track canvases right in the widget for a cinematic now-playing." },
+];
+---
+<section id="features" class="max-w-6xl mx-auto px-5 py-20">
+  <h2 class="text-3xl font-bold tracking-tight text-center">What makes LinerFM different</h2>
+  <div class="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    {features.map((f) => (
+      <div class="rounded-2xl border border-white/10 bg-white/[.02] p-6 hover:border-green-500/30 transition-colors">
+        <div class="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_12px_#1DB954]"></div>
+        <h3 class="mt-4 font-semibold">{f.t}</h3>
+        <p class="mt-2 text-sm text-white/60 leading-relaxed">{f.d}</p>
+      </div>
+    ))}
+  </div>
+</section>

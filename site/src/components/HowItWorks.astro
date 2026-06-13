@@ -1,0 +1,24 @@
+---
+import MacWindow from "./MacWindow.astro";
+const steps = [
+  { n: "1", t: "Connect", d: "Add your own Spotify key with a guided wizard, or import your Spotify data export. No middleman." },
+  { n: "2", t: "Curate with AI", d: "Describe a vibe and let the AI build or extend a playlist; every track is verified on Spotify before you commit." },
+  { n: "3", t: "Apply", d: "Push changes straight to your playlist, or copy the track URIs and paste them in the Spotify client." },
+];
+---
+<section id="how" class="max-w-6xl mx-auto px-5 py-20">
+  <h2 class="text-3xl font-bold tracking-tight text-center">How it works</h2>
+  <p class="mt-2 text-center text-white/60">Three steps, all on your machine.</p>
+  <div class="mt-12 grid md:grid-cols-3 gap-6">
+    {steps.map((s) => (
+      <div class="rounded-2xl border border-white/10 bg-white/[.02] p-6">
+        <div class="w-9 h-9 rounded-full bg-green-500/15 border border-green-500/30 text-mint-300 grid place-items-center text-sm font-bold">{s.n}</div>
+        <h3 class="mt-4 text-lg font-semibold">{s.t}</h3>
+        <p class="mt-2 text-sm text-white/60 leading-relaxed">{s.d}</p>
+        <MacWindow class="mt-5" glow={false}>
+          <div class="aspect-[16/10] grid place-items-center text-white/25 text-xs">screenshot</div>
+        </MacWindow>
+      </div>
+    ))}
+  </div>
+</section>
