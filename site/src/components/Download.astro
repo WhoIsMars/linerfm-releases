@@ -1,0 +1,33 @@
+---
+import DownloadButton from "./DownloadButton.tsx";
+const steps = [
+  { t: "Open the .dmg and drag LinerFM to Applications.", img: "/screenshots/gatekeeper-1.png" },
+  { t: "First launch shows a security warning — that's expected (not yet notarized).", img: "/screenshots/gatekeeper-2.png" },
+  { t: "Go to System Settings → Privacy & Security → click \"Open Anyway\".", img: "/screenshots/gatekeeper-3.png" },
+];
+---
+<section id="download" class="max-w-4xl mx-auto px-5 py-20 text-center">
+  <h2 class="text-3xl font-bold tracking-tight">Download & install</h2>
+  <p class="mt-2 text-white/60">Free 5-day trial. macOS on Apple Silicon (M1 or newer).</p>
+
+  <div class="mt-8 flex justify-center">
+    <DownloadButton client:visible />
+  </div>
+
+  <div class="mt-12 rounded-2xl border border-white/10 bg-white/[.02] p-6 md:p-8 text-left">
+    <h3 class="font-semibold">First launch on macOS</h3>
+    <p class="mt-1 text-sm text-white/60">LinerFM isn't notarized yet (coming soon). On first open you'll need to allow it:</p>
+    <ol class="mt-6 grid md:grid-cols-3 gap-5">
+      {steps.map((s, i) => (
+        <li class="rounded-xl border border-white/10 overflow-hidden">
+          <img src={s.img} alt={`Step ${i + 1}`} class="w-full aspect-[4/3] object-cover bg-ink-800" loading="lazy" />
+          <p class="p-3 text-xs text-white/70"><span class="text-mint-300 font-semibold">{i + 1}.</span> {s.t}</p>
+        </li>
+      ))}
+    </ol>
+    <div class="mt-6">
+      <p class="text-sm text-white/60">Prefer the terminal? Run:</p>
+      <code class="mt-2 block bg-ink-950 border border-white/10 rounded-lg px-4 py-3 text-sm text-mint-300 select-all">xattr -dr com.apple.quarantine /Applications/LinerFM.app</code>
+    </div>
+  </div>
+</section>
