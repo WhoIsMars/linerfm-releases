@@ -1,0 +1,32 @@
+---
+import MacWindow from "./MacWindow.astro";
+const checkout = "https://linerfm.lemonsqueezy.com/checkout/buy/df7c9dab-84b4-49ee-a973-31aaaf42d369?embed=1";
+---
+<section id="top" class="relative overflow-hidden">
+  <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_360px_at_78%_-12%,rgba(29,185,84,.28),transparent_60%),radial-gradient(600px_300px_at_8%_110%,rgba(20,145,68,.18),transparent_60%)]"></div>
+  <div class="relative max-w-6xl mx-auto grid md:grid-cols-[1.1fr_.9fr] gap-9 items-center px-5 py-20">
+    <div>
+      <span class="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/30 text-mint-300">
+        <span class="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_10px_#1DB954]"></span>
+        Now playing · live on your desktop
+      </span>
+      <h1 class="mt-4 text-4xl md:text-5xl font-bold leading-[1.08] tracking-tight text-gradient">
+        Your desktop, finally curating itself.
+      </h1>
+      <p class="mt-4 text-white/70 text-base md:text-lg max-w-xl leading-relaxed">
+        The AI playlist curator for Spotify — a living now-playing widget, smart recommendations,
+        and AI playlist tools. All running locally on your Mac.
+      </p>
+      <div class="mt-7 flex flex-wrap gap-3">
+        <a href={checkout} class="lemonsqueezy-button btn-primary font-semibold px-6 py-3 rounded-xl">Buy · 10€</a>
+        <a href="#download" class="btn-ghost font-semibold px-6 py-3 rounded-xl">Try free · 5 days</a>
+      </div>
+      <p class="mt-4 text-xs text-white/40 tracking-wide">macOS (Apple Silicon) · 100% local · no account · no telemetry</p>
+    </div>
+    <MacWindow label="LinerFM — widget">
+      <div class="aspect-[16/10] flex items-center justify-center text-white/30 text-sm">
+        Widget screenshot
+      </div>
+    </MacWindow>
+  </div>
+</section>
