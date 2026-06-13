@@ -17,9 +17,9 @@ export default function DownloadButton() {
 
   const href = info?.url ?? RELEASES_LATEST_URL;
   const sub = info
-    ? `v${info.version} · ${formatBytes(info.size)} · Apple Silicon`
+    ? `v${info.version} · ${formatBytes(info.size)} · Intel & Apple Silicon`
     : failed
-    ? "Latest release on GitHub · Apple Silicon"
+    ? "Latest release on GitHub · Intel & Apple Silicon"
     : "Loading latest version…";
 
   return (
