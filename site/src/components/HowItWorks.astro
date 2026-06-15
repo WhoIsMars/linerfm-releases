@@ -17,7 +17,7 @@ const steps = [
         <h3 class="mt-4 text-lg font-semibold">{s.t}</h3>
         <p class="mt-2 text-sm text-white/60 leading-relaxed">{s.d}</p>
         <MacWindow class="mt-5" glow={false}>
-          <img src={`${base}screenshots/${s.img}`} alt={`${s.t} screen`} loading="lazy" class="block w-full aspect-[16/10] object-contain bg-ink-950" />
+          <img src={`${base}screenshots/${s.img}`} alt={`${s.t} screen`} class="block w-full h-auto" />
         </MacWindow>
       </div>
     ))}

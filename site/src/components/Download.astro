@@ -1,11 +1,17 @@
 ---
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import DownloadButton from "./DownloadButton.tsx";
 const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
 const steps = [
-  { t: "Open the .dmg and drag LinerFM to Applications.", img: `${base}screenshots/gatekeeper-1.png` },
-  { t: "First launch shows a security warning — that's expected (not yet notarized).", img: `${base}screenshots/gatekeeper-2.png` },
-  { t: "Go to System Settings → Privacy & Security → click \"Open Anyway\".", img: `${base}screenshots/gatekeeper-3.png` },
+  { t: "Open the .dmg and drag LinerFM to Applications.", file: "gatekeeper-1.png" },
+  { t: "First launch shows a security warning — that's expected (not yet notarized).", file: "gatekeeper-2.png" },
+  { t: "Go to System Settings → Privacy & Security → click \"Open Anyway\".", file: "gatekeeper-3.png" },
 ];
+// Show real screenshots only once they exist; otherwise a clean numbered placeholder.
+const shotsExist = steps.every((s) =>
+  existsSync(fileURLToPath(new URL(`../../public/screenshots/${s.file}`, import.meta.url)))
+);
 ---
 <section id="download" class="max-w-4xl mx-auto px-5 py-20 text-center">
   <h2 class="text-3xl font-bold tracking-tight">Download & install</h2>
@@ -22,7 +28,11 @@ const steps = [
     <ol class="mt-6 grid md:grid-cols-3 gap-5">
       {steps.map((s, i) => (
         <li class="rounded-xl border border-white/10 overflow-hidden">
-          <img src={s.img} alt={`Step ${i + 1}`} class="w-full aspect-[4/3] object-cover bg-ink-800" loading="lazy" />
+          {shotsExist ? (
+            <img src={`${base}screenshots/${s.file}`} alt={`Step ${i + 1}`} class="block w-full h-auto" loading="lazy" />
+          ) : (
+            <div class="aspect-[4/3] grid place-items-center bg-ink-800 text-3xl font-bold text-mint-300/70">{i + 1}</div>
+          )}
           <p class="p-3 text-xs text-white/70"><span class="text-mint-300 font-semibold">{i + 1}.</span> {s.t}</p>
         </li>
       ))}
