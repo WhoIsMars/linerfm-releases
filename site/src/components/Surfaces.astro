@@ -1,0 +1,43 @@
+---
+// Le superfici ambient (0.7.0): notch bar, screensaver, lyrics, volume HUD.
+// Screenshot generati dalle superfici reali con dati di scena (traccia fittizia).
+const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
+---
+<section id="surfaces" class="max-w-6xl mx-auto px-5 py-20">
+  <h2 class="text-3xl font-bold tracking-tight text-center">Your music, on every surface</h2>
+  <p class="mt-2 text-center text-white/60">Beyond the widget: around the notch, under the lyrics, on your idle screen.</p>
+
+  <div class="mt-12 grid md:grid-cols-2 gap-6">
+    <div class="rounded-2xl border border-white/10 bg-white/[.02] p-6 md:col-span-2">
+      <div class="flex items-baseline justify-between flex-wrap gap-2">
+        <h3 class="text-lg font-semibold">Notch bar</h3>
+        <p class="text-sm text-white/50">Hover the notch → full transport, seek bar, themes. First click always counts.</p>
+      </div>
+      <img src={`${base}screenshots/notch.png`} alt="LinerFM notch bar expanded with transport and seek"
+        class="mt-5 block w-full max-w-[640px] mx-auto h-auto rounded-xl" loading="lazy" />
+    </div>
+
+    <div class="rounded-2xl border border-white/10 bg-white/[.02] p-6 md:col-span-2">
+      <div class="flex items-baseline justify-between flex-wrap gap-2">
+        <h3 class="text-lg font-semibold">Music screensaver</h3>
+        <p class="text-sm text-white/50">⇧⌘S or auto on idle — artwork, controls, three themes. Any input exits.</p>
+      </div>
+      <img src={`${base}screenshots/screensaver.png`} alt="LinerFM full-screen music screensaver"
+        class="mt-5 block w-full h-auto rounded-xl border border-white/10" loading="lazy" />
+    </div>
+
+    <div class="rounded-2xl border border-white/10 bg-white/[.02] p-6">
+      <h3 class="text-lg font-semibold">Live lyrics</h3>
+      <p class="mt-1 text-sm text-white/50">Synced line under the notch, four styles. ⇧⌘T.</p>
+      <img src={`${base}screenshots/karaoke.png`} alt="LinerFM synced karaoke lyrics strip"
+        class="mt-5 block w-full h-auto rounded-xl" loading="lazy" />
+    </div>
+
+    <div class="rounded-2xl border border-white/10 bg-white/[.02] p-6">
+      <h3 class="text-lg font-semibold">Volume HUD</h3>
+      <p class="mt-1 text-sm text-white/50">Replaces the macOS overlay, themed after your artwork.</p>
+      <img src={`${base}screenshots/hud.png`} alt="LinerFM custom volume HUD"
+        class="mt-5 block w-full max-w-[320px] mx-auto h-auto rounded-xl" loading="lazy" />
+    </div>
+  </div>
+</section>
