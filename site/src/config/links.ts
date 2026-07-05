@@ -5,6 +5,9 @@
 export const CHECKOUT_URL =
   "https://linerfm.lemonsqueezy.com/checkout/buy/df7c9dab-84b4-49ee-a973-31aaaf42d369?embed=1";
 
+/** Community Discord (invito permanente, canale supporto/annunci). */
+export const DISCORD_URL = "https://discord.gg/vhU22mKHAr";
+
 /** Public binaries repo (GitHub Releases + this site). */
 export const REPO_URL = "https://github.com/WhoIsMars/linerfm-releases";
 export const RELEASES_URL = `${REPO_URL}/releases`;
