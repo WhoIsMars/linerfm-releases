@@ -1,0 +1,29 @@
+---
+// Tour completo (demo 33s): AI playlist, screensaver, widget con canvas e lyrics.
+const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
+---
+<section id="demo" class="max-w-6xl mx-auto px-5 py-20">
+  <h2 class="text-3xl font-bold tracking-tight text-center">See it in action</h2>
+  <p class="mt-2 text-center text-white/60">
+    A 30-second tour: AI playlists from what you play, the full-screen screensaver,
+    and the widget with live canvas and lyrics.
+  </p>
+
+  <div class="mt-10 rounded-2xl border border-white/10 bg-white/[.02] p-3 md:p-4">
+    <div class="relative">
+      <div class="pointer-events-none absolute -inset-6 bg-[radial-gradient(60%_60%_at_50%_40%,rgba(29,185,84,.16),transparent_70%)] blur-2xl"></div>
+      <video
+        src={`${base}video/demo.mp4`}
+        poster={`${base}screenshots/screensaver.png`}
+        autoplay
+        muted
+        loop
+        playsinline
+        controls
+        preload="metadata"
+        aria-label="LinerFM full demo: create AI playlists, launch the music screensaver, and use the now-playing widget with animated canvas and synced lyrics"
+        class="relative block w-full h-auto rounded-xl border border-white/10"
+      ></video>
+    </div>
+  </div>
+</section>
