@@ -8,6 +8,9 @@ export const CHECKOUT_URL =
 /** Community Discord (invito permanente, canale supporto/annunci). */
 export const DISCORD_URL = "https://discord.gg/vhU22mKHAr";
 
+/** X profile (@Liner_FM). */
+export const X_URL = "https://x.com/Liner_FM";
+
 /** Public binaries repo (GitHub Releases + this site). */
 export const REPO_URL = "https://github.com/WhoIsMars/linerfm-releases";
 export const RELEASES_URL = `${REPO_URL}/releases`;
