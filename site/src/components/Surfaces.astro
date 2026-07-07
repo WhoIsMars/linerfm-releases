@@ -5,7 +5,7 @@ const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
 ---
 <section id="surfaces" class="max-w-6xl mx-auto px-5 py-20">
   <h2 class="text-3xl font-bold tracking-tight text-center">Your music, on every surface</h2>
-  <p class="mt-2 text-center text-white/60">Beyond the widget: around the notch, under the lyrics, on your idle screen.</p>
+  <p class="mt-2 text-center text-white/60">Beyond the widget: around the notch, in a quick search, under the lyrics, on your idle screen.</p>
 
   <div class="mt-12 grid md:grid-cols-2 gap-6">
     <div class="rounded-2xl border border-white/10 bg-white/[.02] p-6 md:col-span-2">
@@ -19,11 +19,22 @@ const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
 
     <div class="rounded-2xl border border-white/10 bg-white/[.02] p-6 md:col-span-2">
       <div class="flex items-baseline justify-between flex-wrap gap-2">
+        <h3 class="text-lg font-semibold">Spotlight-style search</h3>
+        <p class="text-sm text-white/50">⌘⇧K, then type a song, album, or artist and hit enter. Never opens Spotify.</p>
+      </div>
+      <video src={`${base}video/search.mp4`} autoplay muted loop playsinline preload="metadata"
+        aria-label="LinerFM Spotlight-style search: type an album and pick from the results"
+        class="mt-5 block w-full max-w-[720px] mx-auto h-auto rounded-xl border border-white/10"></video>
+    </div>
+
+    <div class="rounded-2xl border border-white/10 bg-white/[.02] p-6 md:col-span-2">
+      <div class="flex items-baseline justify-between flex-wrap gap-2">
         <h3 class="text-lg font-semibold">Music screensaver</h3>
         <p class="text-sm text-white/50">⇧⌘S or auto on idle — artwork, controls, three themes. Any input exits.</p>
       </div>
-      <img src={`${base}screenshots/screensaver.png`} alt="LinerFM full-screen music screensaver"
-        class="mt-5 block w-full h-auto rounded-xl border border-white/10" loading="lazy" />
+      <video src={`${base}video/screensaver.mp4`} autoplay muted loop playsinline preload="metadata"
+        aria-label="LinerFM full-screen music screensaver in the Glass theme"
+        class="mt-5 block w-full h-auto rounded-xl border border-white/10"></video>
     </div>
 
     <div class="rounded-2xl border border-white/10 bg-white/[.02] p-6">
