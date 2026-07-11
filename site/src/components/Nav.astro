@@ -1,19 +1,21 @@
 ---
 import { CHECKOUT_URL, DISCORD_URL, X_URL } from "../config/links";
+const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
 ---
 <header class="sticky top-0 z-40 backdrop-blur-md bg-ink-950/70 border-b border-white/5">
   <nav class="max-w-6xl mx-auto flex items-center justify-between px-5 h-14" aria-label="Main">
-    <a href="#top" class="font-semibold tracking-tight" aria-label="LinerFM home">Liner<span class="text-green-500">FM</span></a>
+    <a href={base} class="font-semibold tracking-tight" aria-label="LinerFM home">Liner<span class="text-green-500">FM</span></a>
     <div class="hidden sm:flex items-center gap-6 text-sm text-white/70">
-      <a href="#how" class="hover:text-white">How it works</a>
-      <a href="#features" class="hover:text-white">Features</a>
-      <a href="#pricing" class="hover:text-white">Pricing</a>
-      <a href="#faq" class="hover:text-white">FAQ</a>
+      <a href={`${base}#how`} class="hover:text-white">How it works</a>
+      <a href={`${base}#features`} class="hover:text-white">Features</a>
+      <a href={`${base}#pricing`} class="hover:text-white">Pricing</a>
+      <a href={`${base}#faq`} class="hover:text-white">FAQ</a>
+      <a href={`${base}changelog`} class="hover:text-white">What's new</a>
       <a href={DISCORD_URL} class="hover:text-white">Discord</a>
       <a href={X_URL} class="hover:text-white">X</a>
     </div>
     <div class="flex items-center gap-2">
-      <a href="#download" class="btn-ghost text-sm font-semibold px-4 py-2 rounded-lg">Try free</a>
+      <a href={`${base}#download`} class="btn-ghost text-sm font-semibold px-4 py-2 rounded-lg">Try free</a>
       <a href={CHECKOUT_URL} class="lemonsqueezy-button btn-primary text-sm font-semibold px-4 py-2 rounded-lg">Buy · 10€</a>
     </div>
   </nav>

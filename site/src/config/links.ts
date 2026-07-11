@@ -19,3 +19,7 @@ export const RELEASES_LATEST_URL = `${REPO_URL}/releases/latest`;
 /** GitHub API endpoint for the latest release (anonymous, public). */
 export const RELEASES_API_URL =
   "https://api.github.com/repos/WhoIsMars/linerfm-releases/releases/latest";
+
+/** GitHub API endpoint for the release list (What's new page). */
+export const RELEASES_LIST_API_URL =
+  "https://api.github.com/repos/WhoIsMars/linerfm-releases/releases?per_page=15";

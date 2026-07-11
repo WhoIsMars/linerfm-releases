@@ -1,0 +1,20 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import ChangelogList from "../components/ChangelogList.tsx";
+---
+<BaseLayout title="LinerFM — What's new" description="Release notes for every LinerFM update: new surfaces, fixes and improvements.">
+  <Nav />
+  <main class="max-w-3xl mx-auto px-5 py-16">
+    <h1 class="text-3xl font-bold">What's new</h1>
+    <p class="mt-4 text-white/70">
+      LinerFM ships updates often and the app updates itself in one click.
+      This page lists every release, straight from the release feed.
+    </p>
+    <div class="mt-10">
+      <ChangelogList client:load />
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>
