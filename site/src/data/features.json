@@ -1,0 +1,138 @@
+{
+  "_generated": "da docs/product-surface.json nel repo linerfm — non modificare a mano, gira scripts/sync-product-surface.mjs",
+  "updated": "2026-07-26",
+  "cards": [
+    {
+      "id": "widget",
+      "t": "Desktop widget",
+      "d": "A transparent, always-on now-playing widget with looping track canvases.",
+      "since": "0.1.0"
+    },
+    {
+      "id": "notch-hover",
+      "t": "Notch bar",
+      "d": "Hover the notch for transport, a draggable seek bar and quick actions, in three themes.",
+      "since": "0.7.0"
+    },
+    {
+      "id": "dynamic-color",
+      "t": "Artwork colors",
+      "d": "Every surface re-colors itself from the album art of the track that is playing.",
+      "since": "0.3.0"
+    },
+    {
+      "id": "search",
+      "t": "Spotlight-style search",
+      "d": "Hit a shortcut, type a song, album or artist, press enter. Spotify never comes to the front.",
+      "since": "0.6.0"
+    },
+    {
+      "id": "karaoke",
+      "t": "Live lyrics",
+      "d": "Synced karaoke line in a strip below the notch, in four typographic styles.",
+      "since": "0.7.0"
+    },
+    {
+      "id": "screensaver",
+      "t": "Music screensaver",
+      "d": "Full-screen artwork and controls on a shortcut or when idle. Any input exits.",
+      "since": "0.7.0"
+    },
+    {
+      "id": "volume-hud",
+      "t": "Volume HUD",
+      "d": "A custom volume overlay themed after the album art, replacing the macOS one.",
+      "since": "0.7.0"
+    },
+    {
+      "id": "youtube",
+      "t": "YouTube, not just Spotify",
+      "d": "Play a YouTube link in a floating LinerFM window, or leave it in your browser. Either way the widget, the notch and the lyrics follow along.",
+      "since": "0.9.0"
+    },
+    {
+      "id": "discord-presence",
+      "t": "Discord presence",
+      "d": "Show what you are listening to on your Discord profile. One toggle, on by default.",
+      "since": "0.8.0"
+    },
+    {
+      "id": "ai-playlists",
+      "t": "AI playlist tools",
+      "d": "Create or extend playlists from a prompt, powered by your own free Groq key.",
+      "since": "0.5.0"
+    },
+    {
+      "id": "curator",
+      "t": "Smart curator",
+      "d": "A local ML curator learns what you skip and keeps your playlists in shape.",
+      "since": "0.4.0"
+    },
+    {
+      "id": "local",
+      "t": "100% local",
+      "d": "No account, no telemetry, no server. Your listening data never leaves your Mac.",
+      "since": "0.1.0"
+    }
+  ],
+  "surfaces": [
+    {
+      "id": "notch-hover",
+      "title": "Notch bar",
+      "blurb": "Hover the notch, get full transport, seek bar, themes. First click always counts.",
+      "media": {
+        "kind": "video",
+        "src": "video/notch.mp4",
+        "maxWidth": "860px"
+      },
+      "alt": "LinerFM notch bar: hover to expand into full transport, seek bar, and theme switching",
+      "wide": true
+    },
+    {
+      "id": "search",
+      "title": "Spotlight-style search",
+      "blurb": "Cmd Shift K, then type a song, album, or artist and hit enter. Never opens Spotify.",
+      "media": {
+        "kind": "video",
+        "src": "video/search.mp4",
+        "maxWidth": "720px"
+      },
+      "alt": "LinerFM Spotlight-style search: type an album and pick from the results",
+      "wide": true
+    },
+    {
+      "id": "screensaver",
+      "title": "Music screensaver",
+      "blurb": "Shift Cmd S or auto on idle: artwork, controls, three themes. Any input exits.",
+      "media": {
+        "kind": "video",
+        "src": "video/screensaver.mp4"
+      },
+      "alt": "LinerFM full-screen music screensaver in the Glass theme",
+      "wide": true
+    },
+    {
+      "id": "karaoke",
+      "title": "Live lyrics",
+      "blurb": "Synced line under the notch, four styles. Shift Cmd T.",
+      "media": {
+        "kind": "image",
+        "src": "screenshots/karaoke.png"
+      },
+      "alt": "LinerFM synced karaoke lyrics strip",
+      "wide": false
+    },
+    {
+      "id": "volume-hud",
+      "title": "Volume HUD",
+      "blurb": "Replaces the macOS overlay, themed after your artwork.",
+      "media": {
+        "kind": "image",
+        "src": "screenshots/hud.png",
+        "maxWidth": "320px"
+      },
+      "alt": "LinerFM custom volume HUD",
+      "wide": false
+    }
+  ]
+}

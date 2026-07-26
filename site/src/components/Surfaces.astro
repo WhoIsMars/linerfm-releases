@@ -1,55 +1,50 @@
 ---
-// Le superfici ambient (0.7.0): notch bar, screensaver, lyrics, volume HUD.
-// Screenshot generati dalle superfici reali con dati di scena (traccia fittizia).
+// Le superfici ambient (notch bar, search, screensaver, lyrics, volume HUD).
+// Contenuto da src/data/features.json, generato da docs/product-surface.json nel
+// repo dell'app: qui resta solo il layout. Screenshot e video sono girati dalle
+// superfici reali con dati di scena (traccia fittizia).
+import data from "../data/features.json";
+
 const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
+const surfaces = data.surfaces;
 ---
 <section id="surfaces" class="max-w-6xl mx-auto px-5 py-20">
   <h2 class="text-3xl font-bold tracking-tight text-center">Your music, on every surface</h2>
   <p class="mt-2 text-center text-white/60">Beyond the widget: around the notch, in a quick search, under the lyrics, on your idle screen.</p>
 
   <div class="mt-12 grid md:grid-cols-2 gap-6">
-    <div class="rounded-2xl border border-white/10 bg-white/[.02] p-6 md:col-span-2">
-      <div class="flex items-baseline justify-between flex-wrap gap-2">
-        <h3 class="text-lg font-semibold">Notch bar</h3>
-        <p class="text-sm text-white/50">Hover the notch → full transport, seek bar, themes. First click always counts.</p>
+    {surfaces.map((s) => (
+      <div class:list={["rounded-2xl border border-white/10 bg-white/[.02] p-6", s.wide && "md:col-span-2"]}>
+        {s.wide ? (
+          <div class="flex items-baseline justify-between flex-wrap gap-2">
+            <h3 class="text-lg font-semibold">{s.title}</h3>
+            <p class="text-sm text-white/50">{s.blurb}</p>
+          </div>
+        ) : (
+          <>
+            <h3 class="text-lg font-semibold">{s.title}</h3>
+            <p class="mt-1 text-sm text-white/50">{s.blurb}</p>
+          </>
+        )}
+
+        {s.media.kind === "video" ? (
+          <video
+            src={`${base}${s.media.src}`}
+            autoplay muted loop playsinline preload="metadata"
+            aria-label={s.alt}
+            style={s.media.maxWidth ? `max-width:${s.media.maxWidth}` : undefined}
+            class="mt-5 block w-full mx-auto h-auto rounded-xl border border-white/10"
+          ></video>
+        ) : (
+          <img
+            src={`${base}${s.media.src}`}
+            alt={s.alt}
+            style={s.media.maxWidth ? `max-width:${s.media.maxWidth}` : undefined}
+            class="mt-5 block w-full mx-auto h-auto rounded-xl"
+            loading="lazy"
+          />
+        )}
       </div>
-      <video src={`${base}video/notch.mp4`} autoplay muted loop playsinline preload="metadata"
-        aria-label="LinerFM notch bar: hover to expand into full transport, seek bar, and theme switching"
-        class="mt-5 block w-full max-w-[860px] mx-auto h-auto rounded-xl"></video>
-    </div>
-
-    <div class="rounded-2xl border border-white/10 bg-white/[.02] p-6 md:col-span-2">
-      <div class="flex items-baseline justify-between flex-wrap gap-2">
-        <h3 class="text-lg font-semibold">Spotlight-style search</h3>
-        <p class="text-sm text-white/50">⌘⇧K, then type a song, album, or artist and hit enter. Never opens Spotify.</p>
-      </div>
-      <video src={`${base}video/search.mp4`} autoplay muted loop playsinline preload="metadata"
-        aria-label="LinerFM Spotlight-style search: type an album and pick from the results"
-        class="mt-5 block w-full max-w-[720px] mx-auto h-auto rounded-xl border border-white/10"></video>
-    </div>
-
-    <div class="rounded-2xl border border-white/10 bg-white/[.02] p-6 md:col-span-2">
-      <div class="flex items-baseline justify-between flex-wrap gap-2">
-        <h3 class="text-lg font-semibold">Music screensaver</h3>
-        <p class="text-sm text-white/50">⇧⌘S or auto on idle — artwork, controls, three themes. Any input exits.</p>
-      </div>
-      <video src={`${base}video/screensaver.mp4`} autoplay muted loop playsinline preload="metadata"
-        aria-label="LinerFM full-screen music screensaver in the Glass theme"
-        class="mt-5 block w-full h-auto rounded-xl border border-white/10"></video>
-    </div>
-
-    <div class="rounded-2xl border border-white/10 bg-white/[.02] p-6">
-      <h3 class="text-lg font-semibold">Live lyrics</h3>
-      <p class="mt-1 text-sm text-white/50">Synced line under the notch, four styles. ⇧⌘T.</p>
-      <img src={`${base}screenshots/karaoke.png`} alt="LinerFM synced karaoke lyrics strip"
-        class="mt-5 block w-full h-auto rounded-xl" loading="lazy" />
-    </div>
-
-    <div class="rounded-2xl border border-white/10 bg-white/[.02] p-6">
-      <h3 class="text-lg font-semibold">Volume HUD</h3>
-      <p class="mt-1 text-sm text-white/50">Replaces the macOS overlay, themed after your artwork.</p>
-      <img src={`${base}screenshots/hud.png`} alt="LinerFM custom volume HUD"
-        class="mt-5 block w-full max-w-[320px] mx-auto h-auto rounded-xl" loading="lazy" />
-    </div>
+    ))}
   </div>
 </section>
