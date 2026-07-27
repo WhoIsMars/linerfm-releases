@@ -1,5 +1,5 @@
 ---
-import { DISCORD_URL, X_URL, REPO_URL } from "../config/links";
+import { DISCORD_URL, X_URL, INSTAGRAM_URL, REPO_URL } from "../config/links";
 const year = new Date().getFullYear();
 const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
 ---
@@ -11,6 +11,7 @@ const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
       <a href={`${base}eula`} class="hover:text-white">License (EULA)</a>
       <a href={DISCORD_URL} class="hover:text-white">Discord</a>
       <a href={X_URL} class="hover:text-white">X</a>
+      <a href={INSTAGRAM_URL} class="hover:text-white">Instagram</a>
       <a href={REPO_URL} class="hover:text-white">GitHub</a>
       <a href={`${base}changelog`} class="hover:text-white">What's new</a>
     </div>

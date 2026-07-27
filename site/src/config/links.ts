@@ -11,6 +11,9 @@ export const DISCORD_URL = "https://discord.gg/vhU22mKHAr";
 /** X profile (@Liner_FM). */
 export const X_URL = "https://x.com/Liner_FM";
 
+/** Instagram profile (@linerfm), where the feature Reels live. */
+export const INSTAGRAM_URL = "https://www.instagram.com/linerfm/";
+
 /** Public binaries repo (GitHub Releases + this site). */
 export const REPO_URL = "https://github.com/WhoIsMars/linerfm-releases";
 export const RELEASES_URL = `${REPO_URL}/releases`;
