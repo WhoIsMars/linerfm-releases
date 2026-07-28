@@ -1,6 +1,6 @@
 {
   "_generated": "da docs/product-surface.json nel repo linerfm — non modificare a mano, gira scripts/sync-product-surface.mjs",
-  "updated": "2026-07-27",
+  "updated": "2026-07-28",
   "cards": [
     {
       "id": "widget",
@@ -46,8 +46,14 @@
     },
     {
       "id": "youtube",
-      "t": "YouTube, not just Spotify",
+      "t": "YouTube in its own window",
       "d": "Play a YouTube link in a floating LinerFM window, or leave it in your browser. Either way the widget, the notch and the lyrics follow along.",
+      "since": "0.9.0"
+    },
+    {
+      "id": "youtube-music",
+      "t": "Your YouTube Music library",
+      "d": "Search, playlists, likes, Discover and the AI tools all work on YouTube Music, not only Spotify. Pick the source once and the whole app follows it.",
       "since": "0.9.0"
     },
     {
