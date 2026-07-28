@@ -75,6 +75,12 @@
       "since": "0.9.0"
     },
     {
+      "id": "previews",
+      "t": "Hear it before you add it",
+      "d": "Tap play on any result for a 30 second taste. Whatever you were listening to pauses, then picks back up where it left off.",
+      "since": "0.9.0"
+    },
+    {
       "id": "curator",
       "t": "Smart curator",
       "d": "A local ML curator learns what you skip and keeps your playlists in shape.",
