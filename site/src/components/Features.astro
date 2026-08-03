@@ -4,8 +4,12 @@
 // si aggiunge là e compare qui senza toccare questo componente.
 import data from "../data/features.json";
 
-const CURRENT = "0.9.0";
 const features = data.cards;
+// Il badge "New" segue la versione piu' alta fra le card, non un numero scritto
+// a mano: scritto a mano resta indietro al primo rilascio che non aggiunge
+// feature, e la 0.9.1 e' stata esattamente quel caso.
+const rank = (v) => v.split(".").map(Number).reduce((a, n) => a * 1000 + n, 0);
+const CURRENT = features.map((f) => f.since).sort((a, b) => rank(a) - rank(b)).at(-1);
 ---
 <section id="features" class="max-w-6xl mx-auto px-5 py-20">
   <h2 class="text-3xl font-bold tracking-tight text-center">What makes LinerFM different</h2>
