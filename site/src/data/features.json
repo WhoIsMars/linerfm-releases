@@ -1,6 +1,6 @@
 {
   "_generated": "da docs/product-surface.json nel repo linerfm — non modificare a mano, gira scripts/sync-product-surface.mjs",
-  "updated": "2026-07-28",
+  "updated": "2026-08-10",
   "cards": [
     {
       "id": "widget",
@@ -35,7 +35,7 @@
     {
       "id": "screensaver",
       "t": "Music screensaver",
-      "d": "Full-screen artwork and controls on a shortcut or when idle. Any input exits.",
+      "d": "Full screen artwork and lyrics when you step away, on every display you have connected, each one placed exactly on its own screen.",
       "since": "0.7.0"
     },
     {
@@ -91,6 +91,42 @@
       "t": "100% local",
       "d": "No account, no telemetry, no server. Your listening data never leaves your Mac.",
       "since": "0.1.0"
+    },
+    {
+      "id": "listening-stats",
+      "t": "Your listening",
+      "d": "Hours played, top artists and tracks, the times of day you press play, and what you have quietly cooled off on. Save a card you can post.",
+      "since": "0.10.0"
+    },
+    {
+      "id": "onboarding",
+      "t": "Guided setup",
+      "d": "Four steps that check every key and connection while you paste them, so nothing fails silently a week later.",
+      "since": "0.10.0"
+    },
+    {
+      "id": "connect-devices",
+      "t": "Play on any device",
+      "d": "Move the music to a phone, a speaker or another Mac from the widget, and see what plays next in the queue.",
+      "since": "0.10.0"
+    },
+    {
+      "id": "lastfm",
+      "t": "Last.fm scrobbling",
+      "d": "Everything you play lands on your Last.fm profile, with an offline queue that catches up on its own.",
+      "since": "0.10.0"
+    },
+    {
+      "id": "shortcuts",
+      "t": "Your own shortcuts",
+      "d": "Remap every global shortcut, or drive LinerFM from a script with linerfm:// links.",
+      "since": "0.10.0"
+    },
+    {
+      "id": "menubar-track",
+      "t": "Track in the menu bar",
+      "d": "What is playing, next to the menu bar icon. Trimmed to fit, and it never scrolls.",
+      "since": "0.10.0"
     }
   ],
   "surfaces": [
