@@ -1,6 +1,6 @@
 {
   "_generated": "da docs/product-surface.json nel repo linerfm — non modificare a mano, gira scripts/sync-product-surface.mjs",
-  "updated": "2026-08-10",
+  "updated": "2026-09-02",
   "cards": [
     {
       "id": "widget",
@@ -37,6 +37,12 @@
       "t": "Music screensaver",
       "d": "Full screen artwork and lyrics when you step away, on every display you have connected, each one placed exactly on its own screen.",
       "since": "0.7.0"
+    },
+    {
+      "id": "multi-display",
+      "t": "Independent displays",
+      "d": "Duplicate the widget, choose screensaver displays, and toggle each screen's notch independently.",
+      "since": "0.10.1"
     },
     {
       "id": "volume-hud",
@@ -82,8 +88,8 @@
     },
     {
       "id": "curator",
-      "t": "Smart curator",
-      "d": "A local ML curator learns what you skip and keeps your playlists in shape.",
+      "t": "LinerFM AI",
+      "d": "Local AI learns what you skip and keeps your playlists in shape.",
       "since": "0.4.0"
     },
     {
