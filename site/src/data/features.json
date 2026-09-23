@@ -1,6 +1,6 @@
 {
   "_generated": "da docs/product-surface.json nel repo linerfm — non modificare a mano, gira scripts/sync-product-surface.mjs",
-  "updated": "2026-09-02",
+  "updated": "2026-09-23",
   "cards": [
     {
       "id": "widget",
@@ -133,6 +133,18 @@
       "t": "Track in the menu bar",
       "d": "What is playing, next to the menu bar icon. Trimmed to fit, and it never scrolls.",
       "since": "0.10.0"
+    },
+    {
+      "id": "new-look",
+      "t": "A real Mac app",
+      "d": "A glass sidebar, a library of covers, and Settings in panes like System Settings.",
+      "since": "0.11.0"
+    },
+    {
+      "id": "auto-updates",
+      "t": "Updates find you",
+      "d": "LinerFM checks for new versions on its own and tells you in the menu bar and in Settings.",
+      "since": "0.11.0"
     }
   ],
   "surfaces": [
