@@ -1,6 +1,6 @@
 {
   "_generated": "da docs/product-surface.json nel repo linerfm — non modificare a mano, gira scripts/sync-product-surface.mjs",
-  "updated": "2026-09-23",
+  "updated": "2026-09-29",
   "cards": [
     {
       "id": "widget",
@@ -145,6 +145,24 @@
       "t": "Updates find you",
       "d": "LinerFM checks for new versions on its own and tells you in the menu bar and in Settings.",
       "since": "0.11.0"
+    },
+    {
+      "id": "track-stats",
+      "t": "Every song, with its numbers",
+      "d": "See how many times each song in a playlist was played or skipped, when you last played it and how often you cut it short.",
+      "since": "0.12.0"
+    },
+    {
+      "id": "skip-based-removals",
+      "t": "Removals that follow your skips",
+      "d": "LinerFM suggests removing songs you keep skipping or never play, tells you the numbers, and leaves recent additions alone.",
+      "since": "0.12.0"
+    },
+    {
+      "id": "fits-any-screen",
+      "t": "A window that fits any screen",
+      "d": "The main window adapts from a small window to a very large display: the action bar stays in place and long titles wrap instead of being cut.",
+      "since": "0.12.0"
     }
   ],
   "surfaces": [
