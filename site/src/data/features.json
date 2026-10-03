@@ -1,6 +1,6 @@
 {
   "_generated": "da docs/product-surface.json nel repo linerfm — non modificare a mano, gira scripts/sync-product-surface.mjs",
-  "updated": "2026-09-29",
+  "updated": "2026-10-03",
   "cards": [
     {
       "id": "widget",
@@ -163,6 +163,12 @@
       "t": "A window that fits any screen",
       "d": "The main window adapts from a small window to a very large display: the action bar stays in place and long titles wrap instead of being cut.",
       "since": "0.12.0"
+    },
+    {
+      "id": "terminal-theme",
+      "t": "A terminal theme for the widget",
+      "d": "Turn the widget into a terminal-style player: tabs for now playing, queue, library, lyrics, stats and devices, keyboard navigation, and typed commands like vol 40 or seek 1:30. Search follows the same look.",
+      "since": "0.13.0"
     }
   ],
   "surfaces": [
