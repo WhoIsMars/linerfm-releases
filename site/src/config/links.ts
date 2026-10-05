@@ -3,7 +3,7 @@
 
 /** Lemon Squeezy checkout. `?embed=1` makes lemon.js open it as an overlay. */
 export const CHECKOUT_URL =
-  "https://linerfm.lemonsqueezy.com/checkout/buy/df7c9dab-84b4-49ee-a973-31aaaf42d369?embed=1";
+  "https://linerfm.lemonsqueezy.com/checkout/buy/70b5030a-aef8-4f1a-8d26-5e31330e1d83?embed=1";
 
 /** Community Discord (invito permanente, canale supporto/annunci). */
 export const DISCORD_URL = "https://discord.gg/vhU22mKHAr";
