@@ -1,6 +1,6 @@
 {
   "_generated": "da docs/product-surface.json nel repo linerfm — non modificare a mano, gira scripts/sync-product-surface.mjs",
-  "updated": "2026-10-03",
+  "updated": "2026-10-06",
   "cards": [
     {
       "id": "widget",
@@ -169,6 +169,18 @@
       "t": "A terminal theme for the widget",
       "d": "Turn the widget into a terminal-style player: tabs for now playing, queue, library, lyrics, stats and devices, keyboard navigation, and typed commands like vol 40 or seek 1:30. Search follows the same look.",
       "since": "0.13.0"
+    },
+    {
+      "id": "app-follows-widget-theme",
+      "t": "The whole app follows your widget theme",
+      "d": "Pick Cinematic and the windows fill with the colors of the track; pick Terminal and they turn into a monospaced console, like the widget.",
+      "since": "0.14.0"
+    },
+    {
+      "id": "full-window-screens",
+      "t": "Screens that use the whole window",
+      "d": "A large now playing panel in the sidebar, Settings on a single page, and every screen laid out to fill the window instead of leaving empty space.",
+      "since": "0.14.0"
     }
   ],
   "surfaces": [
