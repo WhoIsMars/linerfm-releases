@@ -1,39 +1,518 @@
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   I token vengono da sidecar/linerfm/ui/src/tokens.css nel repo dell'app: il
+   sito e il prodotto usano le stesse superfici, gli stessi fili, la stessa
+   tipografia. Chi guarda la pagina sta già guardando LinerFM.
+
+   Il verde è il colore di un'azione, non un'atmosfera: sta sui pulsanti di
+   acquisto e prova e sugli indicatori di stato veri, e da nessun'altra parte.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 @theme {
+  /* Fondi */
   --color-ink-950: #050505;
   --color-ink-900: #0a0a0c;
   --color-ink-800: #141418;
   --color-ink-700: #1c1c22;
-  --color-green-500: #1DB954;
+
+  /* Superfici in vetro, dall'app */
+  --color-panel: rgba(255, 255, 255, 0.04);
+  --color-panel-2: rgba(255, 255, 255, 0.06);
+  --color-hairline: rgba(255, 255, 255, 0.1);
+  /* contorno dei controlli: 3,7:1 sul fondo, la soglia per un bordo che deve
+     rendere percepibile un pulsante */
+  --color-control: rgba(255, 255, 255, 0.4);
+
+  /* Testo: tre livelli, tutti sopra 4,5:1 sul fondo */
+  --color-fg: #f2f4f2;
+  --color-fg-2: rgba(255, 255, 255, 0.72);
+  --color-fg-3: rgba(255, 255, 255, 0.6);
+
+  /* Azione */
+  --color-green-500: #1db954;
   --color-green-600: #149144;
   --color-mint-300: #9ff0bd;
   --color-danger: #ff6b6b;
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "SF Pro Text", sans-serif;
+
+  --radius-panel: 14px;
+  --radius-control: 10px;
+
+  /* Tipografia di sistema: su Mac è SF Pro, la stessa dell'app. Toglie anche la
+     dipendenza da rsms.me su una pagina che vende "no account, no telemetry". */
+  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
 }
 
 html {
+  /* I controlli nativi (barre di scorrimento, menu a tendina) restavano in
+     stile chiaro sopra un fondo quasi nero senza questa riga. */
+  color-scheme: dark;
   scroll-behavior: smooth;
   background-color: var(--color-ink-950);
-  color: #f2f4f2;
+  color: var(--color-fg);
 }
 body {
   margin: 0;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  /* la stessa stretta dei titoli di sistema: su SF Pro le dimensioni grandi
+     vogliono meno spazio fra le lettere, non di più */
+  letter-spacing: -0.011em;
 }
 
+/* Chi ha chiesto meno movimento al sistema non deve ricevere lo scorrimento
+   animato né le transizioni decorative. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* Focus da tastiera: l'anello di default del browser non arriva al 3:1 sul
+   fondo ink-950. Il verde menta ci arriva con margine (15,2:1). */
+:focus-visible {
+  outline: 3px solid var(--color-mint-300);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+:focus:not(:focus-visible) { outline: none; }
+
+/* Salta la navigazione: visibile solo quando prende il focus. */
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100%;
+  z-index: 100;
+  padding: .75rem 1.25rem;
+  border-radius: 0 0 .5rem .5rem;
+  background: var(--color-mint-300);
+  color: #04170c;
+  font-weight: 600;
+  transition: top .15s ease;
+}
+.skip-link:focus { top: 0; }
+
+/* ── Area di tocco dei link di servizio ───────────────────────────────────
+   I link di navigazione e del piè di pagina sono alti quanto la loro riga di
+   testo, cioè 20px: la spaziatura fra loro basta a soddisfare il criterio 2.5.8
+   (i centri distano più di 24px, misurati: il caso peggiore è la X del footer,
+   larga 9px, a 52px dal link accanto), ma sul telefono restano bersagli piccoli.
+   L'area si allarga con uno pseudo-elemento, che non sposta niente in pagina.
+
+   Due misure diverse perché lo spazio disponibile è diverso: la barra in alto è
+   alta 56px e i suoi link stanno su una riga sola (compaiono da 640px in su),
+   quindi si arriva ai 44px consigliati; i link del piè di pagina vanno a capo
+   con 8px fra le righe, e oltre i 28px le aree di due righe si sovrapporrebbero. */
+header nav a[href]:not(.btn-primary):not(.btn-ghost),
+footer a[href] {
+  position: relative;
+}
+header nav a[href]:not(.btn-primary):not(.btn-ghost)::after,
+footer a[href]::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  /* 20px di testo + 4px sopra e sotto = 28px, dentro gli 8px di distanza. */
+  inset-block: -4px;
+}
+@media (min-width: 40rem) {
+  header nav a[href]:not(.btn-primary):not(.btn-ghost)::after {
+    /* 20px + 12px sopra e sotto = 44px, dentro i 56px della barra. */
+    inset-block: -12px;
+  }
+}
+
+/* Testo alternativo per i lettori di schermo, fuori dallo schermo ma nel DOM. */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Superfici ────────────────────────────────────────────────────────────
+   Un pannello, non una card: fondo appena schiarito, filo di contorno, e il
+   riflesso di un pixel sul bordo superiore. È quel riflesso a far leggere la
+   superficie come vetro invece che come rettangolo grigio, ed è la stessa
+   riga che sta in --panel-shadow nell'app. */
+.panel {
+  background-color: var(--color-panel);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-panel);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .08);
+}
+/* Variante quieta per le griglie fitte: stesso materiale, senza l'ombra
+   proiettata che a nove riquadri affiancati diventa fango. */
+.panel-quiet {
+  background-color: var(--color-panel);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-panel);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06);
+  transition: border-color .2s cubic-bezier(.22, 1, .36, 1),
+              background-color .2s cubic-bezier(.22, 1, .36, 1);
+}
+.panel-quiet:hover {
+  background-color: var(--color-panel-2);
+  border-color: var(--color-control);
+}
+
+/* ── Riquadri dei media ───────────────────────────────────────────────────
+   Gli asset hanno proporzioni molto diverse fra loro: la barra del notch è
+   4,76:1, la striscia dei testi 6,91:1, il HUD del volume 2,67:1, gli
+   screenshot delle finestre stanno fra 1,18:1 e 2:1. Messi in una griglia che
+   pretende righe di pari altezza, il più basso lasciava fino a 106px di vuoto
+   sotto di sé, e quelli con una larghezza massima propria fino a 344px ai lati.
+
+   Due regole, e il vuoto sparisce:
+   1. le griglie di card allineano in alto invece di stirare, così ogni riquadro
+      è alto quanto il suo contenuto;
+   2. un media più stretto della card sta dentro una vetrina, cioè un riquadro
+      di fondo che riempie la larghezza e si stringe sull'altezza. Il margine
+      attorno diventa una cornice voluta invece di un errore di misura. */
+.card-grid { align-items: start; }
+
+/* La vetrina si prende tutta l'altezza che avanza nella card: due card
+   affiancate hanno media di proporzioni diverse (la striscia dei testi è
+   6,9:1, il HUD 2,7:1) e senza questo i due riquadri interni finivano di
+   altezze molto diverse, che è la sproporzione che si vedeva. */
+.media-frame {
+  display: grid;
+  place-items: center;
+  flex: 1;
+  min-height: 9rem;
+  padding: 1rem;
+  border-radius: var(--radius-control);
+  background-color: rgba(255, 255, 255, .025);
+  border: 1px solid var(--color-hairline);
+}
+.media-frame > * { max-width: 100%; }
+
+/* Set di screenshot che devono leggersi come un gruppo: stesso rapporto per
+   tutti, ancorati in alto perché è lì che sta la parte che conta di una
+   finestra (barra del titolo, campi, pulsanti).
+
+   `contain` e non `cover`: ritagliare uno screenshot di interfaccia mangia i
+   bordi, ed è esattamente dove stanno i pulsanti e le etichette. Con `cover` la
+   seconda finestra mostrava "reate with AI" al posto del titolo. Quel che
+   avanza lo riempie il fondo del riquadro, che è una cornice, non un errore. */
+.shot-uniform,
+.shot-tall {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  object-position: top center;
+  background-color: rgba(255, 255, 255, .02);
+}
+.shot-uniform { aspect-ratio: 16 / 10; }
+.shot-tall { aspect-ratio: 4 / 3; }
+
+/* ── Azione ──────────────────────────────────────────────────────────────── */
 .btn-primary {
-  background-image: linear-gradient(92deg, var(--color-green-500), var(--color-green-600));
+  background-color: var(--color-green-500);
   color: #03190d;
-  box-shadow: 0 10px 28px rgba(29,185,84,.30);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .25) inset, 0 8px 24px rgba(29, 185, 84, .22);
+  transition: background-color .15s ease, transform .15s ease;
 }
+.btn-primary:hover { background-color: #22cc5f; }
+.btn-primary:active { transform: translateY(1px); }
 .btn-ghost {
-  background-color: rgba(255,255,255,.06);
-  color: #e8ece8;
-  border: 1px solid rgba(255,255,255,.12);
+  background-color: var(--color-panel-2);
+  color: var(--color-fg);
+  /* il bordo a .12 misurava 1,29:1 contro il fondo: un contorno di controllo
+     deve arrivare a 3:1 per essere considerato percepibile. */
+  border: 1px solid var(--color-control);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06);
+  transition: background-color .15s ease, transform .15s ease;
 }
-.text-gradient {
-  background-image: linear-gradient(92deg, #ffffff 30%, var(--color-mint-300));
-  -webkit-background-clip: text; background-clip: text; color: transparent;
+.btn-ghost:hover { background-color: rgba(255, 255, 255, .12); }
+.btn-ghost:active { transform: translateY(1px); }
+
+/* Indicatore di stato: il punto verde che pulsa esiste solo dove qualcosa sta
+   davvero succedendo, cioè nel widget in riproduzione. */
+.status-dot {
+  width: .4rem;
+  height: .4rem;
+  border-radius: 999px;
+  background: var(--color-green-500);
+  box-shadow: 0 0 8px rgba(29, 185, 84, .8);
+}
+
+/* ── Il giradischi ────────────────────────────────────────────────────────
+   Un solo disco accompagna tutta la parte centrale della pagina, e gira in
+   proporzione a quanto si è scorso: non parte e non finisce, sta dove sei tu.
+   Sporge oltre il bordo destro invece di stare dietro al testo, così non toglie
+   contrasto a niente. Sotto i 1180px sparisce: su schermo stretto sarebbe un
+   ostacolo, non un ornamento. */
+.turntable {
+  position: relative;
+  isolation: isolate;
+  /* Il disco sporge di proposito oltre il bordo destro, e senza questa riga
+     sporgeva anche fuori dal documento: 192px di scorrimento laterale su una
+     finestra da 1200. `clip` e non `hidden`, perché `hidden` creerebbe un
+     contenitore di scorrimento e il disco smetterebbe di restare appeso. */
+  overflow-x: clip;
+}
+.turntable-deck {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+/* Il contenuto delle sezioni è largo 72rem: sotto le 88rem di finestra non
+   resta margine per un disco, e uno spicchio tagliato a filo delle card legge
+   come un errore invece che come un oggetto che esce dall'inquadratura. Sopra
+   quella soglia ne sporge circa metà, che è la quantità giusta perché si capisca
+   cos'è senza rubare la scena. */
+/* Il disco resta al centro della finestra per tutta la durata del blocco: non
+   si sposta mai, cambiano solo quanto è grande e quanto si vede. Il centraggio
+   lo fa il CSS, così lo script ha una cosa sola da toccare (il transform del
+   disco) e non deve rimisurare posizioni a ogni fotogramma: era da lì che
+   veniva il movimento a scatti. */
+.turntable-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: grid;
+  place-items: center;
+}
+
+/* ── L'apertura ───────────────────────────────────────────────────────────
+   Una schermata in cui c'è solo il giradischi, prima che scivoli sullo sfondo.
+   Il testo sta sotto al disco e sale mentre si scorre. */
+/* Più alta della finestra: la parte in eccesso è il tratto di scorrimento in
+   cui la schermata resta ferma e il disco gira, prima che cominci l'uscita.
+   Senza questo margine il disco scivolava via al primo movimento della rotella. */
+.tt-opening {
+  position: relative;
+  z-index: 1;
+  /* Una schermata più un terzo: il terzo in più è il tratto in cui il disco
+     resta al centro e gira prima di scendere. Il testo resta appeso per tutto
+     quel tratto, così non si apre nessun vuoto nero, e il movimento finisce
+     esattamente quando l'apertura è passata e l'hero entra. */
+  height: 175vh;
+  padding: 0 1.25rem;
+  pointer-events: none;
+}
+/* Le due righe stanno agli estremi della finestra, il disco al centro fra
+   loro: nessuna delle due gli passa mai davanti. Niente sticky qui, perché un
+   figlio alto quanto il genitore non ha spazio per restare appeso e finirebbe
+   comunque sotto la barra di navigazione. */
+/* Titolo in alto, invito a scorrere in fondo, e in mezzo l'aria in cui sta il
+   disco: nessuno dei due gli passa mai davanti. */
+.tt-opening-copy {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 10vh 5vh;
+  text-align: center;
+}
+.tt-opening-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .8rem;
+}
+/* Il nome del prodotto in apertura. Due classi e non una: il paragrafo della
+   descrizione qui sotto è `.tt-opening-top p`, che pesa più di una classe sola
+   e vincerebbe su misura e colore. */
+.tt-opening .tt-wordmark {
+  font-size: clamp(2rem, 1.2rem + 2.4vw, 3rem);
+  font-weight: 600;
+  letter-spacing: -.035em;
+  line-height: 1;
+  margin: 0;
+}
+.tt-opening .tt-wordmark span { color: var(--color-green-500); }
+.tt-opening-top p:not(.tt-wordmark) {
+  max-width: 42ch;
+  font-size: .95rem;
+  line-height: 1.55;
+  color: var(--color-fg-3);
+  margin: 0;
+}
+.tt-side {
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--color-mint-300);
+}
+.tt-scroll {
+  font-size: .72rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--color-fg-3);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .7rem;
+}
+.tt-scroll::after {
+  content: "";
+  width: 1px;
+  height: 2rem;
+  background: linear-gradient(180deg, var(--color-control), transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Niente ingresso: resta la riga che apre il lato, e la schermata non chiede
+     di scorrere per vedere qualcosa che non si muoverà. */
+  .tt-opening { min-height: 0; padding-block: 3.5rem 1rem; }
+  .tt-opening-copy { position: static; height: auto; padding-block: 0; gap: .5rem; }
+  .tt-scroll::after { display: none; }
+}
+/* Piatto: il disco e il braccio insieme. Scala e opacità stanno qui, la
+   rotazione solo sul disco, o girerebbe anche il braccio. */
+.tt-plate {
+  position: relative;
+  /* lascia aria sopra per il titolo e sotto per l'invito a scorrere: se il
+     disco riempie la finestra, il testo gli finisce addosso */
+  width: min(58vw, 50vh, 31rem);
+  aspect-ratio: 1;
+  will-change: transform, opacity;
+}
+.tt-vinyl {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  will-change: transform;
+  background:
+    radial-gradient(circle at 50% 50%, #131316 0 17%, transparent 17.4%),
+    repeating-radial-gradient(circle at 50% 50%, #101012 0 2px, #0a0a0c 2px 4.5px);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .6), inset 0 0 0 1px rgba(255, 255, 255, .05);
+  display: grid;
+  place-items: center;
+}
+.tt-vinyl::after {
+  /* il riflesso che rende leggibile la rotazione: senza, un disco nero che gira
+     sembra un disco nero fermo */
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 210deg, transparent 0 12%, rgba(255,255,255,.05) 16%, transparent 22% 100%);
+}
+.tt-label {
+  width: 30%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: linear-gradient(160deg, var(--color-green-500), var(--color-green-600));
+  color: #04170c;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font-size: .6rem;
+  font-weight: 800;
+  letter-spacing: .18em;
+  line-height: 1.5;
+}
+.tt-spindle {
+  position: absolute;
+  width: 1.1%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--color-ink-950);
+}
+/* Il braccio: il perno sta fuori dal disco in alto a destra e la testina cade
+   sul solco esterno. La rotazione va in negativo, perché con l'origine a destra
+   un angolo positivo solleva la punta invece di appoggiarla: con +34 gradi il
+   braccio puntava in aria sopra il disco. Da -4 gradi (bordo esterno) a -24
+   (verso l'etichetta), che è il viaggio di una facciata. */
+.tt-arm {
+  position: absolute;
+  top: 9%;
+  right: 3%;
+  width: 46%;
+  z-index: 1;
+  height: 5px;
+  border-radius: 5px;
+  background: linear-gradient(90deg, rgba(255,255,255,.35), rgba(255,255,255,.6));
+  transform-origin: right center;
+  transform: rotate(-4deg);
+}
+.tt-arm::before {
+  content: "";
+  position: absolute;
+  right: -9px;
+  top: -9px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-panel-2);
+  border: 1px solid var(--color-control);
+}
+.tt-arm::after {
+  content: "";
+  position: absolute;
+  left: -3px;
+  top: -4px;
+  width: 14px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--color-fg);
+}
+/* Il contenuto sta sopra al disco, sempre. */
+.turntable > section { position: relative; z-index: 1; }
+
+/* Su finestra larga il contenuto di questo blocco si stringe e lascia libera
+   la fascia destra: senza, il disco finisce dietro card larghe 1152px e non si
+   vede più. Sotto la soglia il contenuto resta pieno e il disco si intravede
+   negli spazi, che è il massimo possibile senza sacrificare la leggibilità. */
+@media (min-width: 80rem) {
+  .turntable > section.max-w-6xl,
+  .turntable > section > .max-w-6xl { max-width: 62rem; }
+  .turntable > section.max-w-3xl { max-width: 40rem; }
+}
+
+/* Le voci si accendono al passaggio. L'attenuazione la accende lo script:
+   senza JavaScript la pagina resta leggibile per intero, che è il punto. */
+.js-reveal .reveal {
+  opacity: .32;
+  transform: translateY(12px);
+  transition: opacity .5s cubic-bezier(.22, 1, .36, 1), transform .5s cubic-bezier(.22, 1, .36, 1);
+}
+.js-reveal .reveal.is-on { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .js-reveal .reveal { opacity: 1; transform: none; }
+}
+
+/* ── Video ambient ────────────────────────────────────────────────────────
+   Ogni video che parte da solo e cicla deve poter essere fermato: il comando
+   sta sopra al video, in basso a destra, ed è sempre raggiungibile. */
+.ambient-video { position: relative; margin: 0; }
+.ambient-video__toggle {
+  position: absolute;
+  right: .6rem;
+  bottom: .6rem;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--color-control);
+  background: rgba(5, 5, 5, .72);
+  color: var(--color-fg);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  opacity: .7;
+  transition: opacity .15s ease, background .15s ease;
+}
+.ambient-video__toggle:hover,
+.ambient-video__toggle:focus-visible { opacity: 1; background: rgba(5, 5, 5, .9); }
+.ambient-video__toggle svg { width: 16px; height: 16px; }
+
+/* Con "Riduci trasparenza" attivo le superfici diventano solide, come nell'app. */
+@media (prefers-reduced-transparency: reduce) {
+  .panel, .panel-quiet { background-color: #16161a; }
+  .btn-ghost { background-color: #22222a; }
+  .ambient-video__toggle { background: #0d0d10; backdrop-filter: none; }
 }

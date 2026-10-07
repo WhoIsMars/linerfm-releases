@@ -1,0 +1,84 @@
+---
+// Video dimostrativo che parte da solo e cicla, con il comando di pausa che
+// WCAG 2.2.2 richiede per qualsiasi movimento che dura più di cinque secondi.
+//
+// Tre cose che il markup a mano non faceva:
+//  - width e height nativi, così il riquadro è già occupato prima del caricamento;
+//  - la descrizione in <figcaption>, perché un aria-label su un <video> non
+//    focalizzabile non viene esposto in modo affidabile;
+//  - nessun avvio automatico per chi ha chiesto meno movimento al sistema.
+import { mediaSize } from "../lib/media-dimensions";
+
+interface Props {
+  src: string;
+  poster?: string;
+  description: string;
+  maxWidth?: string;
+  class?: string;
+  videoClass?: string;
+}
+
+const { src, poster, description, maxWidth, class: cls = "", videoClass = "" } = Astro.props;
+const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
+const size = mediaSize(src);
+const style = maxWidth ? `max-width:${maxWidth}` : undefined;
+---
+<figure class:list={["ambient-video", cls]} style={style}>
+  <video
+    src={`${base}${src.replace(/^\//, "")}`}
+    poster={poster ? `${base}${poster.replace(/^\//, "")}` : undefined}
+    width={size?.width}
+    height={size?.height}
+    autoplay
+    muted
+    loop
+    playsinline
+    preload="metadata"
+    class:list={["block w-full h-auto", videoClass]}
+  ></video>
+  <button type="button" class="ambient-video__toggle" data-video-toggle aria-label="Pause video">
+    <svg data-icon="pause" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <rect x="3" y="2" width="4" height="12" rx="1"></rect>
+      <rect x="9" y="2" width="4" height="12" rx="1"></rect>
+    </svg>
+    <svg data-icon="play" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" hidden>
+      <path d="M4 2.5v11l9-5.5-9-5.5Z"></path>
+    </svg>
+  </button>
+  <figcaption class="sr-only">{description}</figcaption>
+</figure>
+
+<script>
+  // Un solo listener per pagina: Astro deduplica questo blocco anche quando il
+  // componente compare più volte.
+  document.querySelectorAll<HTMLElement>(".ambient-video").forEach((figure) => {
+    const video = figure.querySelector("video");
+    const toggle = figure.querySelector<HTMLButtonElement>("[data-video-toggle]");
+    if (!video || !toggle) return;
+
+    const pauseIcon = toggle.querySelector<SVGElement>('[data-icon="pause"]');
+    const playIcon = toggle.querySelector<SVGElement>('[data-icon="play"]');
+
+    const sync = () => {
+      const paused = video.paused;
+      toggle.setAttribute("aria-label", paused ? "Play video" : "Pause video");
+      pauseIcon?.toggleAttribute("hidden", paused);
+      playIcon?.toggleAttribute("hidden", !paused);
+    };
+
+    // Chi ha "Riduci movimento" attivo non riceve l'avvio automatico: il video
+    // resta sul poster finché non lo chiede.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      video.autoplay = false;
+      video.pause();
+    }
+
+    toggle.addEventListener("click", () => {
+      if (video.paused) video.play().catch(() => {});
+      else video.pause();
+    });
+    video.addEventListener("play", sync);
+    video.addEventListener("pause", sync);
+    sync();
+  });
+</script>

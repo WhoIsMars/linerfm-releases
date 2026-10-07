@@ -1,43 +1,47 @@
 ---
+// Direzione "vetro di sistema": niente aloni verdi dietro il titolo, niente
+// gradiente sul testo. Il verde compare due volte, sul punto che dice che
+// qualcosa sta suonando e sul pulsante che vende. Il resto è il materiale
+// dell'app, e il prodotto si presenta mostrandosi.
 import { CHECKOUT_URL } from "../config/links";
-const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
+import AmbientVideo from "./AmbientVideo.astro";
 ---
 <section id="top" class="relative overflow-hidden">
-  <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_360px_at_78%_-12%,rgba(29,185,84,.28),transparent_60%),radial-gradient(600px_300px_at_8%_110%,rgba(20,145,68,.18),transparent_60%)]"></div>
-  <div class="relative max-w-6xl mx-auto grid md:grid-cols-[1.1fr_.9fr] gap-9 items-center px-5 py-20">
+  {/* Qui c'era un velo con il centro sopra il bordo della sezione: al taglio
+      superiore il gradiente era già acceso e sopra non c'era nulla, quindi
+      lasciava una riga orizzontale netta attraverso tutta la pagina. Adesso la
+      profondità la dà il disco, il velo non serve più. */}
+  <div class="relative max-w-6xl mx-auto grid md:grid-cols-[1.05fr_.95fr] gap-10 items-center px-5 pt-16 pb-20 md:pt-24 md:pb-24">
     <div>
-      <span class="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/30 text-mint-300">
-        <span class="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_10px_#1DB954]"></span>
+      <span class="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-panel border border-hairline text-fg-2">
+        <span class="status-dot"></span>
         Now playing · live on your desktop
       </span>
-      <h1 class="mt-4 text-4xl md:text-5xl font-bold leading-[1.08] tracking-tight text-gradient">
+      <h1 class="mt-5 text-[2.6rem] md:text-[3.4rem] font-semibold leading-[1.05] tracking-[-0.03em] text-balance max-w-[16ch]">
         Your desktop, finally curating itself.
       </h1>
-      <p class="mt-4 text-white/70 text-base md:text-lg max-w-xl leading-relaxed">
+      <p class="mt-5 text-fg-2 text-base md:text-lg max-w-xl leading-relaxed">
         The music companion for macOS, on Spotify, Apple Music or YouTube Music:
         a living desktop widget, a notch bar with controls and seek, synced lyrics,
         a music screensaver, and a curator that learns your taste. All running
         locally on your Mac.
       </p>
-      <div class="mt-7 flex flex-wrap gap-3">
-        <a href={CHECKOUT_URL} class="lemonsqueezy-button btn-primary font-semibold px-6 py-3 rounded-xl">Buy · 10€</a>
-        <a href="#download" class="btn-ghost font-semibold px-6 py-3 rounded-xl">Try free · 5 days</a>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href={CHECKOUT_URL} class="lemonsqueezy-button btn-primary font-semibold px-6 py-3 rounded-control">Buy · 10€</a>
+        <a href="#download" class="btn-ghost font-semibold px-6 py-3 rounded-control">Try free · 5 days</a>
       </div>
-      <p class="mt-4 text-xs text-white/40 tracking-wide">macOS (Intel &amp; Apple Silicon) · 100% local · no account · no telemetry</p>
+      <p class="mt-5 text-xs text-fg-3 tracking-wide">macOS (Intel &amp; Apple Silicon) · 100% local · no account · no telemetry</p>
     </div>
-    <div class="relative flex justify-center">
-      <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_50%_at_50%_50%,rgba(29,185,84,.20),transparent_70%)] blur-2xl"></div>
-      <video
-        src={`${base}video/hero-clip.mp4`}
-        poster={`${base}screenshots/widget.png`}
-        autoplay
-        muted
-        loop
-        playsinline
-        preload="metadata"
-        aria-label="LinerFM in action: AI playlists, a full-screen music screensaver, and the now-playing widget with animated canvas and synced lyrics"
-        class="relative w-full max-w-[520px] h-auto rounded-xl border border-white/10 drop-shadow-[0_30px_60px_rgba(0,0,0,.55)]"
-      ></video>
+    <!-- Il video sta dentro un pannello, come una finestra dell'app appoggiata
+         sulla scrivania, invece di galleggiare su un alone colorato. -->
+    <div class="panel p-2.5 justify-self-center w-full max-w-[540px]">
+      <AmbientVideo
+        src="video/hero-clip.mp4"
+        poster="screenshots/widget.png"
+        description="LinerFM in action: AI playlists, a full-screen music screensaver, and the now-playing widget with animated canvas and synced lyrics"
+        class="w-full"
+        videoClass="rounded-[10px]"
+      />
     </div>
   </div>
 </section>

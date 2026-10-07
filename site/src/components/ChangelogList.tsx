@@ -17,7 +17,7 @@ function formatDate(iso: string): string {
 function Body({ text }: { text: string }) {
   const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
   return (
-    <div className="mt-3 space-y-2 text-sm text-white/70">
+    <div className="mt-3 space-y-2 text-sm text-fg-2">
       {lines.map((line, i) =>
         line.startsWith("- ") ? (
           <p key={i} className="pl-4 relative before:content-['·'] before:absolute before:left-1">{line.slice(2)}</p>
@@ -44,13 +44,13 @@ export default function ChangelogList() {
 
   if (failed) {
     return (
-      <p className="text-white/60">
+      <p className="text-fg-3">
         Could not load the release feed. See every release on{" "}
         <a href={RELEASES_URL} className="text-green-400 hover:underline">GitHub</a>.
       </p>
     );
   }
-  if (!releases) return <p className="text-white/40">Loading releases…</p>;
+  if (!releases) return <p className="text-fg-3" role="status">Loading releases…</p>;
 
   return (
     <ol className="space-y-10">
@@ -60,7 +60,7 @@ export default function ChangelogList() {
             <h2 className="text-lg font-semibold">
               <a href={r.html_url} className="hover:text-green-400">{r.tag_name}</a>
             </h2>
-            <time dateTime={r.published_at} className="text-xs text-white/40">{formatDate(r.published_at)}</time>
+            <time dateTime={r.published_at} className="text-xs text-fg-3">{formatDate(r.published_at)}</time>
           </div>
           <Body text={r.body} />
         </li>

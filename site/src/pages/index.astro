@@ -10,18 +10,24 @@ import Pricing from "../components/Pricing.astro";
 import Download from "../components/Download.astro";
 import Faq from "../components/Faq.astro";
 import Footer from "../components/Footer.astro";
+import Turntable from "../components/Turntable.astro";
 ---
 <BaseLayout>
   <Nav />
-  <main>
-    <Hero />
-    <SeeItInAction />
-    <Surfaces />
-    <HowItWorks />
-    <Features />
-    <Pricing />
-    <Download />
-    <Faq />
+  <main id="main-content">
+    {/* Il disco apre il sito: è la prima cosa che si vede, da solo. Poi scende
+        sullo sfondo e gira lì mentre passano tutte le sezioni che raccontano
+        il prodotto, dall'hero alle feature. */}
+    <Turntable>
+      <Hero />
+      <SeeItInAction />
+      <Surfaces />
+      <HowItWorks />
+      <Features />
+      <Pricing />
+      <Download />
+      <Faq />
+    </Turntable>
   </main>
   <Footer />
 </BaseLayout>

@@ -3,25 +3,28 @@ import { CHECKOUT_URL } from "../config/links";
 const perks = [
   "One-time purchase, no subscription",
   "Minor updates included forever",
-  "One active device at a time — move your license anytime",
-  "Runs locally — no account, no telemetry",
+  "One active device at a time, move your license anytime",
+  "Runs locally, no account and no telemetry",
 ];
 ---
 <section id="pricing" class="max-w-3xl mx-auto px-5 py-20">
-  <h2 class="text-3xl font-bold tracking-tight text-center">Simple pricing</h2>
-  <div class="mt-10 rounded-3xl border border-green-500/40 bg-green-500/[.06] p-8 md:p-10">
+  <h2 class="text-3xl font-semibold tracking-[-0.02em] text-center">Simple pricing</h2>
+  {/* La card era verde su verde: il prezzo si perdeva dentro il colore del
+      pulsante. Ora è un pannello come gli altri, e il verde resta un punto solo,
+      quello su cui si clicca. */}
+  <div class="mt-10 panel p-8 md:p-10">
     <div class="flex items-baseline gap-2">
-      <span class="text-5xl font-bold">10€</span>
-      <span class="text-white/50">one-time</span>
+      <span class="text-5xl font-semibold tracking-[-0.03em] tabular-nums">10€</span>
+      <span class="text-fg-3">one-time</span>
     </div>
-    <ul class="mt-6 space-y-3">
+    <ul class="mt-7 space-y-3">
       {perks.map((p) => (
-        <li class="flex items-start gap-3 text-sm text-white/80">
-          <span class="mt-1 text-green-500">✓</span><span>{p}</span>
+        <li class="flex items-start gap-3 text-sm text-fg-2">
+          <span class="mt-0.5 text-mint-300" aria-hidden="true">✓</span><span>{p}</span>
         </li>
       ))}
     </ul>
-    <a href={CHECKOUT_URL} class="lemonsqueezy-button btn-primary mt-8 block text-center font-semibold px-6 py-3.5 rounded-xl">Buy LinerFM · 10€</a>
-    <p class="mt-3 text-center text-xs text-white/50">5-day free trial, no card needed. After the trial a license is required — there's no limited free tier.</p>
+    <a href={CHECKOUT_URL} class="lemonsqueezy-button btn-primary mt-8 block text-center font-semibold px-6 py-3.5 rounded-control">Buy LinerFM · 10€</a>
+    <p class="mt-4 text-center text-xs text-fg-3">5-day free trial, no card needed. After the trial a license is required: there is no limited free tier.</p>
   </div>
 </section>

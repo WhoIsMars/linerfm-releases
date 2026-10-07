@@ -12,15 +12,15 @@ const faqs = [
 ];
 ---
 <section id="faq" class="max-w-3xl mx-auto px-5 py-20">
-  <h2 class="text-3xl font-bold tracking-tight text-center">FAQ</h2>
-  <div class="mt-10 divide-y divide-white/10 border-y border-white/10">
+  <h2 class="text-3xl font-semibold tracking-[-0.02em] text-center">FAQ</h2>
+  <div class="mt-10 divide-y divide-hairline border-y border-hairline">
     {faqs.map((f) => (
       <details class="group py-4">
         <summary class="flex items-center justify-between cursor-pointer list-none font-medium">
           {f.q}
-          <span class="text-white/40 group-open:rotate-45 transition-transform text-xl leading-none">+</span>
+          <span class="text-fg-3 group-open:rotate-45 transition-transform text-xl leading-none" aria-hidden="true">+</span>
         </summary>
-        <p class="mt-3 text-sm text-white/60 leading-relaxed">{f.a}</p>
+        <p class="mt-3 text-sm text-fg-3 leading-relaxed">{f.a}</p>
       </details>
     ))}
   </div>

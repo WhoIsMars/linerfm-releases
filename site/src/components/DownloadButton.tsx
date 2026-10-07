@@ -17,15 +17,15 @@ export default function DownloadButton() {
 
   if (failed) {
     return (
-      <a href={RELEASES_LATEST_URL} className="btn-primary inline-flex items-center font-semibold px-7 py-3.5 rounded-xl">
-        Download — latest release on GitHub
+      <a href={RELEASES_LATEST_URL} className="btn-primary inline-flex items-center font-semibold px-7 py-3.5 rounded-control">
+        Download the latest release on GitHub
       </a>
     );
   }
 
   if (!dmgs) {
     return (
-      <span className="btn-ghost inline-flex items-center font-semibold px-7 py-3.5 rounded-xl opacity-70">
+      <span className="btn-ghost inline-flex items-center font-semibold px-7 py-3.5 rounded-control opacity-70">
         Loading latest version…
       </span>
     );
@@ -35,7 +35,7 @@ export default function DownloadButton() {
     const href = info?.url ?? RELEASES_LATEST_URL;
     const sub = info ? `v${info.version} · ${formatBytes(info.size)}` : "Latest on GitHub";
     return (
-      <a href={href} className={`${primary ? "btn-primary" : "btn-ghost"} inline-flex flex-col items-center font-semibold px-7 py-3.5 rounded-xl`}>
+      <a href={href} className={`${primary ? "btn-primary" : "btn-ghost"} inline-flex flex-col items-center font-semibold px-7 py-3.5 rounded-control`}>
         <span>Download · {label}</span>
         <span className="text-xs font-normal opacity-80 mt-0.5">{sub}</span>
       </a>
