@@ -190,8 +190,7 @@
       "blurb": "Hover the notch, get full transport, seek bar, themes. First click always counts.",
       "media": {
         "kind": "video",
-        "src": "video/notch.mp4",
-        "maxWidth": "860px"
+        "src": "video/clip-notch.mp4"
       },
       "alt": "LinerFM notch bar: hover to expand into full transport, seek bar, and theme switching",
       "wide": true
@@ -202,8 +201,7 @@
       "blurb": "Cmd Shift K, then type a song, album, or artist and hit enter. Never opens Spotify.",
       "media": {
         "kind": "video",
-        "src": "video/search.mp4",
-        "maxWidth": "720px"
+        "src": "video/clip-search.mp4"
       },
       "alt": "LinerFM Spotlight-style search: type an album and pick from the results",
       "wide": true
@@ -214,7 +212,7 @@
       "blurb": "Shift Cmd S or auto on idle: artwork, controls, three themes. Any input exits.",
       "media": {
         "kind": "video",
-        "src": "video/screensaver.mp4"
+        "src": "video/clip-screensaver.mp4"
       },
       "alt": "LinerFM full-screen music screensaver in the Glass theme",
       "wide": true
