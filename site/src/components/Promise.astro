@@ -1,0 +1,29 @@
+---
+// Tre risposte alle domande che vengono prima del prezzo: con cosa funziona,
+// dove finiscono i miei dati, quanto costa davvero. Ogni frase è verificabile
+// nel prodotto (FAQ e Privacy dicono lo stesso con più dettagli).
+const items = [
+  {
+    t: "Works with what you use",
+    d: "Spotify, Apple Music or YouTube Music. Pick your source once and the whole app follows it.",
+  },
+  {
+    t: "Stays on your Mac",
+    d: "No account, no telemetry, no server. Your listening history and your keys never leave the machine.",
+  },
+  {
+    t: "Pay once",
+    d: "10€, no subscription. Try every feature free for 5 days first, no card needed.",
+  },
+];
+---
+<section class="max-w-6xl mx-auto px-5 py-16" aria-label="Why LinerFM">
+  <div class="panel grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-hairline">
+    {items.map((it) => (
+      <div class="p-7 md:p-8">
+        <h3 class="font-semibold">{it.t}</h3>
+        <p class="mt-2 text-sm text-fg-3 leading-relaxed">{it.d}</p>
+      </div>
+    ))}
+  </div>
+</section>

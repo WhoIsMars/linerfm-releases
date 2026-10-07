@@ -1,0 +1,89 @@
+---
+// Le sei cose che LinerFM fa, nello stesso ordine e con gli stessi tre capitoli
+// della presentazione (sullo schermo, controllo, playlist). Ogni clip è un tratto
+// della presentazione reso senza testo dalle stesse riprese della UI vera:
+// .planning/social-v2/work/explainer-clean.html nel repo dell'app.
+//
+// Il testo qui è scritto per la pagina, non generato: l'elenco completo e
+// aggiornato a ogni release resta in Features, da features.json.
+import AmbientVideo from "./AmbientVideo.astro";
+
+const rows = [
+  {
+    chapter: "On your screen",
+    title: "Your notch becomes a music player.",
+    body: "Hover the notch for the track, the controls and a seek bar you can drag. Right under it, the lyrics follow the song line by line, in four styles.",
+    keys: "⇧⌘T toggles the lyrics",
+    clip: "video/clip-notch.mp4",
+    alt: "The notch opens into a player with transport controls, then a synced lyric line appears under it",
+  },
+  {
+    chapter: "On your screen",
+    title: "A widget that matches every album.",
+    body: "The desktop widget re-colors itself from each cover as the tracks change. Pick a look, from Glass to Cinematic, or turn it into a terminal you drive with typed commands.",
+    keys: "Dynamic color is one switch in Settings",
+    clip: "video/clip-widget.mp4",
+    alt: "The desktop widget changes color with each album, then switches to the terminal theme",
+  },
+  {
+    chapter: "On your screen",
+    title: "A screensaver when you step away.",
+    body: "Full screen artwork, controls and lyrics, on every display you have connected. It starts when the Mac goes idle, and any key or click brings you back.",
+    keys: "⇧⌘S starts it now",
+    clip: "video/clip-screensaver.mp4",
+    alt: "The music screensaver on a MacBook, changing color with each track",
+  },
+  {
+    chapter: "Control",
+    title: "⌘⇧K from any app. Type, Enter, it plays.",
+    body: "A Spotlight-style search for songs, albums, artists and playlists. Spotify never comes to the front, so you stay in what you were doing.",
+    keys: "Shortcuts are yours to remap",
+    clip: "video/clip-search.mp4",
+    alt: "Command Shift K opens a search over a document, a song is typed and starts playing in the notch",
+  },
+  {
+    chapter: "Playlists",
+    title: "Describe a playlist in your own words.",
+    body: "The AI picks real tracks and checks each one against your music source before you save. Tick the ones you want, name it, one click creates it.",
+    keys: "Runs on your own free Groq key",
+    clip: "video/clip-ai.mp4",
+    alt: "A prompt about a rainy night drive becomes a list of tracks, saved as a new playlist",
+  },
+  {
+    chapter: "Playlists",
+    title: "It spots the songs you keep skipping.",
+    body: "LinerFM counts every play and every skip on your Mac. It suggests what to remove from a playlist, shows the numbers behind each song, and leaves recent additions alone.",
+    keys: "Your listening data never leaves the Mac",
+    clip: "video/clip-cleanup.mp4",
+    alt: "Often-skipped songs are suggested for removal, then a song's play and skip counts open",
+  },
+];
+const chapterNo: Record<string, number> = { "On your screen": 1, Control: 2, Playlists: 3 };
+---
+<section id="features-tour" class="max-w-6xl mx-auto px-5 pt-24 pb-8" aria-labelledby="tour-title">
+  <h2 id="tour-title" class="text-3xl md:text-[2.4rem] font-semibold tracking-[-0.025em] text-center text-balance">
+    Music on every surface of your Mac
+  </h2>
+  <p class="mt-3 text-center text-fg-3 max-w-xl mx-auto">On your screen, under your fingers, in your playlists.</p>
+
+  <div class="mt-16 md:mt-20 space-y-20 md:space-y-28">
+    {rows.map((r, i) => (
+      <article class="grid md:grid-cols-12 gap-8 md:gap-12 items-center">
+        <div class:list={["md:col-span-5", i % 2 === 1 && "md:order-2"]}>
+          <p class="text-sm font-medium text-fg-3">
+            <span class="text-mint-300 tabular-nums">{chapterNo[r.chapter]}</span>
+            <span class="mx-1.5" aria-hidden="true">·</span>{r.chapter}
+          </p>
+          <h3 class="mt-3 text-2xl md:text-[2rem] font-semibold leading-[1.12] tracking-[-0.022em] text-balance">{r.title}</h3>
+          <p class="mt-4 text-fg-2 leading-relaxed">{r.body}</p>
+          <p class="mt-5 inline-flex items-center gap-2 text-xs text-fg-3 px-2.5 py-1 rounded-full border border-hairline bg-panel">{r.keys}</p>
+        </div>
+        <div class:list={["md:col-span-7", i % 2 === 1 && "md:order-1"]}>
+          <div class="panel p-2">
+            <AmbientVideo src={r.clip} poster={r.clip.replace(/\.mp4$/, ".jpg")} description={r.alt} class="w-full" videoClass="rounded-[10px] bg-ink-900" />
+          </div>
+        </div>
+      </article>
+    ))}
+  </div>
+</section>

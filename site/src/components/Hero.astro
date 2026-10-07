@@ -1,47 +1,65 @@
 ---
-// Direzione "vetro di sistema": niente aloni verdi dietro il titolo, niente
-// gradiente sul testo. Il verde compare due volte, sul punto che dice che
-// qualcosa sta suonando e sul pulsante che vende. Il resto è il materiale
-// dell'app, e il prodotto si presenta mostrandosi.
+// Il prodotto si presenta da solo: titolo, due pulsanti e subito sotto la
+// presentazione orizzontale (48 s, resa dalla UI vera con brani e copertine
+// inventati). È il "See it in action" di prima, portato in cima: chi arriva
+// vede LinerFM funzionare prima di leggere un elenco.
 import { CHECKOUT_URL } from "../config/links";
-import AmbientVideo from "./AmbientVideo.astro";
+import { mediaSize } from "../lib/media-dimensions";
+
+const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
+const video = mediaSize("video/explainer.mp4");
 ---
-<section id="top" class="relative overflow-hidden">
-  {/* Qui c'era un velo con il centro sopra il bordo della sezione: al taglio
-      superiore il gradiente era già acceso e sopra non c'era nulla, quindi
-      lasciava una riga orizzontale netta attraverso tutta la pagina. Adesso la
-      profondità la dà il disco, il velo non serve più. */}
-  <div class="relative max-w-6xl mx-auto grid md:grid-cols-[1.05fr_.95fr] gap-10 items-center px-5 pt-16 pb-20 md:pt-24 md:pb-24">
-    <div>
-      <span class="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-panel border border-hairline text-fg-2">
-        <span class="status-dot"></span>
-        Now playing · live on your desktop
-      </span>
-      <h1 class="mt-5 text-[2.6rem] md:text-[3.4rem] font-semibold leading-[1.05] tracking-[-0.03em] text-balance max-w-[16ch]">
-        Your desktop, finally curating itself.
-      </h1>
-      <p class="mt-5 text-fg-2 text-base md:text-lg max-w-xl leading-relaxed">
-        The music companion for macOS, on Spotify, Apple Music or YouTube Music:
-        a living desktop widget, a notch bar with controls and seek, synced lyrics,
-        a music screensaver, and a curator that learns your taste. All running
-        locally on your Mac.
-      </p>
-      <div class="mt-8 flex flex-wrap gap-3">
-        <a href={CHECKOUT_URL} class="lemonsqueezy-button btn-primary font-semibold px-6 py-3 rounded-control">Buy · 10€</a>
-        <a href="#download" class="btn-ghost font-semibold px-6 py-3 rounded-control">Try free · 5 days</a>
-      </div>
-      <p class="mt-5 text-xs text-fg-3 tracking-wide">macOS (Intel &amp; Apple Silicon) · 100% local · no account · no telemetry</p>
+<section id="top" class="relative">
+  <div class="max-w-6xl mx-auto px-5 pt-14 md:pt-20 text-center">
+    <span class="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-panel border border-hairline text-fg-2">
+      <span class="status-dot"></span>
+      For Spotify, Apple Music and YouTube Music
+    </span>
+    <h1 class="mt-5 mx-auto text-[2.6rem] md:text-[3.6rem] font-semibold leading-[1.04] tracking-[-0.03em] text-balance max-w-[18ch]">
+      Your desktop, finally curating itself.
+    </h1>
+    <p class="mt-5 mx-auto text-fg-2 text-base md:text-lg max-w-2xl leading-relaxed text-pretty">
+      LinerFM puts your music all over your Mac: a player in the notch, live lyrics,
+      a widget that matches every album, a screensaver, and AI playlists made of real tracks.
+      Everything runs on your Mac.
+    </p>
+    <div class="mt-8 flex flex-wrap justify-center gap-3">
+      <a href="#download" class="btn-primary font-semibold px-6 py-3 rounded-control">Try free for 5 days</a>
+      <a href={CHECKOUT_URL} class="lemonsqueezy-button btn-ghost font-semibold px-6 py-3 rounded-control">Buy · 10€</a>
     </div>
-    <!-- Il video sta dentro un pannello, come una finestra dell'app appoggiata
-         sulla scrivania, invece di galleggiare su un alone colorato. -->
-    <div class="panel p-2.5 justify-self-center w-full max-w-[540px]">
-      <AmbientVideo
-        src="video/hero-clip.mp4"
-        poster="screenshots/widget.png"
-        description="LinerFM in action: AI playlists, a full-screen music screensaver, and the now-playing widget with animated canvas and synced lyrics"
-        class="w-full"
-        videoClass="rounded-[10px]"
-      />
-    </div>
+    <p class="mt-5 text-xs text-fg-3 tracking-wide">No card for the trial · Apple Silicon &amp; Intel · No account · No telemetry</p>
+  </div>
+
+  <div class="max-w-5xl mx-auto px-5 mt-12 md:mt-14">
+    {/* Controlli nativi: coprono la pausa di WCAG 2.2.2 e lasciano accendere
+        l'audio a chi vuole sentire la musica del video. */}
+    <figure class="panel p-2 md:p-2.5 m-0">
+      <video
+        src={`${base}video/explainer.mp4`}
+        poster={`${base}video/explainer.jpg`}
+        width={video?.width}
+        height={video?.height}
+        autoplay
+        muted
+        loop
+        playsinline
+        controls
+        preload="metadata"
+        class="block w-full h-auto rounded-[10px] bg-ink-900"
+      ></video>
+      <figcaption class="sr-only">
+        A 48-second tour of LinerFM: the notch player and live lyrics, the desktop widget that
+        re-colors itself from the artwork, the terminal look, the screensaver, Command Shift K
+        search, AI playlists, skip-based cleanup and play counts.
+      </figcaption>
+    </figure>
   </div>
 </section>
+
+<script>
+  // Con "Riduci movimento" il video resta sul poster finché non lo si avvia.
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const v = document.querySelector<HTMLVideoElement>("#top video");
+    if (v) { v.autoplay = false; v.pause(); }
+  }
+</script>

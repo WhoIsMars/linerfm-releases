@@ -1,0 +1,15 @@
+---
+// Chiusura della pagina: chi è arrivato in fondo ha già letto tutto, gli serve
+// solo il pulsante. Stessa coppia di azioni dell'hero, stesso ordine.
+import { CHECKOUT_URL } from "../config/links";
+const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
+---
+<section class="max-w-6xl mx-auto px-5 pt-8 pb-24 text-center">
+  <img src={`${base}icon-512.png`} alt="" width="96" height="96" class="mx-auto w-20 h-20 md:w-24 md:h-24" loading="lazy" />
+  <h2 class="mt-6 text-3xl md:text-[2.4rem] font-semibold tracking-[-0.025em] text-balance">Put your music on your Mac.</h2>
+  <p class="mt-3 text-fg-3">Five days free, every feature included.</p>
+  <div class="mt-8 flex flex-wrap justify-center gap-3">
+    <a href="#download" class="btn-primary font-semibold px-6 py-3 rounded-control">Try free for 5 days</a>
+    <a href={CHECKOUT_URL} class="lemonsqueezy-button btn-ghost font-semibold px-6 py-3 rounded-control">Buy · 10€</a>
+  </div>
+</section>

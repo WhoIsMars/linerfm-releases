@@ -8,7 +8,7 @@ const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
   <nav class="max-w-6xl mx-auto flex items-center justify-between px-5 h-14" aria-label="Main">
     <a href={base} class="font-semibold tracking-tight" aria-label="LinerFM home">Liner<span class="text-green-500">FM</span></a>
     <div class="hidden sm:flex items-center gap-6 text-sm text-fg-2">
-      <a href={`${base}#how`} class="hover:text-fg">How it works</a>
+      <a href={`${base}#features-tour`} class="hover:text-fg">Tour</a>
       <a href={`${base}#features`} class="hover:text-fg">Features</a>
       <a href={`${base}#pricing`} class="hover:text-fg">Pricing</a>
       <a href={`${base}#faq`} class="hover:text-fg">FAQ</a>
@@ -17,8 +17,8 @@ const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
       <a href={X_URL} class="hover:text-fg">X</a>
     </div>
     <div class="flex items-center gap-2">
-      <a href={`${base}#download`} class="btn-ghost text-sm font-semibold px-4 py-2 rounded-lg">Try free</a>
-      <a href={CHECKOUT_URL} class="lemonsqueezy-button btn-primary text-sm font-semibold px-4 py-2 rounded-lg">Buy · 10€</a>
+      <a href={CHECKOUT_URL} class="lemonsqueezy-button btn-ghost text-sm font-semibold px-4 py-2 rounded-lg">Buy · 10€</a>
+      <a href={`${base}#download`} class="btn-primary text-sm font-semibold px-4 py-2 rounded-lg">Try free</a>
     </div>
   </nav>
 </header>
