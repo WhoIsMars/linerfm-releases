@@ -26,3 +26,6 @@ export const RELEASES_API_URL =
 /** GitHub API endpoint for the release list (What's new page). */
 export const RELEASES_LIST_API_URL =
   "https://api.github.com/repos/WhoIsMars/linerfm-releases/releases?per_page=15";
+
+/** Stats worker (`stats/` in this repo): counts visits and DMG clicks, no cookies. */
+export const STATS_URL = "https://linerfm-site-stats.piccoletto.workers.dev/hit";

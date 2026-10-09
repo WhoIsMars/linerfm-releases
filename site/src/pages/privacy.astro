@@ -3,18 +3,19 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import Nav from "../components/Nav.astro";
 import Footer from "../components/Footer.astro";
 ---
-<BaseLayout title="LinerFM: Privacy Policy" description="LinerFM runs entirely on your Mac. No account, no telemetry, no server.">
+<BaseLayout title="LinerFM: Privacy Policy" description="LinerFM runs on your Mac. No account, no telemetry in the app, no cookies on this website.">
   <Nav />
   <main id="main-content" class="max-w-3xl mx-auto px-5 py-16">
     <h1 class="text-3xl font-semibold tracking-[-0.02em]">Privacy Policy</h1>
-    <p class="mt-4 text-fg-2">LinerFM runs entirely on your Mac. It has no backend server, no analytics, and no account system.</p>
+    <p class="mt-4 text-fg-2">LinerFM runs on your Mac and has no account system. The app contacts our server to check your trial or license, and when you send a bug report.</p>
     <ul class="mt-6 space-y-3 text-fg-2 text-sm list-disc pl-5">
       <li>Your Spotify and Groq API keys are stored locally on your device and used only to call those services directly from your Mac.</li>
       <li>Your listening history and playlist data never leave your machine.</li>
-      <li>We collect no telemetry, no usage data, and set no cookies on this website.</li>
+      <li>The app sends no telemetry and no usage data.</li>
+      <li>This website sets no cookies. It counts page views and download clicks with an anonymous per-tab id: we store the page, the site you came from, the country and the time, never your IP address or browser details.</li>
       <li>Payments are processed by Lemon Squeezy (our Merchant of Record); their privacy policy governs the checkout.</li>
     </ul>
-    <p class="mt-8 text-xs text-fg-3">Last updated: 2026-06-13. Questions: open an issue on GitHub.</p>
+    <p class="mt-8 text-xs text-fg-3">Last updated: 2026-10-09. Questions: open an issue on GitHub.</p>
   </main>
   <Footer />
 </BaseLayout>

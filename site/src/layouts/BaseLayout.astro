@@ -36,5 +36,9 @@ const og = new URL(`${base}${ogImage.replace(/^\//, "")}`, Astro.site ?? "http:/
   <body>
     <a class="skip-link" href="#main-content">Skip to main content</a>
     <slot />
+    <script>
+      import { track } from "../lib/stats";
+      track("view");
+    </script>
   </body>
 </html>

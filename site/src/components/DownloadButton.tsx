@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { pickMacDmgs, formatBytes, type MacDmgs, type GithubRelease } from "../lib/release";
 import { RELEASES_API_URL, RELEASES_LATEST_URL } from "../config/links";
+import { track } from "../lib/stats";
 
 export default function DownloadButton() {
   const [dmgs, setDmgs] = useState<MacDmgs | null>(null);
@@ -17,7 +18,7 @@ export default function DownloadButton() {
 
   if (failed) {
     return (
-      <a href={RELEASES_LATEST_URL} className="btn-primary inline-flex items-center font-semibold px-7 py-3.5 rounded-control">
+      <a href={RELEASES_LATEST_URL} onClick={() => track("download", "github-page")} className="btn-primary inline-flex items-center font-semibold px-7 py-3.5 rounded-control">
         Download the latest release on GitHub
       </a>
     );
@@ -31,11 +32,11 @@ export default function DownloadButton() {
     );
   }
 
-  const Btn = ({ label, info, primary }: { label: string; info: MacDmgs["intel"]; primary?: boolean }) => {
+  const Btn = ({ label, arch, info, primary }: { label: string; arch: string; info: MacDmgs["intel"]; primary?: boolean }) => {
     const href = info?.url ?? RELEASES_LATEST_URL;
     const sub = info ? `v${info.version} · ${formatBytes(info.size)}` : "Latest on GitHub";
     return (
-      <a href={href} className={`${primary ? "btn-primary" : "btn-ghost"} inline-flex flex-col items-center font-semibold px-7 py-3.5 rounded-control`}>
+      <a href={href} onClick={() => track("download", arch)} className={`${primary ? "btn-primary" : "btn-ghost"} inline-flex flex-col items-center font-semibold px-7 py-3.5 rounded-control`}>
         <span>Download · {label}</span>
         <span className="text-xs font-normal opacity-80 mt-0.5">{sub}</span>
       </a>
@@ -44,8 +45,8 @@ export default function DownloadButton() {
 
   return (
     <div className="flex flex-wrap items-center justify-center gap-3">
-      <Btn label="Apple Silicon" info={dmgs.appleSilicon} primary />
-      <Btn label="Intel" info={dmgs.intel} />
+      <Btn label="Apple Silicon" arch="apple-silicon" info={dmgs.appleSilicon} primary />
+      <Btn label="Intel" arch="intel" info={dmgs.intel} />
     </div>
   );
 }

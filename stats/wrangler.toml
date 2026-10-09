@@ -1,0 +1,10 @@
+name = "linerfm-site-stats"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+# Database creato con: npx wrangler d1 create linerfm-site-stats
+# Tabella:             npx wrangler d1 execute linerfm-site-stats --remote --file=schema.sql
+[[d1_databases]]
+binding = "DB"
+database_name = "linerfm-site-stats"
+database_id = "b2e57a63-66d7-4a32-b8e3-dcb701b3bc48"

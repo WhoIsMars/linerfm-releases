@@ -3,3 +3,6 @@
 site/node_modules/
 site/dist/
 site/.astro/
+
+# Worker statistiche del sito
+stats/node_modules
