@@ -48,3 +48,28 @@ describe("hitPayload", () => {
     expect(hitPayload({ ...base, arch: "intel" }).a).toBe("");
   });
 });
+
+describe("track", () => {
+  // Regression, 2026-10-09: on the live site Chrome's sendBeacon got HTTP 503 from
+  // workers.dev on every call, while fetch with keepalive and no credentials got 204.
+  it("sends with fetch keepalive and no credentials, never sendBeacon", async () => {
+    const { vi } = await import("vitest");
+    const mem = () => { const m = new Map<string, string>(); return { getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => void m.set(k, v), removeItem: (k: string) => void m.delete(k) }; };
+    const fetchSpy = vi.fn(async () => new Response(null, { status: 204 }));
+    const beacon = vi.fn(() => true);
+    vi.stubGlobal("location", { hostname: "whoismars.github.io", pathname: "/linerfm-releases/", search: "?src=tiktok" });
+    vi.stubGlobal("navigator", { webdriver: false, sendBeacon: beacon });
+    vi.stubGlobal("document", { referrer: "" });
+    vi.stubGlobal("localStorage", mem());
+    vi.stubGlobal("sessionStorage", mem());
+    vi.stubGlobal("fetch", fetchSpy);
+    const { track } = await import("./stats");
+    track("download", "intel");
+    expect(beacon).not.toHaveBeenCalled();
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    const [, init] = fetchSpy.mock.calls[0] as unknown as [string, RequestInit];
+    expect(init).toMatchObject({ method: "POST", keepalive: true, credentials: "omit" });
+    expect(JSON.parse(await (init.body as Blob).text())).toMatchObject({ k: "download", a: "intel", s: "tiktok" });
+    vi.unstubAllGlobals();
+  });
+});

@@ -43,7 +43,12 @@ function store(kind: "local" | "session"): Storage | null {
   try { return kind === "local" ? localStorage : sessionStorage; } catch { return null; }
 }
 
-/** Fire-and-forget beacon. text/plain keeps it a simple request (no CORS preflight). */
+/**
+ * Fire-and-forget hit. text/plain keeps it a simple request (no CORS preflight);
+ * keepalive lets a DMG click survive the navigation to GitHub. Not sendBeacon:
+ * on the live site Chrome's beacons got HTTP 503 from workers.dev every time
+ * (2026-10-09), while this same fetch got 204.
+ */
 export function track(kind: "view" | "download", arch?: string): void {
   const local = store("local");
   const session = store("session");
@@ -60,5 +65,5 @@ export function track(kind: "view" | "download", arch?: string): void {
   });
   if (p.s) session?.setItem(SRC_KEY, p.s);
   const body = new Blob([JSON.stringify(p)], { type: "text/plain" });
-  if (!navigator.sendBeacon?.(STATS_URL, body)) fetch(STATS_URL, { method: "POST", body, keepalive: true }).catch(() => {});
+  fetch(STATS_URL, { method: "POST", body, keepalive: true, credentials: "omit" }).catch(() => {});
 }
