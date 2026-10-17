@@ -13,3 +13,7 @@ database_id = "b2e57a63-66d7-4a32-b8e3-dcb701b3bc48"
 [[kv_namespaces]]
 binding = "TRIAL_LEDGER"
 id = "d2bf690b427c4c778eeba30c34691ee2"
+
+# Riepilogo numeri su Discord #metrics ogni 6 ore (00/06/12/18 UTC = 02/08/14/20 Roma d'estate): src/notify.ts
+[triggers]
+crons = ["0 */6 * * *"]

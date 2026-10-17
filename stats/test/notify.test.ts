@@ -1,0 +1,176 @@
+import { describe, it, expect } from "vitest";
+import { downloadEmbed, summaryEmbed, windowOf, handleScheduled } from "../src/notify";
+import { handleHit } from "../src/hit";
+
+const H = 3_600_000;
+// 17/10/2026 18:00 UTC = 20:00 Roma: un tick del cron "0 */6 * * *"
+const TICK = Date.UTC(2026, 9, 17, 18, 0, 0);
+const ORIGIN = "https://whoismars.github.io";
+const UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/605.1.15";
+
+describe("windowOf", () => {
+  it("the window is the 6 hours before the cron tick, not before 'now'", () => {
+    expect(windowOf(TICK + 42_000)).toEqual({ from: TICK - 6 * H, to: TICK });
+  });
+});
+
+describe("downloadEmbed", () => {
+  it("says which Mac, where from and where in the world, with the time in Discord format", () => {
+    const e = downloadEmbed({ ts: TICK, arch: "apple-silicon", src: "", ref: "www.reddit.com", country: "IT" });
+    expect(e.title).toBe("Download dal sito");
+    const f = Object.fromEntries(e.fields.map((x) => [x.name, x.value]));
+    expect(f["Mac"]).toBe("Apple silicon");
+    expect(f["Da dove"]).toBe("Reddit");
+    expect(f["Paese"]).toContain("Italia");
+    expect(f["Quando"]).toBe(`<t:${TICK / 1000}:F> (<t:${TICK / 1000}:R>)`);
+  });
+});
+
+const row = (a: Record<string, unknown>) => ({ ts: TICK - H, kind: "view", ref: "", src: "", arch: "", sid: "s1", country: "IT", ...a });
+const acc = (a: Record<string, unknown>) => ({ ts: TICK - H, kind: "validate", outcome: "ok", reason: "", device: "d1", key: "K", country: "IT", ...a });
+
+describe("summaryEmbed", () => {
+  const base = {
+    win: { from: TICK - 6 * H, to: TICK },
+    hits: [
+      row({ sid: "a" }), row({ sid: "a" }), row({ sid: "b", ref: "www.reddit.com" }),
+      row({ kind: "download", sid: "a", arch: "apple-silicon" }),
+      row({ sid: "z", src: "claude" }),           // traffico di prova: non conta
+      row({ sid: "old", ts: TICK - 7 * H }),      // fuori dalla finestra
+    ],
+    access: [
+      acc({ kind: "trial", outcome: "new", device: "n1" }), acc({ device: "d1" }), acc({ device: "d1" }),
+      acc({ kind: "trial", outcome: "active", device: "t1" }), acc({ outcome: "refused", device: "x" }),
+    ],
+    gh: { dmg: 40, updates: 12 }, ghPrev: { dmg: 37, updates: 10 },
+    orders: [
+      { ts: TICK - H, cents: 799, currency: "EUR", state: "pagato" as const },
+      { ts: TICK - 2 * H, cents: 0, currency: "EUR", state: "regalato" as const },
+      { ts: TICK - 30 * H, cents: 799, currency: "EUR", state: "pagato" as const },
+    ],
+  };
+  const fields = (e: ReturnType<typeof summaryEmbed>) => Object.fromEntries(e.fields.map((x) => [x.name, x.value]));
+
+  it("names the window in Rome time", () => {
+    expect(summaryEmbed(base).title).toBe("Numeri 14:00 → 20:00");
+  });
+
+  it("counts visits and visitors without test traffic or rows outside the window", () => {
+    const f = fields(summaryEmbed(base));
+    expect(f["Visite sito"]).toBe("3 (2 persone)");
+    expect(f["Click download"]).toBe("1");
+    expect(f["Fonti"]).toContain("Reddit");
+  });
+
+  it("GitHub downloads are the change since the previous summary", () => {
+    const f = fields(summaryEmbed(base));
+    expect(f["DMG scaricati"]).toBe("+3 (totale 40)");
+    expect(f["Aggiornamenti"]).toBe("+2");
+    expect(fields(summaryEmbed({ ...base, ghPrev: null }))["DMG scaricati"]).toBe("totale 40");
+  });
+
+  it("app usage: new trials and Macs that opened the app, refusals apart", () => {
+    const f = fields(summaryEmbed(base));
+    expect(f["Prove nuove"]).toBe("1");
+    expect(f["Mac attivi"]).toBe("3");
+    expect(f["Rifiuti"]).toBe("1");
+  });
+
+  it("sales in the window count only paid orders; a free order is not revenue", () => {
+    const f = fields(summaryEmbed(base));
+    expect(f["Vendite"]).toBe("1 (7,99 €)");
+    expect(f["Totale vendite"]).toBe("2 (15,98 €)");
+    expect(fields(summaryEmbed({ ...base, orders: null }))["Vendite"]).toBe("non leggibili");
+  });
+});
+
+function fakeDB(opts: { prior?: number; lastHour?: number; snapshot?: string } = {}) {
+  const runs: { sql: string; v: unknown[] }[] = [];
+  const db = {
+    prepare: (sql: string) => {
+      const stmt = (v: unknown[]) => ({
+        run: async () => { runs.push({ sql, v }); return {}; },
+        first: async () => {
+          if (/sid = \?/.test(sql)) return { n: opts.prior ?? 0 };
+          if (/kind = 'download'/.test(sql)) return { n: opts.lastHour ?? 0 };
+          if (/FROM cache/.test(sql)) return opts.snapshot ? { ts: 0, value: opts.snapshot } : null;
+          return null;
+        },
+        all: async () => ({ results: [] }),
+      });
+      return { bind: (...v: unknown[]) => stmt(v), ...stmt([]) };
+    },
+  } as unknown as D1Database;
+  return { db, runs };
+}
+
+const dl = (sid = "0123456789abcdef", s = "") =>
+  new Request("https://stats.example/hit", { method: "POST", headers: { Origin: ORIGIN, "User-Agent": UA }, body: JSON.stringify({ k: "download", p: "/linerfm-releases/", r: "", s, a: "intel", i: sid }) });
+
+function ctx() {
+  const jobs: Promise<unknown>[] = [];
+  return { c: { waitUntil: (p: Promise<unknown>) => void jobs.push(p), passThroughOnException() {} } as unknown as ExecutionContext, done: () => Promise.all(jobs) };
+}
+
+describe("download notifications from POST /hit", () => {
+  const hook = (urls: string[]) => (async (u: string) => { urls.push(String(u)); return new Response(null, { status: 204 }); }) as typeof fetch;
+
+  it("a DMG click goes to the downloads channel", async () => {
+    const { db } = fakeDB(); const urls: string[] = []; const k = ctx();
+    const res = await handleHit(dl(), { DB: db, DISCORD_DOWNLOADS_WEBHOOK: "https://d.example/dl" }, "IT", TICK, k.c, hook(urls));
+    await k.done();
+    expect(res.status).toBe(204);
+    expect(urls).toEqual(["https://d.example/dl"]);
+  });
+
+  it("the same visitor clicking twice is announced once", async () => {
+    const { db } = fakeDB({ prior: 1 }); const urls: string[] = []; const k = ctx();
+    await handleHit(dl(), { DB: db, DISCORD_DOWNLOADS_WEBHOOK: "https://d.example/dl" }, "IT", TICK, k.c, hook(urls));
+    await k.done();
+    expect(urls).toEqual([]);
+  });
+
+  it("caps the channel at 20 an hour and skips test traffic", async () => {
+    const urls: string[] = [];
+    for (const [opts, s] of [[{ lastHour: 21 }, ""], [{}, "claude"]] as const) {
+      const { db } = fakeDB(opts); const k = ctx();
+      await handleHit(dl(undefined, s), { DB: db, DISCORD_DOWNLOADS_WEBHOOK: "https://d.example/dl" }, "IT", TICK, k.c, hook(urls));
+      await k.done();
+    }
+    expect(urls).toEqual([]);
+  });
+
+  it("a page view is never announced, and a broken Discord never breaks the hit", async () => {
+    const { db, runs } = fakeDB(); const k = ctx();
+    const broken = (async () => { throw new Error("down"); }) as unknown as typeof fetch;
+    const view = new Request("https://stats.example/hit", { method: "POST", headers: { Origin: ORIGIN, "User-Agent": UA }, body: JSON.stringify({ k: "view", p: "/x", r: "", s: "", a: "", i: "0123456789abcdef" }) });
+    expect((await handleHit(view, { DB: db, DISCORD_DOWNLOADS_WEBHOOK: "https://d.example/dl" }, "IT", TICK, k.c, broken)).status).toBe(204);
+    expect((await handleHit(dl(), { DB: db, DISCORD_DOWNLOADS_WEBHOOK: "https://d.example/dl" }, "IT", TICK, k.c, broken)).status).toBe(204);
+    await expect(k.done()).resolves.toBeDefined();
+    expect(runs.filter((r) => /INSERT INTO hits/.test(r.sql))).toHaveLength(2);
+  });
+});
+
+describe("handleScheduled", () => {
+  it("posts one summary to the metrics channel and saves the GitHub snapshot for the next delta", async () => {
+    const { db, runs } = fakeDB({ snapshot: JSON.stringify({ dmg: 1, updates: 0 }) });
+    const posts: { url: string; body: string }[] = [];
+    const f = (async (u: string, init?: RequestInit) => {
+      const url = String(u);
+      if (url.includes("api.github.com")) return Response.json([{ tag_name: "v0.14.2", published_at: "", assets: [{ name: "LinerFM_0.14.2_aarch64.dmg", download_count: 4 }, { name: "LinerFM.app.tar.gz", download_count: 2 }] }]);
+      posts.push({ url, body: String(init?.body) });
+      return new Response(null, { status: 204 });
+    }) as typeof fetch;
+    await handleScheduled({ DB: db, DISCORD_METRICS_WEBHOOK: "https://d.example/metrics" }, TICK, f);
+    expect(posts.map((p) => p.url)).toEqual(["https://d.example/metrics"]);
+    const embed = JSON.parse(posts[0].body).embeds[0];
+    expect(embed.fields.find((x: { name: string }) => x.name === "DMG scaricati").value).toBe("+3 (totale 4)");
+    expect(runs.some((r) => /INSERT OR REPLACE INTO cache/.test(r.sql) && r.v[0] === "summary-gh")).toBe(true);
+  });
+
+  it("does nothing without the webhook", async () => {
+    const { db } = fakeDB(); const posts: string[] = [];
+    await handleScheduled({ DB: db }, TICK, (async (u: string) => { posts.push(String(u)); return Response.json([]); }) as typeof fetch);
+    expect(posts).toEqual([]);
+  });
+});
