@@ -74,3 +74,51 @@ describe("summarize", () => {
     expect(s.days).toHaveLength(30);
   });
 });
+
+import { summarizeAccess, type AccessRow } from "../src/dashboard";
+
+const a = (x: Partial<AccessRow>): AccessRow => ({ ts: NOW - 1000, kind: "trial", outcome: "new", reason: "", device: "0000aaaa", key: "", country: "IT", ...x });
+
+describe("summarizeAccess", () => {
+  it("counts Macs on trial, expired trials that came back, live licenses and refusals", () => {
+    const s = summarizeAccess([
+      a({ device: "m1", outcome: "new", ts: NOW - 3 * DAY }),
+      a({ device: "m1", outcome: "active", ts: NOW - 1 * DAY }),
+      a({ device: "m2", outcome: "expired", reason: "2d" }),
+      a({ kind: "validate", outcome: "ok", key: "K1", device: "m3" }),
+      a({ kind: "validate", outcome: "ok", key: "K1", device: "m3" }),
+      a({ kind: "validate", outcome: "ok", key: "K2", device: "m4", ts: NOW - 5 * DAY }),
+      a({ kind: "activate", outcome: "refused", reason: "invalid", key: "XX", device: "m5" }),
+      a({ kind: "sale", outcome: "ok", reason: "7.99 EUR", device: "", key: "" }),
+    ], NOW);
+    expect(s.trialing).toBe(1);        // m1, its last word is "active"
+    expect(s.expiredBack).toBe(1);     // m2
+    expect(s.liveLicenses).toBe(1);    // K1 checked in the last 48h; K2 silent for 5 days
+    expect(s.refused7d).toBe(1);
+    expect(s.sales).toEqual(["7.99 EUR"]);
+    expect(s.licenses.map((l) => l.key)).toEqual(["K1", "K2"]);
+  });
+
+  it("lists the latest events without the repetitive hourly checks", () => {
+    const s = summarizeAccess([
+      a({ kind: "validate", outcome: "ok", key: "K1", ts: NOW - 3 }),
+      a({ kind: "validate", outcome: "ok", key: "K1", ts: NOW - 2 }),
+      a({ kind: "activate", outcome: "ok", key: "K1", ts: NOW - 1 }),
+    ], NOW);
+    expect(s.recent.map((r) => r.kind)).toEqual(["activate"]);
+  });
+});
+
+describe("handleDashboard with app accesses", () => {
+  it("shows the access section from the access table", async () => {
+    const calls: string[] = [];
+    const db = {
+      prepare: (sql: string) => ({ bind: () => ({ all: async () => { calls.push(sql); return { results: sql.includes("FROM access") ? [a({ kind: "activate", outcome: "refused", reason: "activation_limit", key: "ZZ99" })] : [] }; } }) }),
+    } as unknown as D1Database;
+    const res = await handleDashboard(get(basic("secret")), { DB: db, DASH_PASSWORD: "secret" }, NOW, noGithub);
+    const html = await res.text();
+    expect(calls.some((s) => s.includes("FROM access"))).toBe(true);
+    expect(html).toContain("ZZ99");
+    expect(html).toContain("activation_limit");
+  });
+});
