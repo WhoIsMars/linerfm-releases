@@ -45,8 +45,8 @@ describe("handleDashboard", () => {
     expect(res.headers.get("X-Robots-Tag")).toContain("noindex");
     expect(calls[0]).toEqual([NOW - 30 * DAY]);
     const html = await res.text();
-    expect(html).toContain("tiktok");
-    expect(html).toContain("www.reddit.com");
+    expect(html).toContain("TikTok");
+    expect(html).toContain("Reddit");
   });
 
   it("escapes what it prints", async () => {
