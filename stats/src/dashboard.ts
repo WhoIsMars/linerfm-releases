@@ -1,7 +1,7 @@
 // GET /dashboard: the owner's private view of the site numbers, last 30 days.
 // HTTP Basic auth against the DASH_PASSWORD secret (`wrangler secret put DASH_PASSWORD`);
 // without the secret the page stays closed. Nothing is cached or indexed.
-export interface Env { DB: D1Database; DASH_PASSWORD?: string; LS_API_KEY?: string; LS_STORE_ID?: string }
+export interface Env { DB: D1Database; DASH_PASSWORD?: string; DASH_LINK_TOKEN?: string; LS_API_KEY?: string; LS_STORE_ID?: string }
 
 export interface Row { ts: number; kind: string; ref: string; src: string; arch: string; sid: string; country: string }
 
@@ -113,7 +113,7 @@ async function githubDownloads(fetchImpl: typeof fetch): Promise<[string, number
 export async function readSales(fetchImpl: typeof fetch, apiKey: string | undefined, storeId: string) {
   if (!apiKey) return null;
   try {
-    const out = { paid: 0, cents: 0, currency: "EUR", last: "", refunded: 0 };
+    const out = { paid: 0, cents: 0, currency: "EUR", last: "", refunded: 0, times: [] as number[] };
     for (let n = 1, last = 1; n <= last && n <= 10; n++) {
       const r = await fetchImpl(`https://api.lemonsqueezy.com/v1/orders?filter[store_id]=${storeId}&page[number]=${n}&page[size]=100`,
         { headers: { Authorization: `Bearer ${apiKey}`, Accept: "application/vnd.api+json" } });
@@ -124,7 +124,7 @@ export async function readSales(fetchImpl: typeof fetch, apiKey: string | undefi
         if (a.test_mode) continue;
         if (a.refunded) { out.refunded++; continue; }
         if (a.status !== "paid" || !(a.total > 0)) continue; // 0 € = chiave regalata
-        out.paid++; out.cents += a.total; out.currency = a.currency;
+        out.paid++; out.cents += a.total; out.currency = a.currency; out.times.push(Date.parse(a.created_at));
         if (a.created_at > out.last) out.last = a.created_at;
       }
     }
@@ -190,115 +190,241 @@ function eventLine(r: AccessRow): { tone: string; title: string; detail: string 
 
 type Sales = Awaited<ReturnType<typeof readSales>>;
 
-function page(s: ReturnType<typeof summarize>, x: ReturnType<typeof summarizeAccess>, sales: Sales, gh: [string, number][] | null, now: number): string {
-  const pct = (a: number, b: number) => (b ? `${Math.round((a / b) * 1000) / 10}%` : "");
-  const trialsTotal = x.trialing + x.expiredBack;
-  const salesN = sales ? sales.paid : x.sales.length;
-  const steps = [
-    { label: "Visite al sito", value: s.visits, note: "30 giorni" },
-    { label: "Click sul download", value: s.downloads, note: pct(s.downloads, s.visits) },
-    { label: "Mac che hanno aperto l'app", value: trialsTotal, note: "dal 17/10" },
-    { label: "Vendite", value: salesN, note: sales ? `${money(sales.cents, sales.currency)} in tutto` : "da Lemon Squeezy non leggibile", tone: "ok" },
-  ];
-  const funnel = steps.map((st, i) => `<div class="step${st.tone ? " " + st.tone : ""}"><span class="lbl">${esc(st.label)}</span><b>${esc(st.value)}</b><span class="note">${esc(st.note)}</span>${i < steps.length - 1 ? '<i class="arrow" aria-hidden="true">›</i>' : ""}</div>`).join("");
+// ── Pagina ────────────────────────────────────────────────────────────────────
+// Colori di sistema Apple in modalità scura, più il verde dell'app per i soldi.
+const C = { green: "#1DB954", blue: "#0A84FF", indigo: "#5E5CE6", orange: "#FF9F0A", teal: "#40C8E0", red: "#FF453A", yellow: "#FFD60A", purple: "#BF5AF2", gray: "#8E8E93" };
+const BRAND: Record<string, string> = { YouTube: "#FF3B30", TikTok: "#25F4EE", Instagram: "#E1306C", Reddit: "#FF4500", "Hacker News": "#FF6600", Bing: "#0A84FF", Google: "#34A853", X: "#E5E5EA", AlternativeTo: "#3A8BEA", Discord: "#5865F2", GitHub: "#E5E5EA" };
 
-  const refusedNow = x.recent.filter((r) => r.outcome === "refused" && now - r.ts < DAY).length;
-  const health = refusedNow
-    ? `<span class="pill bad">${refusedNow} ${refusedNow === 1 ? "rifiuto" : "rifiuti"} nelle ultime 24 ore</span>`
-    : `<span class="pill ok">Licenze: nessun rifiuto nelle ultime 24 ore</span>`;
+const ICON: Record<string, string> = {
+  money: '<path d="M3 7h18v10H3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/>',
+  eye: '<path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/>',
+  down: '<path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+  mac: '<path d="M4 6h16v10H4zM2 19h20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+  key: '<circle cx="8" cy="12" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M11.5 12H21m-3 0v3m-3-3v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+  shield: '<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8.5 12l2.5 2.5 4.5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+  alert: '<path d="M12 3l10 18H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 10v4m0 3v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+};
+const icon = (name: string) => `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">${ICON[name]}</svg>`;
+const flag = (c: string) => (/^[A-Z]{2}$/.test(c) ? String.fromCodePoint(...[...c].map((ch) => 0x1f1a5 + ch.charCodeAt(0))) : "🌐");
+
+/** Linea dei 30 giorni dentro un riquadro: solo forma, niente assi. */
+function spark(values: number[], color: string): string {
+  if (!values.some((v) => v > 0)) return `<svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="26" x2="100" y2="26" stroke="${color}" stroke-opacity=".35" stroke-width="2"/></svg>`;
+  const max = Math.max(...values), step = 100 / Math.max(1, values.length - 1);
+  const pts = values.map((v, i) => `${(i * step).toFixed(1)},${(26 - (v / max) * 22).toFixed(1)}`);
+  return `<svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polygon points="0,28 ${pts.join(" ")} 100,28" fill="${color}" fill-opacity=".18"/><polyline points="${pts.join(" ")}" fill="none" stroke="${color}" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>`;
+}
+
+const sum = (a: number[]) => a.reduce((n, v) => n + v, 0);
+function delta(cur: number, prev: number): string {
+  if (!cur && !prev) return "";
+  const d = cur - prev;
+  if (d === 0) return `<span class="delta flat">uguale ai 7 giorni prima</span>`;
+  return `<span class="delta ${d > 0 ? "up" : "down"}">${d > 0 ? "▲" : "▼"} ${Math.abs(d)} rispetto ai 7 giorni prima</span>`;
+}
+
+function page(s: ReturnType<typeof summarize>, x: ReturnType<typeof summarizeAccess>, sales: Sales, gh: [string, number][] | null, now: number): string {
+  const visitsByDay = s.days.map((d) => d.visits), dlByDay = s.days.map((d) => d.downloads);
+  const v7 = sum(visitsByDay.slice(-7)), v7p = sum(visitsByDay.slice(-14, -7));
+  const d7 = sum(dlByDay.slice(-7)), d7p = sum(dlByDay.slice(-14, -7));
+  const salesDays = s.days.map((d) => (sales?.times ?? []).filter((t) => new Date(t).toISOString().slice(0, 10) === d.day).length);
+  const refused24 = x.recent.filter((r) => r.outcome === "refused" && now - r.ts < DAY).length;
+  const salesN = sales ? sales.paid : x.sales.length;
+  const lastSale = sales?.last ? ago(Date.parse(sales.last), now) : "";
+
+  type Tile = { color: string; icon: string; label: string; value: string | number; foot: string; spark?: number[]; big?: boolean };
+  const tiles: Tile[] = [
+    { color: C.green, icon: "money", label: "Vendite", value: salesN, foot: sales ? `${money(sales.cents, sales.currency)} incassati${lastSale ? ` · ultima ${lastSale}` : ""}` : "Lemon Squeezy non leggibile", spark: salesDays, big: true },
+    { color: C.blue, icon: "eye", label: "Visite, 7 giorni", value: v7, foot: delta(v7, v7p) || `${s.visits} in 30 giorni`, spark: visitsByDay },
+    { color: C.indigo, icon: "down", label: "Download, 7 giorni", value: d7, foot: delta(d7, d7p) || `${s.downloads} in 30 giorni`, spark: dlByDay },
+    { color: C.orange, icon: "mac", label: "Mac in prova", value: x.trialing, foot: x.expiredBack ? `${x.expiredBack} con la prova finita hanno riaperto l'app` : "prove gratuite in corso" },
+    { color: C.teal, icon: "key", label: "Licenze attive", value: x.liveLicenses, foot: "controllate nelle ultime 48 ore" },
+    refused24
+      ? { color: C.red, icon: "alert", label: "Rifiuti, 24 ore", value: refused24, foot: "accessi negati: guarda la cronologia" }
+      : { color: C.green, icon: "shield", label: "Licenze", value: "OK", foot: x.refused7d ? `${x.refused7d} rifiuti negli ultimi 7 giorni` : "nessun rifiuto in 7 giorni" },
+  ];
+  const tileHtml = tiles.map((t) => `<article class="tile${t.big ? " big" : ""}" style="--c:${t.color}">
+    <header><span class="ico">${icon(t.icon)}</span>${esc(t.label)}</header>
+    <b class="num" data-n="${typeof t.value === "number" ? t.value : ""}">${esc(t.value)}</b>
+    <footer>${t.foot.startsWith("<span") ? t.foot : esc(t.foot)}</footer>${t.spark ? spark(t.spark, t.color) : ""}</article>`).join("");
+
+  // in una frase, quello che conta adesso
+  const headline = refused24
+    ? `<span style="color:${C.red}">${refused24} ${refused24 === 1 ? "accesso negato" : "accessi negati"} nelle ultime 24 ore.</span> Controlla la cronologia.`
+    : salesN
+      ? `<span style="color:${C.green}">${salesN} ${salesN === 1 ? "vendita" : "vendite"}</span>, <span style="color:${C.blue}">${v7} visite</span> negli ultimi 7 giorni, licenze in regola.`
+      : `<span style="color:${C.blue}">${v7} visite</span> negli ultimi 7 giorni, ancora nessuna vendita, licenze in regola.`;
+
+  const trialsTotal = x.trialing + x.expiredBack;
+  const funnelSteps = [
+    { label: "Visite al sito", n: s.visits, color: C.blue },
+    { label: "Click sul download", n: s.downloads, color: C.indigo },
+    { label: "Mac che aprono l'app", n: trialsTotal, color: C.orange },
+    { label: "Vendite", n: salesN, color: C.green },
+  ];
+  const fMax = Math.max(1, ...funnelSteps.map((f) => f.n));
+  const funnel = funnelSteps.map((f, i) => {
+    const prev = i ? funnelSteps[i - 1].n : 0;
+    const conv = i === 2 ? "registrati dal 17/10" : i && prev ? `${Math.round((f.n / prev) * 100)}% del passo prima` : i ? "" : "ultimi 30 giorni";
+    return `<li style="--c:${f.color}"><div class="fl"><span>${esc(f.label)}</span><b>${esc(f.n)}</b></div><div class="track"><i style="width:${Math.max(2, Math.round((f.n / fMax) * 100))}%"></i></div><small>${esc(conv)}</small></li>`;
+  }).join("");
 
   const feed = x.recent.length
-    ? `<ul class="feed">${x.recent.slice(0, 25).map((r) => { const e = eventLine(r); return `<li class="${e.tone}" title="${esc(r.reason)}"><i class="dot"></i><div><b>${esc(e.title)}</b><span>${esc(e.detail)}${r.country ? ` · ${esc(countryName(r.country))}` : ""}</span></div><time title="${esc(rome(r.ts))}">${esc(ago(r.ts, now))}</time></li>`; }).join("")}</ul>`
-    : `<p class="empty">Nessun accesso registrato negli ultimi 30 giorni. Il registro è attivo dal 17/10: prove, attivazioni e controlli compaiono qui appena succedono.</p>`;
+    ? `<ul class="feed">${x.recent.slice(0, 12).map((r) => { const e = eventLine(r); const col = e.tone === "ok" ? C.green : e.tone === "bad" ? C.red : e.tone === "warn" ? C.orange : C.blue;
+        return `<li style="--c:${col}" title="${esc(r.reason)}"><i class="badge"></i><div><b>${esc(e.title)}</b><span>${esc(e.detail)}${r.country ? ` · ${flag(r.country)} ${esc(countryName(r.country))}` : ""}</span></div><time title="${esc(rome(r.ts))}">${esc(ago(r.ts, now))}</time></li>`; }).join("")}</ul>`
+    : `<div class="empty"><span class="ico" style="--c:${C.blue}">${icon("shield")}</span><p>Nessun accesso registrato finora. Prove, attivazioni e controlli delle licenze compaiono qui appena succedono, e arrivano anche su Discord.</p></div>`;
 
   const licenses = x.licenses.length
-    ? `<ul class="rows">${x.licenses.map((l) => { const live = now - l.lastOk < 2 * DAY; return `<li><span class="mono">····${esc(l.key)}</span><span class="tag ${live ? "ok" : l.lastRefused ? "bad" : ""}">${live ? "attiva" : l.lastRefused ? "rifiutata" : "silenziosa"}</span><span class="muted">${esc(l.macs)} Mac · ultimo controllo ${esc(ago(l.lastOk, now))}</span>${l.lastRefused ? `<span class="muted bad">rifiuto: ${esc(reasonText(l.lastRefused.reason))}</span>` : ""}</li>`; }).join("")}</ul>`
-    : `<p class="empty">Nessuna licenza ha ancora contattato il server dal 17/10.</p>`;
+    ? `<ul class="lic">${x.licenses.map((l) => { const live = now - l.lastOk < 2 * DAY; const col = live ? C.green : l.lastRefused ? C.red : C.gray;
+        return `<li style="--c:${col}"><span class="mono">····${esc(l.key)}</span><span class="tag">${live ? "attiva" : l.lastRefused ? "rifiutata" : "silenziosa"}</span><small>${esc(l.macs)} Mac · controllo ${esc(ago(l.lastOk, now))}${l.lastRefused ? ` · rifiuto: ${esc(reasonText(l.lastRefused.reason))}` : ""}</small></li>`; }).join("")}</ul>`
+    : `<p class="muted">Nessuna licenza ha ancora contattato il server.</p>`;
 
-  const maxV = Math.max(1, ...s.days.map((d) => d.visits));
-  const bars = s.days.map((d, i) => `<div class="col" title="${esc(d.day.slice(8))}/${esc(d.day.slice(5, 7))}: ${d.visits} visite, ${d.downloads} download"><i class="v" style="height:${Math.round((d.visits / maxV) * 100)}%"></i>${d.downloads ? `<i class="d" style="height:${Math.round((d.downloads / maxV) * 100)}%"></i>` : ""}${i % 5 === 4 || i === s.days.length - 1 ? `<span>${esc(d.day.slice(8))}/${esc(d.day.slice(5, 7))}</span>` : ""}</div>`).join("");
+  const maxV = Math.max(1, ...visitsByDay);
+  const chart = s.days.map((d, i) => `<div class="col"><div class="stack" style="height:${Math.round((d.visits / maxV) * 100)}%"><i class="v"></i>${d.downloads ? `<i class="d" style="height:${Math.round((d.downloads / Math.max(1, d.visits)) * 100)}%"></i>` : ""}</div><em>${esc(d.day.slice(8))}/${esc(d.day.slice(5, 7))}<br>${d.visits} visite${d.downloads ? `, ${d.downloads} download` : ""}</em>${i % 7 === 2 || i === s.days.length - 1 ? `<span>${esc(d.day.slice(8))}/${esc(d.day.slice(5, 7))}</span>` : ""}</div>`).join("");
 
-  const barList = (items: [string, number][], total: number) => items.length
-    ? `<ul class="bars">${items.map(([k, n]) => `<li><span>${esc(k)}</span><i style="width:${Math.max(4, Math.round((n / Math.max(1, total)) * 100))}%"></i><b>${esc(n)}</b></li>`).join("")}</ul>`
-    : `<p class="empty">Ancora nessuna visita.</p>`;
-  const sources = barList(s.bySource.map(([k, v, d]) => [`${prettySource(k)}${d ? ` · ${d} download` : ""}`, v]), s.visits);
-  const countries = barList(s.countries.map(([c, n]) => [countryName(c), n]), s.visits);
+  const total = Math.max(1, s.visits);
+  const bars = (items: { name: string; n: number; color: string; extra?: string }[], emptyText: string) => items.length
+    ? `<ul class="hbars">${items.slice(0, 7).map((it) => `<li style="--c:${it.color}"><span>${it.name}${it.extra ? ` <small>· ${esc(it.extra)}</small>` : ""}</span><b>${esc(it.n)}</b><div class="track"><i style="width:${Math.max(3, Math.round((it.n / total) * 100))}%"></i></div></li>`).join("")}</ul>`
+    : `<p class="muted">${esc(emptyText)}</p>`;
+  const sources = bars(s.bySource.map(([k, v, d]) => { const name = prettySource(k); return { name: esc(name), n: v, color: BRAND[name] ?? C.gray, extra: d ? `${d} download` : "" }; }), "Ancora nessuna visita.");
+  const countries = bars(s.countries.map(([c, n]) => ({ name: `${flag(c)} ${esc(countryName(c))}`, n, color: C.blue })), "Ancora nessuna visita.");
 
   const archName = (a: string) => (a === "apple-silicon" ? "Apple Silicon" : a === "intel" ? "Intel" : a === "github-page" ? "pagina GitHub" : a);
-  const downloads = s.recent.length
-    ? `<ul class="rows">${s.recent.map((r) => `<li><b>${esc(archName(r.arch))}</b><span class="muted">da ${esc(prettySource(r.from))} · ${esc(countryName(r.country))}</span><time>${esc(rome(r.ts))}</time></li>`).join("")}</ul>`
-    : `<p class="empty">Nessun download dal sito negli ultimi 30 giorni.</p>`;
   const ghTotal = gh ? gh.reduce((n, [, c]) => n + c, 0) : 0;
-  const github = gh
-    ? `<p class="big">${esc(ghTotal)} <span class="muted">download DMG nelle ultime ${esc(gh.length)} release</span></p>${gh.filter(([, c]) => c > 0).length ? `<ul class="chips">${gh.filter(([, c]) => c > 0).map(([t, c]) => `<li>${esc(t)} <b>${esc(c)}</b></li>`).join("")}</ul>` : ""}`
-    : `<p class="empty">GitHub non raggiungibile in questo momento.</p>`;
+  const downloads = `${s.recent.length ? `<ul class="feed">${s.recent.slice(0, 5).map((r) => `<li style="--c:${C.indigo}"><i class="badge"></i><div><b>${esc(archName(r.arch))}</b><span>da ${esc(prettySource(r.from))} · ${flag(r.country)} ${esc(countryName(r.country))}</span></div><time title="${esc(rome(r.ts))}">${esc(ago(r.ts, now))}</time></li>`).join("")}</ul>` : `<p class="muted">Nessun download dal sito negli ultimi 30 giorni.</p>`}
+    <p class="gh">${gh ? `<b>${esc(ghTotal)}</b> download DMG su GitHub nelle ultime ${esc(gh.length)} release, contando anche gli aggiornamenti manuali` : "GitHub non raggiungibile in questo momento"}</p>`;
 
-  return `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>LinerFM, numeri</title><style>
-:root{color-scheme:dark;--bg:#050505;--panel:rgba(255,255,255,.04);--panel-2:rgba(255,255,255,.06);--line:rgba(255,255,255,.1);--line-2:rgba(255,255,255,.06);
---shadow:0 8px 32px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08);--text:#f5f5f7;--text-2:rgba(235,235,245,.72);--text-3:rgba(235,235,245,.6);
---green:#1db954;--red:#ff6b6b;--amber:#e0a955;--r:14px;--r-sm:10px}
-*{box-sizing:border-box}html{background:var(--bg)}body{margin:0;color:var(--text);font:13px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;-webkit-font-smoothing:antialiased;letter-spacing:-.011em}
-main{max-width:1120px;margin:0 auto;padding:32px 16px 72px}
-header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:24px}
-h1{font:700 28px/1.1 -apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;letter-spacing:-.025em;margin:0}
-.sub{color:var(--text-3);font-size:12px;margin-top:6px}
-h2{font-size:13px;font-weight:600;color:var(--text-2);margin:0 0 14px;letter-spacing:0}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
-.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:500;background:var(--panel-2);border:1px solid var(--line)}
-.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}.pill.ok{color:var(--green)}.pill.bad{color:var(--red)}
-.funnel{display:grid;grid-template-columns:repeat(4,1fr);gap:0;padding:0;overflow:hidden}
-.step{position:relative;padding:18px 20px;border-right:1px solid var(--line-2)}.step:last-child{border-right:0}
-.step .lbl{display:block;color:var(--text-2);font-size:12px}.step b{display:block;font:650 34px/1.1 -apple-system,"SF Pro Display",sans-serif;letter-spacing:-.02em;margin:6px 0 4px;font-variant-numeric:tabular-nums}
-.step .note{color:var(--text-3);font-size:12px}.step.ok b{color:var(--green)}
-.arrow{position:absolute;right:-9px;top:50%;transform:translateY(-50%);width:18px;height:18px;border-radius:50%;background:#111113;border:1px solid var(--line);color:var(--text-3);font-style:normal;font-size:13px;display:grid;place-items:center;z-index:1}
-.grid{display:grid;grid-template-columns:3fr 2fr;gap:14px;margin-top:14px}.grid.even{grid-template-columns:1fr 1fr}
-@media(max-width:820px){.funnel{grid-template-columns:1fr 1fr}.step:nth-child(2){border-right:0}.step:nth-child(-n+2){border-bottom:1px solid var(--line-2)}.arrow{display:none}.grid,.grid.even{grid-template-columns:1fr}}
-.feed,.rows,.bars,.chips{list-style:none;margin:0;padding:0}
-.feed li{display:grid;grid-template-columns:10px 1fr auto;gap:12px;align-items:start;padding:10px 0;border-top:1px solid var(--line-2)}.feed li:first-child{border-top:0;padding-top:2px}
-.feed .dot{width:8px;height:8px;border-radius:50%;background:var(--text-3);margin-top:5px}.feed li.ok .dot{background:var(--green)}.feed li.bad .dot{background:var(--red)}.feed li.warn .dot{background:var(--amber)}
-.feed b{display:block;font-weight:550}.feed span{color:var(--text-3);font-size:12px}.feed time,.rows time{color:var(--text-3);font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
-.rows li{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;padding:10px 0;border-top:1px solid var(--line-2)}.rows li:first-child{border-top:0;padding-top:2px}.rows time{margin-left:auto}
-.mono{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:12px}.muted{color:var(--text-3);font-size:12px}.muted.bad{color:var(--red)}
-.tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--panel-2);color:var(--text-2)}.tag.ok{color:var(--green)}.tag.bad{color:var(--red)}
-.chart{display:flex;gap:4px;align-items:flex-end;height:120px;margin-bottom:22px}
-.col{flex:1;height:100%;position:relative;display:flex;align-items:flex-end}.col .v{display:block;width:100%;background:rgba(235,235,245,.22);border-radius:4px 4px 1px 1px;min-height:2px}
-.col .d{position:absolute;left:25%;width:50%;bottom:0;background:var(--green);border-radius:3px 3px 0 0}.col span{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--text-3);white-space:nowrap}
-.legend{display:flex;gap:14px;color:var(--text-3);font-size:12px;margin:-6px 0 12px}.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px;background:rgba(235,235,245,.22)}.legend i.d{background:var(--green)}
-.bars li{display:grid;grid-template-columns:minmax(110px,1.2fr) 2fr 28px;gap:10px;align-items:center;padding:6px 0}.bars span{color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bars i{display:block;height:8px;border-radius:4px;background:rgba(235,235,245,.28)}.bars b{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
-.big{font:650 24px/1.2 -apple-system,"SF Pro Display",sans-serif;margin:0 0 12px}.big .muted{font:400 12px/1 inherit}
-.chips{display:flex;flex-wrap:wrap;gap:6px}.chips li{background:var(--panel-2);border:1px solid var(--line-2);border-radius:999px;padding:3px 10px;font-size:12px;color:var(--text-2)}.chips b{color:var(--text);margin-left:4px}
-.empty{color:var(--text-3);margin:0;padding:6px 0;line-height:1.5}.note-foot{color:var(--text-3);font-size:12px;margin:18px 2px 0;line-height:1.5}
-</style></head><body><main>
-<header><div><h1>LinerFM</h1><div class="sub">Aggiornato ${esc(rome(now))}, ora di Roma · ultimi 30 giorni</div></div>${health}</header>
-
-<section class="panel funnel" aria-label="Percorso">${funnel}</section>
-<p class="note-foot" style="margin-top:8px">Percorso: chi arriva al sito, chi scarica, chi apre l'app, chi compra.</p>
-
+  return `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex"><meta name="theme-color" content="#000000"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="LinerFM"><title>LinerFM, numeri</title><style>
+:root{color-scheme:dark;--bg:#000;--card:#1C1C1E;--card-2:#2C2C2E;--line:rgba(84,84,88,.45);--text:#fff;--text-2:rgba(235,235,245,.72);--text-3:rgba(235,235,245,.55);--r:20px}
+*{box-sizing:border-box}html{background:var(--bg)}body{margin:0;color:var(--text);font:15px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:1280px;margin:0 auto;padding:max(24px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 56px max(16px,env(safe-area-inset-left))}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font:700 34px/1.1 -apple-system,"SF Pro Display",sans-serif;letter-spacing:-.02em;margin:0}
+.live{display:inline-flex;align-items:center;gap:8px;color:var(--text-3);font-size:13px}.live i{width:8px;height:8px;border-radius:50%;background:${C.green};box-shadow:0 0 0 0 ${C.green};animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(29,185,84,.6)}70%{box-shadow:0 0 0 8px rgba(29,185,84,0)}100%{box-shadow:0 0 0 0 rgba(29,185,84,0)}}
+.headline{font:600 22px/1.3 -apple-system,"SF Pro Display",sans-serif;letter-spacing:-.01em;margin:14px 0 22px;color:var(--text-2)}
+.tiles{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.tile{position:relative;overflow:hidden;background:var(--card);border-radius:var(--r);padding:16px 16px 14px;min-height:150px;display:flex;flex-direction:column;
+  background-image:radial-gradient(120% 90% at 100% 0%,color-mix(in srgb,var(--c) 22%,transparent),transparent 60%)}
+.tile header{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--c)}
+.ico{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:9px;background:color-mix(in srgb,var(--c) 22%,transparent);color:var(--c)}
+.tile .num{font:700 40px/1 -apple-system,"SF Pro Display",sans-serif;letter-spacing:-.02em;margin:14px 0 6px;font-variant-numeric:tabular-nums}
+.tile.big .num{font-size:52px;color:var(--c)}
+.tile footer{font-size:12.5px;color:var(--text-3);position:relative;z-index:1}
+.spark{position:absolute;left:0;right:0;bottom:0;width:100%;height:46px;opacity:.9}
+.tile:has(.spark) footer{margin-bottom:34px}
+.delta{font-weight:600}.delta.up{color:${C.green}}.delta.down{color:${C.red}}.delta.flat{color:var(--text-3)}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px;margin-top:12px}
+.card{background:var(--card);border-radius:var(--r);padding:18px}.s4{grid-column:span 4}.s5{grid-column:span 5}.s7{grid-column:span 7}.s8{grid-column:span 8}.s12{grid-column:span 12}
+h2{font:700 17px/1.2 -apple-system,"SF Pro Display",sans-serif;margin:0 0 14px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}h2 small{font:400 13px/1 inherit;color:var(--text-3)}
+.funnel{list-style:none;margin:0;padding:0;display:grid;gap:14px}.funnel .fl{display:flex;justify-content:space-between;font-size:14px;color:var(--text-2)}.funnel b{color:var(--text);font-size:20px;font-variant-numeric:tabular-nums}
+.track{height:10px;border-radius:5px;background:var(--card-2);margin:6px 0 3px;overflow:hidden}.track i{display:block;height:100%;border-radius:5px;background:var(--c);transition:width .8s cubic-bezier(.22,1,.36,1)}
+.funnel small,.hbars small{color:var(--text-3);font-size:12px}
+.feed{list-style:none;margin:0;padding:0}.feed li{display:grid;grid-template-columns:12px 1fr auto;gap:12px;align-items:start;padding:10px 0;border-top:.5px solid var(--line)}.feed li:first-child{border-top:0;padding-top:0}
+.badge{width:10px;height:10px;border-radius:50%;background:var(--c);margin-top:5px;box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 25%,transparent)}
+.feed b{display:block;font-weight:600;font-size:14px}.feed span{color:var(--text-3);font-size:12.5px}.feed time{color:var(--text-3);font-size:12.5px;white-space:nowrap}
+.empty{display:flex;gap:14px;align-items:flex-start;color:var(--text-2);font-size:14px}.empty p{margin:3px 0 0}
+.lic{list-style:none;margin:0;padding:0}.lic li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:10px 0;border-top:.5px solid var(--line)}.lic li:first-child{border-top:0;padding-top:0}
+.lic small{flex-basis:100%;color:var(--text-3);font-size:12.5px}.mono{font:500 14px ui-monospace,"SF Mono",Menlo,monospace}
+.tag{font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;color:var(--c);background:color-mix(in srgb,var(--c) 20%,transparent)}
+.chart{display:flex;gap:5px;align-items:flex-end;height:180px;padding-bottom:22px;border-bottom:.5px solid var(--line);background:repeating-linear-gradient(to top,transparent 0,transparent calc(25% - .5px),var(--line) calc(25% - .5px),var(--line) 25%);background-size:100% calc(100% - 22px);background-repeat:no-repeat}
+.col{flex:1;height:100%;position:relative;display:flex;align-items:flex-end;padding-bottom:22px;margin-bottom:-22px}
+.stack{position:relative;width:100%;min-height:3px;border-radius:6px 6px 2px 2px;overflow:hidden;display:flex;flex-direction:column-reverse}
+.stack .v{position:absolute;inset:0;background:linear-gradient(to top,color-mix(in srgb,${C.blue} 70%,transparent),${C.blue})}.stack .d{position:relative;display:block;width:100%;background:${C.green};z-index:1}
+.col span{position:absolute;bottom:0;left:50%;transform:translateX(-50%);font-size:11px;color:var(--text-3);white-space:nowrap}
+.col em{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--card-2);color:var(--text);font:600 12px/1.35 inherit;font-style:normal;padding:6px 9px;border-radius:9px;white-space:nowrap;z-index:5;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+.col:hover em{display:block}.col:hover .stack{filter:brightness(1.2)}
+.legend{display:flex;gap:16px;font-size:13px;color:var(--text-3)}.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.hbars{list-style:none;margin:0;padding:0;display:grid;gap:12px}.hbars li{display:grid;grid-template-columns:1fr auto;gap:0 10px;align-items:center}.hbars span{font-size:14px;color:var(--text-2)}.hbars b{font-variant-numeric:tabular-nums}.hbars .track{grid-column:1/3;margin:4px 0 0}
+.gh{margin:14px 0 0;color:var(--text-3);font-size:13px}.gh b{color:var(--text);font-size:16px}
+.muted{color:var(--text-3);font-size:14px;margin:0}
+.foot{color:var(--text-3);font-size:12.5px;margin:18px 4px 0;line-height:1.5}
+@media(max-width:1100px){.tiles{grid-template-columns:repeat(3,1fr)}.s4,.s5,.s7,.s8{grid-column:span 6}}
+@media(max-width:720px){h1{font-size:28px}.headline{font-size:18px}.tiles{grid-template-columns:1fr 1fr;gap:10px}.tile.big,.tile:last-child{grid-column:span 2}.tile{min-height:136px}.tile .num{font-size:34px}.tile.big .num{font-size:44px}
+  .s4,.s5,.s7,.s8,.s12{grid-column:span 12}.chart{gap:2px;height:150px}}
+@media(prefers-reduced-motion:reduce){.live i{animation:none}.track i{transition:none}}
+</style></head><body><main id="app">
+<div class="top"><h1>LinerFM</h1><span class="live"><i></i><span id="upd" data-ts="${now}">Aggiornato adesso · ${esc(rome(now))}</span></span></div>
+<p class="headline">${headline}</p>
+<section class="tiles">${tileHtml}</section>
 <div class="grid">
-  <section class="panel"><h2>Accessi all'app</h2>${feed}</section>
-  <section class="panel"><h2>Licenze</h2>${licenses}
-    <h2 style="margin-top:22px">Prove</h2><ul class="rows"><li><b>${esc(x.trialing)}</b><span class="muted">Mac in prova adesso</span></li><li><b>${esc(x.expiredBack)}</b><span class="muted">prove finite che hanno riaperto l'app (bloccata)</span></li><li><b class="${x.refused7d ? "muted bad" : ""}">${esc(x.refused7d)}</b><span class="muted">rifiuti negli ultimi 7 giorni</span></li></ul>
-  </section>
+  <section class="card s5"><h2>Percorso <small>dal sito alla vendita</small></h2><ul class="funnel">${funnel}</ul></section>
+  <section class="card s7"><h2>Accessi all'app <small>ultimi eventi</small></h2>${feed}</section>
+  <section class="card s8"><h2>Visite al sito <small class="legend"><span><i style="background:${C.blue}"></i>visite</span><span><i style="background:${C.green}"></i>download</span></small></h2><div class="chart">${chart}</div></section>
+  <section class="card s4"><h2>Licenze</h2>${licenses}</section>
+  <section class="card s4"><h2>Da dove arrivano</h2>${sources}</section>
+  <section class="card s4"><h2>Paesi</h2>${countries}</section>
+  <section class="card s4"><h2>Download</h2>${downloads}</section>
 </div>
+<p class="foot">Ultimi 30 giorni, ora di Roma. Il traffico di prova è escluso, e il tuo browser non si conta se apri il sito con ?notrack=1. Le prove si contano per Mac: finché il worker non controlla l'identificativo, una chiamata inventata può creare una prova finta.</p>
+</main>
+<script>
+(() => {
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function countUp(root) {
+    if (reduce) return;
+    root.querySelectorAll(".num[data-n]").forEach((el) => {
+      const n = Number(el.dataset.n); if (!n || n > 9999) return;
+      const t0 = performance.now(), d = 700;
+      const tick = (t) => { const p = Math.min(1, (t - t0) / d); el.textContent = Math.round(n * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(tick); };
+      requestAnimationFrame(tick);
+    });
+  }
+  function ago() {
+    const el = document.getElementById("upd"); if (!el) return;
+    const s = Math.round((Date.now() - Number(el.dataset.ts)) / 1000);
+    el.firstChild.textContent = s < 60 ? "Aggiornato adesso" : "Aggiornato " + Math.round(s / 60) + " min fa";
+  }
+  countUp(document);
+  setInterval(ago, 15000);
+  // ogni minuto si ricarica da sola, senza lampi: sostituisce solo il contenuto
+  setInterval(async () => {
+    if (document.hidden) return;
+    try {
+      const r = await fetch(location.pathname, { credentials: "same-origin", cache: "no-store" });
+      if (!r.ok) return;
+      const next = new DOMParser().parseFromString(await r.text(), "text/html").getElementById("app");
+      if (next) document.getElementById("app").replaceWith(next);
+    } catch {}
+  }, 60000);
+})();
+</script></body></html>`;
+}
 
-<section class="panel" style="margin-top:14px"><h2>Visite al sito, giorno per giorno</h2><div class="legend"><span><i></i>visite</span><span><i class="d"></i>download</span><span>massimo ${esc(maxV)} al giorno</span></div><div class="chart">${bars}</div></section>
-
-<div class="grid even">
-  <section class="panel"><h2>Da dove arrivano</h2>${sources}</section>
-  <section class="panel"><h2>Paesi</h2>${countries}</section>
-</div>
-<div class="grid even">
-  <section class="panel"><h2>Ultimi download dal sito</h2>${downloads}</section>
-  <section class="panel"><h2>Download su GitHub</h2>${github}</section>
-</div>
-<p class="note-foot">Il traffico di prova è escluso. Il tuo browser non si conta se apri il sito con ?notrack=1. Le prove si contano per Mac: finché il worker non controlla l'identificativo, una chiamata inventata può creare una prova finta.</p>
-</main></body></html>`;
+// ── Accesso: password, oppure link segreto che lascia un cookie per un anno ──
+const COOKIE = "lfm_dash";
+async function sha256hex(s: string): Promise<string> {
+  const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("");
+}
+function sameText(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+/** Il cookie non contiene il token del link: è un suo hash, così copiarlo dal browser non rivela il link. */
+const cookieValue = (token: string) => sha256hex(`lfm-dash-cookie:${token}`);
+function readCookie(req: Request, name: string): string {
+  for (const part of (req.headers.get("Cookie") ?? "").split(";")) {
+    const [k, ...v] = part.trim().split("=");
+    if (k === name) return v.join("=");
+  }
+  return "";
 }
 
 export async function handleDashboard(req: Request, env: Env, now: number, fetchImpl: typeof fetch = fetch): Promise<Response> {
   if (!env.DASH_PASSWORD) return new Response("dashboard closed: DASH_PASSWORD not set", { status: 503 });
-  if (!authorized(req, env.DASH_PASSWORD)) {
+  const token = env.DASH_LINK_TOKEN && env.DASH_LINK_TOKEN.length >= 32 ? env.DASH_LINK_TOKEN : "";
+  const k = new URL(req.url).searchParams.get("k");
+  if (token && k && sameText(k, token)) {
+    return new Response(null, { status: 302, headers: {
+      Location: "/dashboard", "Cache-Control": "no-store", "Referrer-Policy": "no-referrer",
+      "Set-Cookie": `${COOKIE}=${await cookieValue(token)}; Max-Age=31536000; Path=/dashboard; HttpOnly; Secure; SameSite=Lax`,
+    } });
+  }
+  const viaCookie = token ? sameText(readCookie(req, COOKIE), await cookieValue(token)) : false;
+  if (!viaCookie && !authorized(req, env.DASH_PASSWORD)) {
     return new Response("password required", { status: 401, headers: { "WWW-Authenticate": 'Basic realm="LinerFM stats", charset="UTF-8"', "Cache-Control": "no-store" } });
   }
   const since = now - 30 * DAY;

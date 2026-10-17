@@ -50,11 +50,11 @@ describe("handleDashboard", () => {
   });
 
   it("escapes what it prints", async () => {
-    const { db } = fakeDB([v("a", { src: "<script>" })]);
+    const { db } = fakeDB([v("a", { src: "<img src=x onerror=alert(1)>" })]);
     const res = await handleDashboard(get(basic("secret")), { DB: db, DASH_PASSWORD: "secret" }, NOW, noGithub);
     const html = await res.text();
-    expect(html).not.toContain("<script>");
-    expect(html).toContain("&lt;script&gt;");
+    expect(html).not.toContain("<img src=x");
+    expect(html).toContain("&lt;img src=x");
   });
 });
 

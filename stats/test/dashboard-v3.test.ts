@@ -30,7 +30,7 @@ describe("prettySource", () => {
 describe("readSales", () => {
   it("counts only real paid orders above zero and sums the money", async () => {
     const s = await readSales(lsOrders([order({}), order({ total: 0 }), order({ test_mode: true }), order({ refunded: true })]), "k", "1");
-    expect(s).toEqual({ paid: 1, cents: 1099, currency: "EUR", last: "2026-10-15T11:06:17.000000Z", refunded: 1 });
+    expect(s).toEqual({ paid: 1, cents: 1099, currency: "EUR", last: "2026-10-15T11:06:17.000000Z", refunded: 1, times: [Date.parse("2026-10-15T11:06:17.000000Z")] });
   });
   it("returns null without a key or when Lemon Squeezy fails", async () => {
     expect(await readSales(lsOrders([]), undefined, "1")).toBeNull();
