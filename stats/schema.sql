@@ -23,3 +23,10 @@ CREATE TABLE IF NOT EXISTS access (
   country TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS access_ts ON access (ts);
+
+-- Copie di risposte esterne (GitHub limita le chiamate da Cloudflare): src/admin.ts cachedJson.
+CREATE TABLE IF NOT EXISTS cache (
+  k TEXT PRIMARY KEY,
+  ts INTEGER NOT NULL,
+  value TEXT NOT NULL
+);

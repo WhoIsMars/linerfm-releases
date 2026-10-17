@@ -8,3 +8,8 @@ compatibility_date = "2025-01-01"
 binding = "DB"
 database_name = "linerfm-site-stats"
 database_id = "b2e57a63-66d7-4a32-b8e3-dcb701b3bc48"
+
+# Registro delle prove gratuite del worker licenze: la dashboard lo LEGGE soltanto (scheda Utenti).
+[[kv_namespaces]]
+binding = "TRIAL_LEDGER"
+id = "d2bf690b427c4c778eeba30c34691ee2"

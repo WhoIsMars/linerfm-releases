@@ -1,11 +1,13 @@
+import { TABS, navHtml, summarizeUsers, readLedger, cachedJson, loadGithub, githubReleases, readOrders, tabUsers, tabActivity, tabDownloads, tabSales, tabSecurity, type GhRelease } from "./admin";
+
 // GET /dashboard: the owner's private view of the site numbers, last 30 days.
 // HTTP Basic auth against the DASH_PASSWORD secret (`wrangler secret put DASH_PASSWORD`);
 // without the secret the page stays closed. Nothing is cached or indexed.
-export interface Env { DB: D1Database; DASH_PASSWORD?: string; DASH_LINK_TOKEN?: string; LS_API_KEY?: string; LS_STORE_ID?: string }
+export interface Env { DB: D1Database; DASH_PASSWORD?: string; DASH_LINK_TOKEN?: string; LS_API_KEY?: string; LS_STORE_ID?: string; TRIAL_LEDGER?: KVNamespace }
 
 export interface Row { ts: number; kind: string; ref: string; src: string; arch: string; sid: string; country: string }
 
-const DAY = 86_400_000;
+export const DAY = 86_400_000;
 const RELEASES = "https://api.github.com/repos/WhoIsMars/linerfm-releases/releases?per_page=10";
 
 function authorized(req: Request, password: string): boolean {
@@ -20,9 +22,9 @@ function authorized(req: Request, password: string): boolean {
   return diff === 0;
 }
 
-const ENT: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
-const esc = (s: unknown) => String(s).replace(/[&<>"']/g, (c) => ENT[c]);
-const dayOf = (ts: number) => new Date(ts).toISOString().slice(0, 10);
+export const ENT: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+export const esc = (s: unknown) => String(s).replace(/[&<>"']/g, (c) => ENT[c]);
+export const dayOf = (ts: number) => new Date(ts).toISOString().slice(0, 10);
 
 /** One visit = one browser tab (sid) with a view. Source: ?src tag, else referrer host, else direct. */
 export function summarize(rows: Row[], now: number) {
@@ -132,12 +134,12 @@ export async function readSales(fetchImpl: typeof fetch, apiKey: string | undefi
   } catch { return null; }
 }
 
-const ROME = new Intl.DateTimeFormat("it-IT", { timeZone: "Europe/Rome", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
-const rome = (ts: number) => (ts ? ROME.format(new Date(ts)) : "mai");
-const COUNTRY = new Intl.DisplayNames(["it"], { type: "region" });
-const countryName = (c: string) => { try { return c && c !== "?" ? COUNTRY.of(c) ?? c : "Sconosciuto"; } catch { return c || "Sconosciuto"; } };
-const money = (cents: number, cur: string) => new Intl.NumberFormat("it-IT", { style: "currency", currency: cur || "EUR" }).format(cents / 100);
-const ago = (ts: number, now: number) => {
+export const ROME = new Intl.DateTimeFormat("it-IT", { timeZone: "Europe/Rome", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+export const rome = (ts: number) => (ts ? ROME.format(new Date(ts)) : "mai");
+export const COUNTRY = new Intl.DisplayNames(["it"], { type: "region" });
+export const countryName = (c: string) => { try { return c && c !== "?" ? COUNTRY.of(c) ?? c : "Sconosciuto"; } catch { return c || "Sconosciuto"; } };
+export const money = (cents: number, cur: string) => new Intl.NumberFormat("it-IT", { style: "currency", currency: cur || "EUR" }).format(cents / 100);
+export const ago = (ts: number, now: number) => {
   const m = Math.round((now - ts) / 60000);
   if (m < 1) return "adesso"; if (m < 60) return `${m} min fa`;
   const h = Math.round(m / 60); if (h < 24) return `${h} ${h === 1 ? "ora" : "ore"} fa`;
@@ -145,7 +147,7 @@ const ago = (ts: number, now: number) => {
 };
 
 /** Il traffico di prova dell'owner e di Claude non è traffico. */
-const TEST_SOURCES = new Set(["verifica", "test", "claude"]);
+export const TEST_SOURCES = new Set(["verifica", "test", "claude"]);
 
 const SOURCE_NAMES: [RegExp, string][] = [
   [/^(www\.)?youtube(\.com)?$|^youtu\.be$|^m\.youtube\.com$/, "YouTube"], [/^(www\.)?tiktok(\.com)?$/, "TikTok"],
@@ -159,14 +161,14 @@ export function prettySource(s: string): string {
   return s;
 }
 
-const REASON: Record<string, string> = {
+export const REASON: Record<string, string> = {
   invalid: "chiave non valida", activation_limit: "limite di Mac raggiunto", wrong_product: "chiave di un altro prodotto",
   refunded: "ordine rimborsato", disabled: "licenza disabilitata", device_mismatch: "chiave usata su un altro Mac",
   bad_device: "identificativo del Mac non valido", rate_limited: "troppi reset oggi", inactive: "non attiva", expired: "scaduta",
 };
-const reasonText = (r: string) => REASON[r] ?? r;
+export const reasonText = (r: string) => REASON[r] ?? r;
 
-function eventLine(r: AccessRow): { tone: string; title: string; detail: string } {
+export function eventLine(r: AccessRow): { tone: string; title: string; detail: string } {
   const mac = r.device ? `Mac ${r.device}` : "";
   const key = r.key ? `chiave ····${r.key}` : "";
   const why = r.reason ? reasonText(r.reason) : "";
@@ -192,10 +194,10 @@ type Sales = Awaited<ReturnType<typeof readSales>>;
 
 // ── Pagina ────────────────────────────────────────────────────────────────────
 // Colori di sistema Apple in modalità scura, più il verde dell'app per i soldi.
-const C = { green: "#1DB954", blue: "#0A84FF", indigo: "#5E5CE6", orange: "#FF9F0A", teal: "#40C8E0", red: "#FF453A", yellow: "#FFD60A", purple: "#BF5AF2", gray: "#8E8E93" };
-const BRAND: Record<string, string> = { YouTube: "#FF3B30", TikTok: "#25F4EE", Instagram: "#E1306C", Reddit: "#FF4500", "Hacker News": "#FF6600", Bing: "#0A84FF", Google: "#34A853", X: "#E5E5EA", AlternativeTo: "#3A8BEA", Discord: "#5865F2", GitHub: "#E5E5EA" };
+export const C = { green: "#1DB954", blue: "#0A84FF", indigo: "#5E5CE6", orange: "#FF9F0A", teal: "#40C8E0", red: "#FF453A", yellow: "#FFD60A", purple: "#BF5AF2", gray: "#8E8E93" };
+export const BRAND: Record<string, string> = { YouTube: "#FF3B30", TikTok: "#25F4EE", Instagram: "#E1306C", Reddit: "#FF4500", "Hacker News": "#FF6600", Bing: "#0A84FF", Google: "#34A853", X: "#E5E5EA", AlternativeTo: "#3A8BEA", Discord: "#5865F2", GitHub: "#E5E5EA" };
 
-const ICON: Record<string, string> = {
+export const ICON: Record<string, string> = {
   money: '<path d="M3 7h18v10H3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/>',
   eye: '<path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/>',
   down: '<path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
@@ -204,26 +206,123 @@ const ICON: Record<string, string> = {
   shield: '<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8.5 12l2.5 2.5 4.5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
   alert: '<path d="M12 3l10 18H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 10v4m0 3v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
 };
-const icon = (name: string) => `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">${ICON[name]}</svg>`;
-const flag = (c: string) => (/^[A-Z]{2}$/.test(c) ? String.fromCodePoint(...[...c].map((ch) => 0x1f1a5 + ch.charCodeAt(0))) : "🌐");
+export const icon = (name: string) => `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">${ICON[name]}</svg>`;
+export const flag = (c: string) => (/^[A-Z]{2}$/.test(c) ? String.fromCodePoint(...[...c].map((ch) => 0x1f1a5 + ch.charCodeAt(0))) : "🌐");
 
 /** Linea dei 30 giorni dentro un riquadro: solo forma, niente assi. */
-function spark(values: number[], color: string): string {
+export function spark(values: number[], color: string): string {
   if (!values.some((v) => v > 0)) return `<svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="26" x2="100" y2="26" stroke="${color}" stroke-opacity=".35" stroke-width="2"/></svg>`;
   const max = Math.max(...values), step = 100 / Math.max(1, values.length - 1);
   const pts = values.map((v, i) => `${(i * step).toFixed(1)},${(26 - (v / max) * 22).toFixed(1)}`);
   return `<svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polygon points="0,28 ${pts.join(" ")} 100,28" fill="${color}" fill-opacity=".18"/><polyline points="${pts.join(" ")}" fill="none" stroke="${color}" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>`;
 }
 
-const sum = (a: number[]) => a.reduce((n, v) => n + v, 0);
-function delta(cur: number, prev: number): string {
+export const sum = (a: number[]) => a.reduce((n, v) => n + v, 0);
+export function delta(cur: number, prev: number): string {
   if (!cur && !prev) return "";
   const d = cur - prev;
   if (d === 0) return `<span class="delta flat">uguale ai 7 giorni prima</span>`;
   return `<span class="delta ${d > 0 ? "up" : "down"}">${d > 0 ? "▲" : "▼"} ${Math.abs(d)} rispetto ai 7 giorni prima</span>`;
 }
 
-function page(s: ReturnType<typeof summarize>, x: ReturnType<typeof summarizeAccess>, sales: Sales, gh: [string, number][] | null, now: number): string {
+
+const CSS = `:root{color-scheme:dark;--bg:#000;--card:#1C1C1E;--card-2:#2C2C2E;--line:rgba(84,84,88,.45);--text:#fff;--text-2:rgba(235,235,245,.72);--text-3:rgba(235,235,245,.55);--r:20px}
+*{box-sizing:border-box}html{background:var(--bg)}body{margin:0;color:var(--text);font:15px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:1280px;margin:0 auto;padding:max(24px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 56px max(16px,env(safe-area-inset-left))}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font:700 34px/1.1 -apple-system,"SF Pro Display",sans-serif;letter-spacing:-.02em;margin:0}
+.live{display:inline-flex;align-items:center;gap:8px;color:var(--text-3);font-size:13px}.live i{width:8px;height:8px;border-radius:50%;background:${C.green};box-shadow:0 0 0 0 ${C.green};animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(29,185,84,.6)}70%{box-shadow:0 0 0 8px rgba(29,185,84,0)}100%{box-shadow:0 0 0 0 rgba(29,185,84,0)}}
+.headline{font:600 22px/1.3 -apple-system,"SF Pro Display",sans-serif;letter-spacing:-.01em;margin:14px 0 22px;color:var(--text-2)}
+.tiles{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.tile{position:relative;overflow:hidden;background:var(--card);border-radius:var(--r);padding:16px 16px 14px;min-height:150px;display:flex;flex-direction:column;
+  background-image:radial-gradient(120% 90% at 100% 0%,color-mix(in srgb,var(--c) 22%,transparent),transparent 60%)}
+.tile header{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--c)}
+.ico{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:9px;background:color-mix(in srgb,var(--c) 22%,transparent);color:var(--c)}
+.tile .num{font:700 40px/1 -apple-system,"SF Pro Display",sans-serif;letter-spacing:-.02em;margin:14px 0 6px;font-variant-numeric:tabular-nums}
+.tile.big .num{font-size:52px;color:var(--c)}
+.tile footer{font-size:12.5px;color:var(--text-3);position:relative;z-index:1}
+.spark{position:absolute;left:0;right:0;bottom:0;width:100%;height:46px;opacity:.9}
+.tile:has(.spark) footer{margin-bottom:34px}
+.delta{font-weight:600}.delta.up{color:${C.green}}.delta.down{color:${C.red}}.delta.flat{color:var(--text-3)}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px;margin-top:12px}
+.card{background:var(--card);border-radius:var(--r);padding:18px}.s4{grid-column:span 4}.s5{grid-column:span 5}.s7{grid-column:span 7}.s8{grid-column:span 8}.s12{grid-column:span 12}
+h2{font:700 17px/1.2 -apple-system,"SF Pro Display",sans-serif;margin:0 0 14px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}h2 small{font:400 13px/1 inherit;color:var(--text-3)}
+.funnel{list-style:none;margin:0;padding:0;display:grid;gap:14px}.funnel .fl{display:flex;justify-content:space-between;font-size:14px;color:var(--text-2)}.funnel b{color:var(--text);font-size:20px;font-variant-numeric:tabular-nums}
+.track{height:10px;border-radius:5px;background:var(--card-2);margin:6px 0 3px;overflow:hidden}.track i{display:block;height:100%;border-radius:5px;background:var(--c);transition:width .8s cubic-bezier(.22,1,.36,1)}
+.funnel small,.hbars small{color:var(--text-3);font-size:12px}
+.feed{list-style:none;margin:0;padding:0}.feed li{display:grid;grid-template-columns:12px 1fr auto;gap:12px;align-items:start;padding:10px 0;border-top:.5px solid var(--line)}.feed li:first-child{border-top:0;padding-top:0}
+.badge{width:10px;height:10px;border-radius:50%;background:var(--c);margin-top:5px;box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 25%,transparent)}
+.feed b{display:block;font-weight:600;font-size:14px}.feed span{color:var(--text-3);font-size:12.5px}.feed time{color:var(--text-3);font-size:12.5px;white-space:nowrap}
+.empty{display:flex;gap:14px;align-items:flex-start;color:var(--text-2);font-size:14px}.empty p{margin:3px 0 0}
+.lic{list-style:none;margin:0;padding:0}.lic li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:10px 0;border-top:.5px solid var(--line)}.lic li:first-child{border-top:0;padding-top:0}
+.lic small{flex-basis:100%;color:var(--text-3);font-size:12.5px}.mono{font:500 14px ui-monospace,"SF Mono",Menlo,monospace}
+.tag{font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;color:var(--c);background:color-mix(in srgb,var(--c) 20%,transparent)}
+.chart{display:flex;gap:5px;align-items:flex-end;height:180px;padding-bottom:22px;border-bottom:.5px solid var(--line);background:repeating-linear-gradient(to top,transparent 0,transparent calc(25% - .5px),var(--line) calc(25% - .5px),var(--line) 25%);background-size:100% calc(100% - 22px);background-repeat:no-repeat}
+.col{flex:1;height:100%;position:relative;display:flex;align-items:flex-end;padding-bottom:22px;margin-bottom:-22px}
+.stack{position:relative;width:100%;min-height:3px;border-radius:6px 6px 2px 2px;overflow:hidden;display:flex;flex-direction:column-reverse}
+.stack .v{position:absolute;inset:0;background:linear-gradient(to top,color-mix(in srgb,${C.blue} 70%,transparent),${C.blue})}.stack .d{position:relative;display:block;width:100%;background:${C.green};z-index:1}
+.col span{position:absolute;bottom:0;left:50%;transform:translateX(-50%);font-size:11px;color:var(--text-3);white-space:nowrap}
+.col em{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--card-2);color:var(--text);font:600 12px/1.35 inherit;font-style:normal;padding:6px 9px;border-radius:9px;white-space:nowrap;z-index:5;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+.col:hover em{display:block}.col:hover .stack{filter:brightness(1.2)}
+.legend{display:flex;gap:16px;font-size:13px;color:var(--text-3)}.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.hbars{list-style:none;margin:0;padding:0;display:grid;gap:12px}.hbars li{display:grid;grid-template-columns:1fr auto;gap:0 10px;align-items:center}.hbars span{font-size:14px;color:var(--text-2)}.hbars b{font-variant-numeric:tabular-nums}.hbars .track{grid-column:1/3;margin:4px 0 0}
+.gh{margin:14px 0 0;color:var(--text-3);font-size:13px}.gh b{color:var(--text);font-size:16px}
+.muted{color:var(--text-3);font-size:14px;margin:0}
+.foot{color:var(--text-3);font-size:12.5px;margin:18px 4px 0;line-height:1.5}
+@media(max-width:1100px){.tiles{grid-template-columns:repeat(3,1fr)}.s4,.s5,.s7,.s8{grid-column:span 6}}
+@media(max-width:720px){h1{font-size:28px}.headline{font-size:18px}.tiles{grid-template-columns:1fr 1fr;gap:10px}.tile.big,.tile:last-child{grid-column:span 2}.tile{min-height:136px}.tile .num{font-size:34px}.tile.big .num{font-size:44px}
+  .s4,.s5,.s7,.s8,.s12{grid-column:span 12}.chart{gap:2px;height:150px}}
+@media(prefers-reduced-motion:reduce){.live i{animation:none}.track i{transition:none}}
+.nav{display:flex;gap:4px;padding:4px;margin:16px 0 4px;background:var(--card);border-radius:12px;overflow-x:auto;scrollbar-width:none;width:max-content;max-width:100%}
+.nav::-webkit-scrollbar{display:none}.nav a{padding:7px 14px;border-radius:9px;color:var(--text-2);text-decoration:none;font-size:14px;font-weight:600;white-space:nowrap}
+.nav a:hover{color:var(--text)}.nav a[aria-current="page"]{background:var(--card-2);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14px}.table th{text-align:left;color:var(--text-3);font-weight:600;font-size:12px;padding:0 10px 10px;white-space:nowrap}
+.table td{padding:11px 10px;border-top:.5px solid var(--line);white-space:nowrap}.table td:first-child,.table th:first-child{padding-left:0}.scroll{overflow-x:auto;margin:0 -2px}
+.state{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--c)}.state::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}`;
+
+const SCRIPT = `(() => {
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function countUp(root) {
+    if (reduce) return;
+    root.querySelectorAll(".num[data-n]").forEach((el) => {
+      const n = Number(el.dataset.n); if (!n || n > 9999) return;
+      const t0 = performance.now(), d = 700;
+      const tick = (t) => { const p = Math.min(1, (t - t0) / d); el.textContent = Math.round(n * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(tick); };
+      requestAnimationFrame(tick);
+    });
+  }
+  function ago() {
+    const el = document.getElementById("upd"); if (!el) return;
+    const s = Math.round((Date.now() - Number(el.dataset.ts)) / 1000);
+    el.firstChild.textContent = s < 60 ? "Aggiornato adesso" : "Aggiornato " + Math.round(s / 60) + " min fa";
+  }
+  countUp(document);
+  setInterval(ago, 15000);
+  // ogni minuto si ricarica da sola, senza lampi: sostituisce solo il contenuto
+  setInterval(async () => {
+    if (document.hidden) return;
+    try {
+      const r = await fetch(location.pathname, { credentials: "same-origin", cache: "no-store" });
+      if (!r.ok) return;
+      const next = new DOMParser().parseFromString(await r.text(), "text/html").getElementById("app");
+      if (next) document.getElementById("app").replaceWith(next);
+    } catch {}
+  }, 60000);
+})();`;
+
+/** Guscio comune a tutte le schede: intestazione, navigazione, stile, aggiornamento automatico. */
+export function shell(nav: string, body: string, now: number): string {
+  return `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex"><meta name="theme-color" content="#000000"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="LinerFM"><title>LinerFM, admin</title><style>${CSS}</style></head><body><main id="app">
+<div class="top"><h1>LinerFM</h1><span class="live"><i></i><span id="upd" data-ts="${now}">Aggiornato adesso · ${esc(rome(now))}</span></span></div>
+${nav}
+${body}
+</main>
+<script>${SCRIPT}</script></body></html>`;
+}
+
+function page(s: ReturnType<typeof summarize>, x: ReturnType<typeof summarizeAccess>, sales: Sales, gh: [string, number][] | null, now: number, nav: string): string {
   const visitsByDay = s.days.map((d) => d.visits), dlByDay = s.days.map((d) => d.downloads);
   const v7 = sum(visitsByDay.slice(-7)), v7p = sum(visitsByDay.slice(-14, -7));
   const d7 = sum(dlByDay.slice(-7)), d7p = sum(dlByDay.slice(-14, -7));
@@ -294,58 +393,7 @@ function page(s: ReturnType<typeof summarize>, x: ReturnType<typeof summarizeAcc
   const downloads = `${s.recent.length ? `<ul class="feed">${s.recent.slice(0, 5).map((r) => `<li style="--c:${C.indigo}"><i class="badge"></i><div><b>${esc(archName(r.arch))}</b><span>da ${esc(prettySource(r.from))} · ${flag(r.country)} ${esc(countryName(r.country))}</span></div><time title="${esc(rome(r.ts))}">${esc(ago(r.ts, now))}</time></li>`).join("")}</ul>` : `<p class="muted">Nessun download dal sito negli ultimi 30 giorni.</p>`}
     <p class="gh">${gh ? `<b>${esc(ghTotal)}</b> download DMG su GitHub nelle ultime ${esc(gh.length)} release, contando anche gli aggiornamenti manuali` : "GitHub non raggiungibile in questo momento"}</p>`;
 
-  return `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex"><meta name="theme-color" content="#000000"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="LinerFM"><title>LinerFM, numeri</title><style>
-:root{color-scheme:dark;--bg:#000;--card:#1C1C1E;--card-2:#2C2C2E;--line:rgba(84,84,88,.45);--text:#fff;--text-2:rgba(235,235,245,.72);--text-3:rgba(235,235,245,.55);--r:20px}
-*{box-sizing:border-box}html{background:var(--bg)}body{margin:0;color:var(--text);font:15px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-main{max-width:1280px;margin:0 auto;padding:max(24px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 56px max(16px,env(safe-area-inset-left))}
-.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
-h1{font:700 34px/1.1 -apple-system,"SF Pro Display",sans-serif;letter-spacing:-.02em;margin:0}
-.live{display:inline-flex;align-items:center;gap:8px;color:var(--text-3);font-size:13px}.live i{width:8px;height:8px;border-radius:50%;background:${C.green};box-shadow:0 0 0 0 ${C.green};animation:pulse 2s infinite}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(29,185,84,.6)}70%{box-shadow:0 0 0 8px rgba(29,185,84,0)}100%{box-shadow:0 0 0 0 rgba(29,185,84,0)}}
-.headline{font:600 22px/1.3 -apple-system,"SF Pro Display",sans-serif;letter-spacing:-.01em;margin:14px 0 22px;color:var(--text-2)}
-.tiles{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
-.tile{position:relative;overflow:hidden;background:var(--card);border-radius:var(--r);padding:16px 16px 14px;min-height:150px;display:flex;flex-direction:column;
-  background-image:radial-gradient(120% 90% at 100% 0%,color-mix(in srgb,var(--c) 22%,transparent),transparent 60%)}
-.tile header{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--c)}
-.ico{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:9px;background:color-mix(in srgb,var(--c) 22%,transparent);color:var(--c)}
-.tile .num{font:700 40px/1 -apple-system,"SF Pro Display",sans-serif;letter-spacing:-.02em;margin:14px 0 6px;font-variant-numeric:tabular-nums}
-.tile.big .num{font-size:52px;color:var(--c)}
-.tile footer{font-size:12.5px;color:var(--text-3);position:relative;z-index:1}
-.spark{position:absolute;left:0;right:0;bottom:0;width:100%;height:46px;opacity:.9}
-.tile:has(.spark) footer{margin-bottom:34px}
-.delta{font-weight:600}.delta.up{color:${C.green}}.delta.down{color:${C.red}}.delta.flat{color:var(--text-3)}
-.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px;margin-top:12px}
-.card{background:var(--card);border-radius:var(--r);padding:18px}.s4{grid-column:span 4}.s5{grid-column:span 5}.s7{grid-column:span 7}.s8{grid-column:span 8}.s12{grid-column:span 12}
-h2{font:700 17px/1.2 -apple-system,"SF Pro Display",sans-serif;margin:0 0 14px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}h2 small{font:400 13px/1 inherit;color:var(--text-3)}
-.funnel{list-style:none;margin:0;padding:0;display:grid;gap:14px}.funnel .fl{display:flex;justify-content:space-between;font-size:14px;color:var(--text-2)}.funnel b{color:var(--text);font-size:20px;font-variant-numeric:tabular-nums}
-.track{height:10px;border-radius:5px;background:var(--card-2);margin:6px 0 3px;overflow:hidden}.track i{display:block;height:100%;border-radius:5px;background:var(--c);transition:width .8s cubic-bezier(.22,1,.36,1)}
-.funnel small,.hbars small{color:var(--text-3);font-size:12px}
-.feed{list-style:none;margin:0;padding:0}.feed li{display:grid;grid-template-columns:12px 1fr auto;gap:12px;align-items:start;padding:10px 0;border-top:.5px solid var(--line)}.feed li:first-child{border-top:0;padding-top:0}
-.badge{width:10px;height:10px;border-radius:50%;background:var(--c);margin-top:5px;box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 25%,transparent)}
-.feed b{display:block;font-weight:600;font-size:14px}.feed span{color:var(--text-3);font-size:12.5px}.feed time{color:var(--text-3);font-size:12.5px;white-space:nowrap}
-.empty{display:flex;gap:14px;align-items:flex-start;color:var(--text-2);font-size:14px}.empty p{margin:3px 0 0}
-.lic{list-style:none;margin:0;padding:0}.lic li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:10px 0;border-top:.5px solid var(--line)}.lic li:first-child{border-top:0;padding-top:0}
-.lic small{flex-basis:100%;color:var(--text-3);font-size:12.5px}.mono{font:500 14px ui-monospace,"SF Mono",Menlo,monospace}
-.tag{font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;color:var(--c);background:color-mix(in srgb,var(--c) 20%,transparent)}
-.chart{display:flex;gap:5px;align-items:flex-end;height:180px;padding-bottom:22px;border-bottom:.5px solid var(--line);background:repeating-linear-gradient(to top,transparent 0,transparent calc(25% - .5px),var(--line) calc(25% - .5px),var(--line) 25%);background-size:100% calc(100% - 22px);background-repeat:no-repeat}
-.col{flex:1;height:100%;position:relative;display:flex;align-items:flex-end;padding-bottom:22px;margin-bottom:-22px}
-.stack{position:relative;width:100%;min-height:3px;border-radius:6px 6px 2px 2px;overflow:hidden;display:flex;flex-direction:column-reverse}
-.stack .v{position:absolute;inset:0;background:linear-gradient(to top,color-mix(in srgb,${C.blue} 70%,transparent),${C.blue})}.stack .d{position:relative;display:block;width:100%;background:${C.green};z-index:1}
-.col span{position:absolute;bottom:0;left:50%;transform:translateX(-50%);font-size:11px;color:var(--text-3);white-space:nowrap}
-.col em{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--card-2);color:var(--text);font:600 12px/1.35 inherit;font-style:normal;padding:6px 9px;border-radius:9px;white-space:nowrap;z-index:5;box-shadow:0 6px 20px rgba(0,0,0,.5)}
-.col:hover em{display:block}.col:hover .stack{filter:brightness(1.2)}
-.legend{display:flex;gap:16px;font-size:13px;color:var(--text-3)}.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
-.hbars{list-style:none;margin:0;padding:0;display:grid;gap:12px}.hbars li{display:grid;grid-template-columns:1fr auto;gap:0 10px;align-items:center}.hbars span{font-size:14px;color:var(--text-2)}.hbars b{font-variant-numeric:tabular-nums}.hbars .track{grid-column:1/3;margin:4px 0 0}
-.gh{margin:14px 0 0;color:var(--text-3);font-size:13px}.gh b{color:var(--text);font-size:16px}
-.muted{color:var(--text-3);font-size:14px;margin:0}
-.foot{color:var(--text-3);font-size:12.5px;margin:18px 4px 0;line-height:1.5}
-@media(max-width:1100px){.tiles{grid-template-columns:repeat(3,1fr)}.s4,.s5,.s7,.s8{grid-column:span 6}}
-@media(max-width:720px){h1{font-size:28px}.headline{font-size:18px}.tiles{grid-template-columns:1fr 1fr;gap:10px}.tile.big,.tile:last-child{grid-column:span 2}.tile{min-height:136px}.tile .num{font-size:34px}.tile.big .num{font-size:44px}
-  .s4,.s5,.s7,.s8,.s12{grid-column:span 12}.chart{gap:2px;height:150px}}
-@media(prefers-reduced-motion:reduce){.live i{animation:none}.track i{transition:none}}
-</style></head><body><main id="app">
-<div class="top"><h1>LinerFM</h1><span class="live"><i></i><span id="upd" data-ts="${now}">Aggiornato adesso · ${esc(rome(now))}</span></span></div>
-<p class="headline">${headline}</p>
+  return shell(nav, `<p class="headline">${headline}</p>
 <section class="tiles">${tileHtml}</section>
 <div class="grid">
   <section class="card s5"><h2>Percorso <small>dal sito alla vendita</small></h2><ul class="funnel">${funnel}</ul></section>
@@ -356,39 +404,7 @@ h2{font:700 17px/1.2 -apple-system,"SF Pro Display",sans-serif;margin:0 0 14px;d
   <section class="card s4"><h2>Paesi</h2>${countries}</section>
   <section class="card s4"><h2>Download</h2>${downloads}</section>
 </div>
-<p class="foot">Ultimi 30 giorni, ora di Roma. Il traffico di prova è escluso, e il tuo browser non si conta se apri il sito con ?notrack=1. Le prove si contano per Mac: finché il worker non controlla l'identificativo, una chiamata inventata può creare una prova finta.</p>
-</main>
-<script>
-(() => {
-  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  function countUp(root) {
-    if (reduce) return;
-    root.querySelectorAll(".num[data-n]").forEach((el) => {
-      const n = Number(el.dataset.n); if (!n || n > 9999) return;
-      const t0 = performance.now(), d = 700;
-      const tick = (t) => { const p = Math.min(1, (t - t0) / d); el.textContent = Math.round(n * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(tick); };
-      requestAnimationFrame(tick);
-    });
-  }
-  function ago() {
-    const el = document.getElementById("upd"); if (!el) return;
-    const s = Math.round((Date.now() - Number(el.dataset.ts)) / 1000);
-    el.firstChild.textContent = s < 60 ? "Aggiornato adesso" : "Aggiornato " + Math.round(s / 60) + " min fa";
-  }
-  countUp(document);
-  setInterval(ago, 15000);
-  // ogni minuto si ricarica da sola, senza lampi: sostituisce solo il contenuto
-  setInterval(async () => {
-    if (document.hidden) return;
-    try {
-      const r = await fetch(location.pathname, { credentials: "same-origin", cache: "no-store" });
-      if (!r.ok) return;
-      const next = new DOMParser().parseFromString(await r.text(), "text/html").getElementById("app");
-      if (next) document.getElementById("app").replaceWith(next);
-    } catch {}
-  }, 60000);
-})();
-</script></body></html>`;
+<p class="foot">Ultimi 30 giorni, ora di Roma. Il traffico di prova è escluso, e il tuo browser non si conta se apri il sito con ?notrack=1. Le prove si contano per Mac: finché il worker non controlla l'identificativo, una chiamata inventata può creare una prova finta.</p>`, now);
 }
 
 // ── Accesso: password, oppure link segreto che lascia un cookie per un anno ──
@@ -427,16 +443,37 @@ export async function handleDashboard(req: Request, env: Env, now: number, fetch
   if (!viaCookie && !authorized(req, env.DASH_PASSWORD)) {
     return new Response("password required", { status: 401, headers: { "WWW-Authenticate": 'Basic realm="LinerFM stats", charset="UTF-8"', "Cache-Control": "no-store" } });
   }
+  const tabParam = new URL(req.url).searchParams.get("tab") ?? "";
+  const tab = TABS.some(([k]) => k === tabParam) ? tabParam : "panoramica";
   const since = now - 30 * DAY;
-  const [hits, access, gh, sales] = await Promise.all([
-    env.DB.prepare("SELECT ts, kind, ref, src, arch, sid, country FROM hits WHERE ts > ? ORDER BY ts").bind(since).all<Row>(),
-    env.DB.prepare("SELECT ts, kind, outcome, reason, device, key, country FROM access WHERE ts > ? ORDER BY ts").bind(since).all<AccessRow>()
-      .catch(() => ({ results: [] as AccessRow[] })),
-    githubDownloads(fetchImpl),
-    readSales(fetchImpl, env.LS_API_KEY, env.LS_STORE_ID ?? "406309"),
-  ]);
-  const real = (hits.results ?? []).filter((r) => !TEST_SOURCES.has(r.src));
-  return new Response(page(summarize(real, now), summarizeAccess(access.results ?? [], now), sales, gh, now), {
-    headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow", "Referrer-Policy": "no-referrer" },
-  });
+  const store = env.LS_STORE_ID ?? "406309";
+  const accessQ = () => env.DB.prepare("SELECT ts, kind, outcome, reason, device, key, country FROM access WHERE ts > ? ORDER BY ts").bind(since).all<AccessRow>()
+    .then((r) => r.results ?? []).catch(() => [] as AccessRow[]);
+  const hitsQ = () => env.DB.prepare("SELECT ts, kind, ref, src, arch, sid, country FROM hits WHERE ts > ? ORDER BY ts").bind(since).all<Row>()
+    .then((r) => (r.results ?? []).filter((x) => !TEST_SOURCES.has(x.src))).catch(() => [] as Row[]);
+  const ghQ = () => cachedJson<GhRelease[]>(env.DB, "github-releases", now, 30 * 60_000, () => loadGithub(fetchImpl));
+  let body: string;
+  switch (tab) {
+    case "utenti": {
+      const [ledger, access] = await Promise.all([readLedger(env.TRIAL_LEDGER), accessQ()]);
+      body = tabUsers(summarizeUsers(ledger, access, now), now); break;
+    }
+    case "attivita": body = tabActivity(await accessQ(), now); break;
+    case "download": {
+      const [hits, gh] = await Promise.all([hitsQ(), ghQ()]);
+      body = tabDownloads(summarize(hits, now), gh ? githubReleases(gh) : null, now, prettySource); break;
+    }
+    case "vendite": body = tabSales(await readOrders(fetchImpl, env.LS_API_KEY, store), now); break;
+    case "sicurezza": body = tabSecurity(await accessQ(), now); break;
+    default: {
+      const [hits, access, gh, sales] = await Promise.all([hitsQ(), accessQ(), ghQ(), readSales(fetchImpl, env.LS_API_KEY, store)]);
+      const ghList: [string, number][] | null = gh ? githubReleases(gh).slice(0, 10).map((r) => [r.tag, r.dmgArm + r.dmgIntel]) : null;
+      return html(page(summarize(hits, now), summarizeAccess(access, now), sales, ghList, now, navHtml(tab)));
+    }
+  }
+  return html(shell(navHtml(tab), body, now));
 }
+
+const html = (doc: string) => new Response(doc, {
+  headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow", "Referrer-Policy": "no-referrer" },
+});
