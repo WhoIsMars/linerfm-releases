@@ -1,0 +1,118 @@
+---
+// Banner di consenso al pixel TikTok. Il pixel NON è nell'HTML: lo inietta lo
+// script solo dopo "Accept" (holdConsent di TikTok non basterebbe, events.js
+// verrebbe scaricato comunque). Accept e Decline hanno lo stesso peso visivo.
+// Qualsiasi elemento con [data-cookie-settings] riapre il banner (privacy page).
+const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
+---
+<div
+  id="tt-consent"
+  role="region"
+  aria-label="Cookie consent"
+  hidden
+  class="fixed inset-x-0 bottom-0 z-50 px-4 pb-4"
+>
+  <div class="mx-auto max-w-2xl rounded-2xl border border-white/12 bg-ink-800/95 backdrop-blur p-5 shadow-2xl">
+    <p class="text-sm text-white/80">
+      We'd like to use the TikTok pixel to measure which ads bring people here and whether they buy.
+      It sets a cookie and, if you buy, shares a hashed email and the order total with TikTok.
+      The app itself stays 100% local either way.
+      <a href={`${base}privacy/`} class="underline underline-offset-2 text-white">Details</a>
+    </p>
+    <div class="mt-4 flex gap-3">
+      <button type="button" data-consent="denied" class="btn-ghost flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold">Decline</button>
+      <button type="button" data-consent="granted" class="btn-ghost flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold">Accept</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  import {
+    readConsent, writeConsent, clearTracking, ttclidFrom, readStoredTtclid, storeTtclid,
+    readCookie, checkoutUrl, purchaseFromCheckout, type Consent,
+  } from "../lib/tt-consent";
+
+  const PIXEL = "DBA8IKRC77UAEK31C1M0";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const w = window as any;
+  const banner = document.getElementById("tt-consent")!;
+  const storage = (() => { try { return window.localStorage; } catch { return null; } })();
+  const noop = { getItem: () => null, setItem: () => {}, removeItem: () => {} };
+  const kv = storage ?? noop;
+
+  // Codice base copiato da Events Manager > LinerFM_pixel > Impostazioni (2026-10-18),
+  // senza le due righe finali: load e page partono solo da grant().
+  function installTtq() {
+    if (w.ttq) return;
+    // prettier-ignore
+    !function (w: any, d: any, t: any) {
+      w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],ttq.setAndDefer=function(t: any,e: any){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t: any){for(
+      var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e: any,n: any){var r="https://analytics.tiktok.com/i18n/pixel/events.js",o=n&&n.partner;ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=r,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};n=document.createElement("script")
+      ;n.type="text/javascript",n.async=!0,n.src=r+"?sdkid="+e+"&lib="+t;e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)};
+    }(window, document, "ttq");
+  }
+
+  function rewriteCheckoutLinks() {
+    const ids = { ttclid: readStoredTtclid(kv), ttp: readCookie(document.cookie, "_ttp") };
+    document.querySelectorAll<HTMLAnchorElement>("a.lemonsqueezy-button").forEach((a) => {
+      a.href = checkoutUrl(a.href, ids);
+    });
+    // lemon.js può aver letto gli href al caricamento: gli si fa rileggere quelli nuovi.
+    w.LemonSqueezy?.Refresh?.();
+  }
+
+  let started = false;
+  function grant() {
+    if (started) return;
+    started = true;
+    const clid = ttclidFrom(location.search);
+    if (clid) storeTtclid(kv, clid);
+    installTtq();
+    w.ttq.load(PIXEL);
+    w.ttq.page();
+    rewriteCheckoutLinks();
+    // Al click su Buy: identificativi aggiornati (il cookie _ttp arriva dopo il load) e InitiateCheckout.
+    document.addEventListener("click", (ev) => {
+      const a = (ev.target as Element | null)?.closest?.("a.lemonsqueezy-button") as HTMLAnchorElement | null;
+      if (!a) return;
+      a.href = checkoutUrl(a.href, { ttclid: readStoredTtclid(kv), ttp: readCookie(document.cookie, "_ttp") });
+      w.ttq.track("InitiateCheckout", { currency: "EUR", value: 10, content_type: "product" });
+    }, true);
+    // Purchase lato browser, deduplicato con quello del worker tramite event_id = id ordine.
+    w.LemonSqueezy?.Setup?.({
+      eventHandler: (e: unknown) => {
+        const p = purchaseFromCheckout(e);
+        if (p) w.ttq.track("Purchase", { currency: p.currency, value: p.value, content_type: "product" }, { event_id: p.event_id });
+      },
+    });
+  }
+
+  function forgetTracking() {
+    clearTracking(kv);
+    // _ttp è un cookie di primo livello sul dominio del sito
+    for (const domain of ["", `; domain=${location.hostname}`, `; domain=.${location.hostname}`]) {
+      document.cookie = `_ttp=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${domain}`;
+    }
+  }
+
+  function choose(c: Consent) {
+    const was = readConsent(kv);
+    writeConsent(kv, c);
+    banner.hidden = true;
+    if (c === "granted") return grant();
+    forgetTracking();
+    // il pixel già caricato in questa pagina non si scarica: si ricarica senza
+    if (was === "granted" || started) location.reload();
+  }
+
+  banner.querySelectorAll<HTMLButtonElement>("[data-consent]").forEach((b) => {
+    b.addEventListener("click", () => choose(b.dataset.consent as Consent));
+  });
+  document.querySelectorAll("[data-cookie-settings]").forEach((el) => {
+    el.addEventListener("click", () => { banner.hidden = false; });
+  });
+
+  const current = readConsent(kv);
+  if (current === "granted") grant();
+  else if (current === null) banner.hidden = false;
+</script>
