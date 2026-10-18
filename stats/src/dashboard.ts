@@ -68,7 +68,7 @@ export function summarize(rows: Row[], now: number) {
 }
 
 // ── Accessi all'app (tabella `access`, scritta dal worker licenze) ───────────
-export interface AccessRow { ts: number; kind: string; outcome: string; reason: string; device: string; key: string; country: string }
+export interface AccessRow { id?: number; ts: number; kind: string; outcome: string; reason: string; device: string; key: string; country: string }
 
 /** Prove, licenze vive, rifiuti, vendite. Una licenza è "viva" se si è rivalidata nelle ultime 48 ore. */
 export function summarizeAccess(rows: AccessRow[], now: number) {
@@ -253,6 +253,7 @@ h2{font:700 17px/1.2 -apple-system,"SF Pro Display",sans-serif;margin:0 0 14px;d
 .funnel small,.hbars small{color:var(--text-3);font-size:12px}
 .feed{list-style:none;margin:0;padding:0}.feed li{display:grid;grid-template-columns:12px 1fr auto;gap:12px;align-items:start;padding:10px 0;border-top:.5px solid var(--line)}.feed li:first-child{border-top:0;padding-top:0}
 .badge{width:10px;height:10px;border-radius:50%;background:var(--c);margin-top:5px;box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 25%,transparent)}
+.feed li:has(.dismiss){grid-template-columns:12px 1fr auto auto}.dismiss{margin:0}.dismiss button{font:inherit;font-size:12px;color:var(--text-3);background:none;border:.5px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}.dismiss button:hover{color:inherit}
 .feed b{display:block;font-weight:600;font-size:14px}.feed span{color:var(--text-3);font-size:12.5px}.feed time{color:var(--text-3);font-size:12.5px;white-space:nowrap}
 .empty{display:flex;gap:14px;align-items:flex-start;color:var(--text-2);font-size:14px}.empty p{margin:3px 0 0}
 .lic{list-style:none;margin:0;padding:0}.lic li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:10px 0;border-top:.5px solid var(--line)}.lic li:first-child{border-top:0;padding-top:0}
@@ -443,11 +444,12 @@ export async function handleDashboard(req: Request, env: Env, now: number, fetch
   if (!viaCookie && !authorized(req, env.DASH_PASSWORD)) {
     return new Response("password required", { status: 401, headers: { "WWW-Authenticate": 'Basic realm="LinerFM stats", charset="UTF-8"', "Cache-Control": "no-store" } });
   }
+  if (req.method === "POST") return dismiss(req, env);
   const tabParam = new URL(req.url).searchParams.get("tab") ?? "";
   const tab = TABS.some(([k]) => k === tabParam) ? tabParam : "panoramica";
   const since = now - 30 * DAY;
   const store = env.LS_STORE_ID ?? "406309";
-  const accessQ = () => env.DB.prepare("SELECT ts, kind, outcome, reason, device, key, country FROM access WHERE ts > ? ORDER BY ts").bind(since).all<AccessRow>()
+  const accessQ = () => env.DB.prepare("SELECT rowid AS id, ts, kind, outcome, reason, device, key, country FROM access WHERE ts > ? AND rowid NOT IN (SELECT id FROM dismissed) ORDER BY ts").bind(since).all<AccessRow>()
     .then((r) => r.results ?? []).catch(() => [] as AccessRow[]);
   const hitsQ = () => env.DB.prepare("SELECT ts, kind, ref, src, arch, sid, country FROM hits WHERE ts > ? ORDER BY ts").bind(since).all<Row>()
     .then((r) => (r.results ?? []).filter((x) => !TEST_SOURCES.has(x.src))).catch(() => [] as Row[]);
@@ -472,6 +474,16 @@ export async function handleDashboard(req: Request, env: Env, now: number, fetch
     }
   }
   return html(shell(navHtml(tab), body, now));
+}
+
+/** POST /dashboard dismiss=<rowid>: hides one access row (a test refusal) from every tab. The row stays in D1. */
+async function dismiss(req: Request, env: Env): Promise<Response> {
+  // Basic auth travels on cross-site requests too: only a form from the dashboard itself counts
+  if (req.headers.get("Origin") !== new URL(req.url).origin) return new Response("forbidden", { status: 403 });
+  const id = Number((await req.formData().catch(() => null))?.get("dismiss"));
+  if (!Number.isInteger(id) || id <= 0) return new Response("bad id", { status: 400 });
+  await env.DB.prepare("INSERT OR IGNORE INTO dismissed (id, ts) VALUES (?, ?)").bind(id, Date.now()).run();
+  return new Response(null, { status: 303, headers: { Location: "/dashboard?tab=sicurezza", "Cache-Control": "no-store" } });
 }
 
 const html = (doc: string) => new Response(doc, {
