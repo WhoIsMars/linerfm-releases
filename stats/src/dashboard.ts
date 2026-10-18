@@ -478,8 +478,11 @@ export async function handleDashboard(req: Request, env: Env, now: number, fetch
 
 /** POST /dashboard dismiss=<rowid>: hides one access row (a test refusal) from every tab. The row stays in D1. */
 async function dismiss(req: Request, env: Env): Promise<Response> {
-  // Basic auth travels on cross-site requests too: only a form from the dashboard itself counts
-  if (req.headers.get("Origin") !== new URL(req.url).origin) return new Response("forbidden", { status: 403 });
+  // Basic auth travels on cross-site requests too: only a form from the dashboard itself counts.
+  // The page is served with Referrer-Policy: no-referrer, so the browser sends Origin: null on its
+  // own form; Sec-Fetch-Site (set by the browser, a page cannot forge it) still says same-origin.
+  const sameSite = req.headers.get("Sec-Fetch-Site") === "same-origin" || req.headers.get("Origin") === new URL(req.url).origin;
+  if (!sameSite) return new Response("forbidden", { status: 403 });
   const id = Number((await req.formData().catch(() => null))?.get("dismiss"));
   if (!Number.isInteger(id) || id <= 0) return new Response("bad id", { status: 400 });
   await env.DB.prepare("INSERT OR IGNORE INTO dismissed (id, ts) VALUES (?, ?)").bind(id, Date.now()).run();

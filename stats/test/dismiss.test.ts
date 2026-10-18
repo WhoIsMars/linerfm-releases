@@ -45,6 +45,20 @@ describe("dismissing a security alert", () => {
     expect(reads.find((s) => s.includes("FROM access"))).toMatch(/rowid NOT IN \(SELECT id FROM dismissed\)/);
   });
 
+  it("works from the real page: no-referrer makes the browser send Origin: null, Sec-Fetch-Site says same-origin", async () => {
+    const { db, runs } = fakeDB();
+    const res = await handleDashboard(post("dismiss=6", { Origin: "null", "Sec-Fetch-Site": "same-origin" }), { DB: db, DASH_PASSWORD: "pw" }, NOW, noFetch);
+    expect(res.status).toBe(303);
+    expect(runs).toHaveLength(1);
+  });
+
+  it("Origin: null from another site is still refused", async () => {
+    const { db, runs } = fakeDB();
+    const res = await handleDashboard(post("dismiss=6", { Origin: "null", "Sec-Fetch-Site": "cross-site" }), { DB: db, DASH_PASSWORD: "pw" }, NOW, noFetch);
+    expect(res.status).toBe(403);
+    expect(runs).toEqual([]);
+  });
+
   it("refuses without the password, from another site, or with a bad id", async () => {
     const env = () => { const f = fakeDB(); return { f, env: { DB: f.db, DASH_PASSWORD: "pw" } }; };
     const a = env(); expect((await handleDashboard(post("dismiss=6", { Authorization: "" }), a.env, NOW, noFetch)).status).toBe(401);
