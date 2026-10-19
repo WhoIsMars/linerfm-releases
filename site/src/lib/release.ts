@@ -28,6 +28,12 @@ export function pickMacDmgs(release: GithubRelease): MacDmgs {
   };
 }
 
+/** The Windows installer (NSIS, x64) of a release, or null when it has none. */
+export function pickWindowsExe(release: GithubRelease): DmgInfo | null {
+  const a = release.assets.find((x) => /x64-setup\.exe$/i.test(x.name));
+  return a ? toDmgInfo(release, a) : null;
+}
+
 export function formatBytes(bytes: number): string {
   const mb = bytes / (1024 * 1024);
   if (mb >= 1) return `${mb.toFixed(1)} MB`;
