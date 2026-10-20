@@ -178,3 +178,10 @@ describe("riepilogo Discord ogni 6 ore", () => {
     expect(e.fields.find((f) => f.name === "Installer Windows")?.value).toBe("totale 5"); // il riepilogo vecchio non li aveva
   });
 });
+
+describe("aggiornamento automatico", () => {
+  it("ricarica la scheda aperta, non la Panoramica", async () => {
+    const html = await (await handleDashboard(req("?tab=eventi"), { DB: fakeDb({}), DASH_PASSWORD: "pw" }, NOW, ls([]))).text();
+    expect(html).toContain("fetch(location.pathname + location.search");
+  });
+});

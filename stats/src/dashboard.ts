@@ -332,7 +332,7 @@ const SCRIPT = `(() => {
   setInterval(async () => {
     if (document.hidden) return;
     try {
-      const r = await fetch(location.pathname, { credentials: "same-origin", cache: "no-store" });
+      const r = await fetch(location.pathname + location.search, { credentials: "same-origin", cache: "no-store" });
       if (!r.ok) return;
       const next = new DOMParser().parseFromString(await r.text(), "text/html").getElementById("app");
       if (next) document.getElementById("app").replaceWith(next);
