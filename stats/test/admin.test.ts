@@ -44,7 +44,7 @@ describe("githubReleases", () => {
       { name: "latest.json", download_count: 8 }, { name: "LinerFM_0.14.1_aarch64.dmg", download_count: 2 }, { name: "LinerFM_0.14.1_x64.dmg", download_count: 1 },
       { name: "LinerFM_aarch64.app.tar.gz", download_count: 4 }, { name: "LinerFM_x64.app.tar.gz", download_count: 0 },
     ] }]);
-    expect(r).toEqual([{ tag: "v0.14.1", date: "2026-10-16", dmgArm: 2, dmgIntel: 1, updates: 4, checks: 8 }]);
+    expect(r).toEqual([{ tag: "v0.14.1", date: "2026-10-16", dmgArm: 2, dmgIntel: 1, win: 0, updates: 4, checks: 8 }]);
   });
 });
 

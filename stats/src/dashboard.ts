@@ -1,4 +1,4 @@
-import { TABS, navHtml, summarizeUsers, readLedger, cachedJson, loadGithub, githubReleases, readOrders, tabUsers, tabActivity, tabDownloads, tabSales, tabSecurity, type GhRelease } from "./admin";
+import { TABS, navHtml, summarizeUsers, readLedger, cachedJson, loadGithub, githubReleases, readOrders, tabUsers, tabActivity, tabDownloads, tabSales, tabSecurity, tabEvents, tabSocial, type GhRelease, type SocialRow } from "./admin";
 
 // GET /dashboard: the owner's private view of the site numbers, last 30 days.
 // HTTP Basic auth against the DASH_PASSWORD secret (`wrangler secret put DASH_PASSWORD`);
@@ -26,6 +26,14 @@ export const ENT: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&g
 export const esc = (s: unknown) => String(s).replace(/[&<>"']/g, (c) => ENT[c]);
 export const dayOf = (ts: number) => new Date(ts).toISOString().slice(0, 10);
 
+/** Una scheda del browser (sid): le sue visite e i suoi clic sui pulsanti di download. */
+export interface Session { sid: string; first: number; last: number; firstClick: number; lastClick: number; views: number; clicks: number; arches: string[]; from: string; country: string }
+
+/** "1 clic" oppure "4 clic in 1 min": quanti pulsanti ha premuto la stessa persona. */
+export const clicksText = (p: Session) => (p.clicks === 1 ? "1 clic" : `${p.clicks} clic in ${Math.max(1, Math.round((p.lastClick - p.firstClick) / 60_000))} min`);
+
+export const archName = (a: string) => (a === "apple-silicon" ? "Apple Silicon" : a === "intel" ? "Intel" : a === "windows" ? "Windows" : a === "github-page" ? "pagina GitHub" : a);
+
 /** One visit = one browser tab (sid) with a view. Source: ?src tag, else referrer host, else direct. */
 export function summarize(rows: Row[], now: number) {
   const tabs = new Map<string, { src: string; ref: string; country: string; viewed: boolean; downloads: number; day: string }>();
@@ -47,19 +55,33 @@ export function summarize(rows: Row[], now: number) {
     countries.set(t.country || "?", (countries.get(t.country || "?") ?? 0) + 1);
   }
   const downloads = rows.filter((r) => r.kind === "download");
-  for (const r of downloads) {
-    const s = sources.get(from(r.sid)) ?? [0, 0];
+  for (const sid of new Set(downloads.map((r) => r.sid))) {
+    const s = sources.get(from(sid)) ?? [0, 0];
     s[1]++;
-    sources.set(from(r.sid), s);
+    sources.set(from(sid), s);
   }
+  // Una persona = una scheda del browser: 4 clic sui pulsanti in un minuto sono una persona sola.
+  const sessions = new Map<string, Session>();
+  for (const r of rows) {
+    const s = sessions.get(r.sid) ?? { sid: r.sid, first: r.ts, last: r.ts, firstClick: 0, lastClick: 0, views: 0, clicks: 0, arches: [], from: from(r.sid), country: r.country };
+    s.last = r.ts;
+    if (r.kind === "view") s.views++;
+    if (r.kind === "download") { s.clicks++; s.firstClick ||= r.ts; s.lastClick = r.ts; if (!s.arches.includes(r.arch)) s.arches.push(r.arch); }
+    sessions.set(r.sid, s);
+  }
+  const people = [...sessions.values()].filter((s) => s.clicks > 0).sort((a, b) => b.lastClick - a.lastClick);
   const days = Array.from({ length: 30 }, (_, i) => ({ day: dayOf(now - (29 - i) * DAY), visits: 0, downloads: 0 }));
   const byDay = new Map(days.map((d) => [d.day, d]));
   for (const t of tabs.values()) if (t.viewed && byDay.has(t.day)) byDay.get(t.day)!.visits++;
-  for (const r of downloads) if (byDay.has(dayOf(r.ts))) byDay.get(dayOf(r.ts))!.downloads++;
+  const dlDays = new Set(downloads.map((r) => `${dayOf(r.ts)}|${r.sid}`));
+  for (const k of dlDays) { const d = byDay.get(k.slice(0, 10)); if (d) d.downloads++; }
   const visits = [...tabs.values()].filter((t) => t.viewed).length;
   return {
     visits,
     downloads: downloads.length,
+    downloaders: people.length,
+    people,
+    sessions: [...sessions.values()],
     bySource: [...sources.entries()].map(([k, [vi, dl]]) => [k, vi, dl] as [string, number, number]).sort((a, b) => b[1] - a[1] || b[2] - a[2]),
     countries: [...countries.entries()].sort((a, b) => b[1] - a[1]),
     days,
@@ -209,6 +231,11 @@ export const ICON: Record<string, string> = {
 export const icon = (name: string) => `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">${ICON[name]}</svg>`;
 export const flag = (c: string) => (/^[A-Z]{2}$/.test(c) ? String.fromCodePoint(...[...c].map((ch) => 0x1f1a5 + ch.charCodeAt(0))) : "🌐");
 
+/** Una riga per persona che ha scaricato: pulsanti premuti, fonte, paese, clic. */
+export function personFeed(people: Session[], now: number): string {
+  return `<ul class="feed">${people.map((p) => `<li style="--c:${C.indigo}"><i class="badge"></i><div><b>${esc(p.arches.map(archName).join(", "))}</b><span>da ${esc(prettySource(p.from))} · ${flag(p.country)} ${esc(countryName(p.country))} · ${esc(clicksText(p))}</span></div><time title="${esc(ago(p.last, now))}">${esc(rome(p.firstClick))}</time></li>`).join("")}</ul>`;
+}
+
 /** Linea dei 30 giorni dentro un riquadro: solo forma, niente assi. */
 export function spark(values: number[], color: string): string {
   if (!values.some((v) => v > 0)) return `<svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="26" x2="100" y2="26" stroke="${color}" stroke-opacity=".35" stroke-width="2"/></svg>`;
@@ -241,7 +268,7 @@ h1{font:700 34px/1.1 -apple-system,"SF Pro Display",sans-serif;letter-spacing:-.
 .ico{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:9px;background:color-mix(in srgb,var(--c) 22%,transparent);color:var(--c)}
 .tile .num{font:700 40px/1 -apple-system,"SF Pro Display",sans-serif;letter-spacing:-.02em;margin:14px 0 6px;font-variant-numeric:tabular-nums}
 .tile.big .num{font-size:52px;color:var(--c)}
-.tile footer{font-size:12.5px;color:var(--text-3);position:relative;z-index:1}
+.tile footer{font-size:12.5px;color:var(--text-3);position:relative;z-index:1}.why{display:block;margin-top:6px;font-size:11.5px;line-height:1.35;color:var(--text-3);opacity:.85}
 .spark{position:absolute;left:0;right:0;bottom:0;width:100%;height:46px;opacity:.9}
 .tile:has(.spark) footer{margin-bottom:34px}
 .delta{font-weight:600}.delta.up{color:${C.green}}.delta.down{color:${C.red}}.delta.flat{color:var(--text-3)}
@@ -332,21 +359,24 @@ function page(s: ReturnType<typeof summarize>, x: ReturnType<typeof summarizeAcc
   const salesN = sales ? sales.paid : x.sales.length;
   const lastSale = sales?.last ? ago(Date.parse(sales.last), now) : "";
 
-  type Tile = { color: string; icon: string; label: string; value: string | number; foot: string; spark?: number[]; big?: boolean };
+  // why: da dove viene il numero e cosa include, in una riga sotto il numero
+  type Tile = { color: string; icon: string; label: string; value: string | number; foot: string; why: string; spark?: number[]; big?: boolean };
   const tiles: Tile[] = [
-    { color: C.green, icon: "money", label: "Vendite", value: salesN, foot: sales ? `${money(sales.cents, sales.currency)} incassati${lastSale ? ` · ultima ${lastSale}` : ""}` : "Lemon Squeezy non leggibile", spark: salesDays, big: true },
-    { color: C.blue, icon: "eye", label: "Visite, 7 giorni", value: v7, foot: delta(v7, v7p) || `${s.visits} in 30 giorni`, spark: visitsByDay },
-    { color: C.indigo, icon: "down", label: "Download, 7 giorni", value: d7, foot: delta(d7, d7p) || `${s.downloads} in 30 giorni`, spark: dlByDay },
-    { color: C.orange, icon: "mac", label: "Mac in prova", value: x.trialing, foot: x.expiredBack ? `${x.expiredBack} con la prova finita hanno riaperto l'app` : "prove gratuite in corso" },
-    { color: C.teal, icon: "key", label: "Licenze attive", value: x.liveLicenses, foot: "controllate nelle ultime 48 ore" },
+    { color: C.green, icon: "money", label: "Vendite", value: salesN, foot: sales ? `${money(sales.cents, sales.currency)} incassati${lastSale ? ` · ultima ${lastSale}` : ""}` : "Lemon Squeezy non leggibile", why: "ordini veri su Lemon Squeezy, senza quelli di prova e quelli a 0 €", spark: salesDays, big: true },
+    { color: C.blue, icon: "eye", label: "Visite, 7 giorni", value: v7, foot: delta(v7, v7p) || `${s.visits} in 30 giorni`, why: "una visita = una scheda del browser aperta sul sito; le tue prove non contano", spark: visitsByDay },
+    { color: C.indigo, icon: "down", label: "Persone che hanno scaricato, 7 giorni", value: d7, foot: delta(d7, d7p) || `${s.downloaders} in 30 giorni, ${s.downloads} clic sui pulsanti`,
+      why: "chi ha premuto almeno un pulsante di download sul sito; più clic della stessa persona contano uno, e un clic non vuol dire installato", spark: dlByDay },
+    { color: C.orange, icon: "mac", label: "Computer in prova", value: x.trialing, foot: x.expiredBack ? `${x.expiredBack} con la prova finita hanno riaperto l'app` : "prove gratuite in corso",
+      why: "dal registro accessi del server licenze (attivo dal 17/10), ultimi 30 giorni: Mac e PC Windows insieme, il server non li distingue" },
+    { color: C.teal, icon: "key", label: "Licenze attive", value: x.liveLicenses, foot: "controllate nelle ultime 48 ore", why: "app con licenza che hanno contattato il server licenze" },
     refused24
-      ? { color: C.red, icon: "alert", label: "Rifiuti, 24 ore", value: refused24, foot: "accessi negati: guarda la cronologia" }
-      : { color: C.green, icon: "shield", label: "Licenze", value: "OK", foot: x.refused7d ? `${x.refused7d} rifiuti negli ultimi 7 giorni` : "nessun rifiuto in 7 giorni" },
+      ? { color: C.red, icon: "alert", label: "Rifiuti, 24 ore", value: refused24, foot: "accessi negati: guarda la cronologia", why: "richieste respinte dal server licenze" }
+      : { color: C.green, icon: "shield", label: "Licenze", value: "OK", foot: x.refused7d ? `${x.refused7d} rifiuti negli ultimi 7 giorni` : "nessun rifiuto in 7 giorni", why: "richieste respinte dal server licenze" },
   ];
   const tileHtml = tiles.map((t) => `<article class="tile${t.big ? " big" : ""}" style="--c:${t.color}">
     <header><span class="ico">${icon(t.icon)}</span>${esc(t.label)}</header>
     <b class="num" data-n="${typeof t.value === "number" ? t.value : ""}">${esc(t.value)}</b>
-    <footer>${t.foot.startsWith("<span") ? t.foot : esc(t.foot)}</footer>${t.spark ? spark(t.spark, t.color) : ""}</article>`).join("");
+    <footer>${t.foot.startsWith("<span") ? t.foot : esc(t.foot)}<small class="why">${esc(t.why)}</small></footer>${t.spark ? spark(t.spark, t.color) : ""}</article>`).join("");
 
   // in una frase, quello che conta adesso
   const headline = refused24
@@ -358,14 +388,14 @@ function page(s: ReturnType<typeof summarize>, x: ReturnType<typeof summarizeAcc
   const trialsTotal = x.trialing + x.expiredBack;
   const funnelSteps = [
     { label: "Visite al sito", n: s.visits, color: C.blue },
-    { label: "Click sul download", n: s.downloads, color: C.indigo },
-    { label: "Mac che aprono l'app", n: trialsTotal, color: C.orange },
+    { label: "Persone che hanno scaricato", n: s.downloaders, color: C.indigo },
+    { label: "Computer che aprono l'app", n: trialsTotal, color: C.orange },
     { label: "Vendite", n: salesN, color: C.green },
   ];
   const fMax = Math.max(1, ...funnelSteps.map((f) => f.n));
   const funnel = funnelSteps.map((f, i) => {
     const prev = i ? funnelSteps[i - 1].n : 0;
-    const conv = i === 2 ? "registrati dal 17/10" : i && prev ? `${Math.round((f.n / prev) * 100)}% del passo prima` : i ? "" : "ultimi 30 giorni";
+    const conv = i === 1 ? `${s.downloads} clic sui pulsanti${prev ? `, ${Math.round((f.n / prev) * 100)}% delle visite` : ""}` : i === 2 ? "registrati dal 17/10, Mac e PC Windows insieme" : i && prev ? `${Math.round((f.n / prev) * 100)}% del passo prima` : i ? "" : "ultimi 30 giorni";
     return `<li style="--c:${f.color}"><div class="fl"><span>${esc(f.label)}</span><b>${esc(f.n)}</b></div><div class="track"><i style="width:${Math.max(2, Math.round((f.n / fMax) * 100))}%"></i></div><small>${esc(conv)}</small></li>`;
   }).join("");
 
@@ -389,10 +419,9 @@ function page(s: ReturnType<typeof summarize>, x: ReturnType<typeof summarizeAcc
   const sources = bars(s.bySource.map(([k, v, d]) => { const name = prettySource(k); return { name: esc(name), n: v, color: BRAND[name] ?? C.gray, extra: d ? `${d} download` : "" }; }), "Ancora nessuna visita.");
   const countries = bars(s.countries.map(([c, n]) => ({ name: `${flag(c)} ${esc(countryName(c))}`, n, color: C.blue })), "Ancora nessuna visita.");
 
-  const archName = (a: string) => (a === "apple-silicon" ? "Apple Silicon" : a === "intel" ? "Intel" : a === "github-page" ? "pagina GitHub" : a);
   const ghTotal = gh ? gh.reduce((n, [, c]) => n + c, 0) : 0;
-  const downloads = `${s.recent.length ? `<ul class="feed">${s.recent.slice(0, 5).map((r) => `<li style="--c:${C.indigo}"><i class="badge"></i><div><b>${esc(archName(r.arch))}</b><span>da ${esc(prettySource(r.from))} · ${flag(r.country)} ${esc(countryName(r.country))}</span></div><time title="${esc(rome(r.ts))}">${esc(ago(r.ts, now))}</time></li>`).join("")}</ul>` : `<p class="muted">Nessun download dal sito negli ultimi 30 giorni.</p>`}
-    <p class="gh">${gh ? `<b>${esc(ghTotal)}</b> download DMG su GitHub nelle ultime ${esc(gh.length)} release, contando anche gli aggiornamenti manuali` : "GitHub non raggiungibile in questo momento"}</p>`;
+  const downloads = `${s.people.length ? personFeed(s.people.slice(0, 5), now) : `<p class="muted">Nessun download dal sito negli ultimi 30 giorni.</p>`}
+    <p class="gh">${gh ? `<b>${esc(ghTotal)}</b> programmi di installazione (DMG e Windows) scaricati da GitHub nelle ultime ${esc(gh.length)} release: contano anche i tuoi download e quelli di prova` : "GitHub non raggiungibile in questo momento"}</p>`;
 
   return shell(nav, `<p class="headline">${headline}</p>
 <section class="tiles">${tileHtml}</section>
@@ -403,7 +432,7 @@ function page(s: ReturnType<typeof summarize>, x: ReturnType<typeof summarizeAcc
   <section class="card s4"><h2>Licenze</h2>${licenses}</section>
   <section class="card s4"><h2>Da dove arrivano</h2>${sources}</section>
   <section class="card s4"><h2>Paesi</h2>${countries}</section>
-  <section class="card s4"><h2>Download</h2>${downloads}</section>
+  <section class="card s4"><h2>Download <small>una riga per persona</small></h2>${downloads}</section>
 </div>
 <p class="foot">Ultimi 30 giorni, ora di Roma. Il traffico di prova è escluso, e il tuo browser non si conta se apri il sito con ?notrack=1. Le prove si contano per Mac: finché il worker non controlla l'identificativo, una chiamata inventata può creare una prova finta.</p>`, now);
 }
@@ -463,13 +492,23 @@ export async function handleDashboard(req: Request, env: Env, now: number, fetch
     case "attivita": body = tabActivity(await accessQ(), now); break;
     case "download": {
       const [hits, gh] = await Promise.all([hitsQ(), ghQ()]);
-      body = tabDownloads(summarize(hits, now), gh ? githubReleases(gh) : null, now, prettySource); break;
+      body = tabDownloads(summarize(hits, now), gh ? githubReleases(gh) : null, now); break;
+    }
+    case "eventi": {
+      const [hits, access, orders] = await Promise.all([hitsQ(), accessQ(), readOrders(fetchImpl, env.LS_API_KEY, store)]);
+      body = tabEvents(summarize(hits, now).sessions, access, orders, now); break;
+    }
+    case "social": {
+      // la tabella la crea metrics.mjs alla prima scrittura: prima di allora la query fallisce e la scheda lo dice
+      const rows = await env.DB.prepare("SELECT ts, platform, item, title, views, likes, comments FROM social WHERE ts > ? ORDER BY ts").bind(now - 60 * DAY).all<SocialRow>()
+        .then((r) => r.results ?? []).catch(() => [] as SocialRow[]);
+      body = tabSocial(rows, now); break;
     }
     case "vendite": body = tabSales(await readOrders(fetchImpl, env.LS_API_KEY, store), now); break;
     case "sicurezza": body = tabSecurity(await accessQ(), now); break;
     default: {
       const [hits, access, gh, sales] = await Promise.all([hitsQ(), accessQ(), ghQ(), readSales(fetchImpl, env.LS_API_KEY, store)]);
-      const ghList: [string, number][] | null = gh ? githubReleases(gh).slice(0, 10).map((r) => [r.tag, r.dmgArm + r.dmgIntel]) : null;
+      const ghList: [string, number][] | null = gh ? githubReleases(gh).slice(0, 10).map((r) => [r.tag, r.dmgArm + r.dmgIntel + r.win]) : null;
       return html(page(summarize(hits, now), summarizeAccess(access, now), sales, ghList, now, navHtml(tab)));
     }
   }

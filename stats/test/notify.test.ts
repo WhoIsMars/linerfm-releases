@@ -15,11 +15,11 @@ describe("windowOf", () => {
 });
 
 describe("downloadEmbed", () => {
-  it("says which Mac, where from and where in the world, with the time in Discord format", () => {
+  it("says which system, where from and where in the world, with the time in Discord format", () => {
     const e = downloadEmbed({ ts: TICK, arch: "apple-silicon", src: "", ref: "www.reddit.com", country: "IT" });
     expect(e.title).toBe("Download dal sito");
     const f = Object.fromEntries(e.fields.map((x) => [x.name, x.value]));
-    expect(f["Mac"]).toBe("Apple silicon");
+    expect(f["Sistema"]).toBe("Apple silicon");
     expect(f["Da dove"]).toBe("Reddit");
     expect(f["Paese"]).toContain("Italia");
     expect(f["Quando"]).toBe(`<t:${TICK / 1000}:F> (<t:${TICK / 1000}:R>)`);
@@ -58,7 +58,7 @@ describe("summaryEmbed", () => {
   it("counts visits and visitors without test traffic or rows outside the window", () => {
     const f = fields(summaryEmbed(base));
     expect(f["Visite sito"]).toBe("3 (2 persone)");
-    expect(f["Click download"]).toBe("1");
+    expect(f["Persone che hanno scaricato"]).toBe("1");
     expect(f["Fonti"]).toContain("Reddit");
   });
 

@@ -1,7 +1,8 @@
 // Schede del pannello admin oltre alla Panoramica: Utenti, Attività, Download, Vendite, Sicurezza.
 // Stesso accesso della dashboard (link segreto o password), stesso guscio grafico (shell).
 import {
-  C, DAY, esc, rome, ago, countryName, flag, money, icon, eventLine, reasonText, dayOf, type AccessRow,
+  C, BRAND, DAY, esc, rome, ago, countryName, flag, money, icon, eventLine, reasonText, dayOf, archName, clicksText, personFeed, prettySource,
+  type AccessRow, type Session,
 } from "./dashboard";
 
 const TRIAL_DAYS = 5;
@@ -70,12 +71,13 @@ export function activeByDay(access: AccessRow[], now: number) {
 }
 
 export interface GhRelease { tag_name: string; published_at: string; assets: { name: string; download_count: number }[] }
-/** Per release: installazioni nuove (DMG), aggiornamenti scaricati (.app.tar.gz), controlli dell'updater (latest.json). */
+/** Per release: installazioni nuove (DMG), installer Windows (-setup.exe: anche gli aggiornamenti Windows, latest.json punta lì),
+ *  aggiornamenti Mac scaricati (.app.tar.gz), controlli dell'updater (latest.json). */
 export function githubReleases(list: GhRelease[]) {
   const n = (r: GhRelease, re: RegExp) => r.assets.filter((a) => re.test(a.name)).reduce((s, a) => s + a.download_count, 0);
   return list.map((r) => ({
     tag: r.tag_name, date: (r.published_at ?? "").slice(0, 10),
-    dmgArm: n(r, /aarch64\.dmg$/), dmgIntel: n(r, /x64\.dmg$/), updates: n(r, /\.app\.tar\.gz$/), checks: n(r, /^latest\.json$/),
+    dmgArm: n(r, /aarch64\.dmg$/), dmgIntel: n(r, /x64\.dmg$/), win: n(r, /-setup\.exe$/), updates: n(r, /\.app\.tar\.gz$/), checks: n(r, /^latest\.json$/),
   }));
 }
 
@@ -133,12 +135,12 @@ export async function readOrders(fetchImpl: typeof fetch, apiKey: string | undef
 }
 
 // ── Pezzi grafici ─────────────────────────────────────────────────────────────
-export const TABS: [string, string][] = [["panoramica", "Panoramica"], ["utenti", "Utenti"], ["attivita", "Attività"], ["download", "Download"], ["vendite", "Vendite"], ["sicurezza", "Sicurezza"]];
+export const TABS: [string, string][] = [["panoramica", "Panoramica"], ["eventi", "Eventi"], ["utenti", "Utenti"], ["attivita", "Attività"], ["download", "Download"], ["social", "Social"], ["vendite", "Vendite"], ["sicurezza", "Sicurezza"]];
 export const navHtml = (active: string) =>
   `<nav class="nav" aria-label="Sezioni">${TABS.map(([k, label]) => `<a href="/dashboard${k === "panoramica" ? "" : `?tab=${k}`}"${k === active ? ' aria-current="page"' : ""}>${label}</a>`).join("")}</nav>`;
 
-function kpi(color: string, ic: string, label: string, value: string | number, foot = ""): string {
-  return `<article class="tile" style="--c:${color};min-height:118px"><header><span class="ico">${icon(ic)}</span>${esc(label)}</header><b class="num" data-n="${typeof value === "number" ? value : ""}">${esc(value)}</b>${foot ? `<footer>${esc(foot)}</footer>` : ""}</article>`;
+function kpi(color: string, ic: string, label: string, value: string | number, foot = "", why = ""): string {
+  return `<article class="tile" style="--c:${color};min-height:118px"><header><span class="ico">${icon(ic)}</span>${esc(label)}</header><b class="num" data-n="${typeof value === "number" ? value : ""}">${esc(value)}</b>${foot || why ? `<footer>${esc(foot)}${why ? `<small class="why">${esc(why)}</small>` : ""}</footer>` : ""}</article>`;
 }
 const card = (span: string, title: string, sub: string, inner: string) => `<section class="card ${span}"><h2>${esc(title)}${sub ? ` <small>${esc(sub)}</small>` : ""}</h2>${inner}</section>`;
 const empty = (text: string) => `<p class="muted">${esc(text)}</p>`;
@@ -162,7 +164,7 @@ export function tabUsers(users: User[], now: number): string {
   }).join("");
   return `<section class="kpis" style="margin-top:16px">${kpi(C.blue, "mac", "Mac in tutto", users.length, `${active7} attivi negli ultimi 7 giorni`)}${kpi(C.orange, "mac", "In prova", n("trial"))}${kpi(C.gray, "mac", "Prova finita, senza licenza", n("expired"))}${kpi(C.green, "key", "Con licenza", n("license"))}</section>
 <div class="grid">${card("s12", "Tutti i Mac", "dal più recente", users.length ? `<div class="scroll"><table class="table"><thead><tr><th>Mac</th><th>Stato</th><th>Licenza o prova</th><th>Giorni attivi</th><th>Primo accesso</th><th>Ultimo accesso</th><th>Paese</th></tr></thead><tbody>${rows}</tbody></table></div>` : empty("Ancora nessun Mac ha aperto l'app."))}</div>
-<p class="foot">Un Mac è il suo identificativo anonimo (8 caratteri). Le prove partono dal registro delle prove gratuite; giorni attivi, paese e licenza dal registro accessi, attivo dal 17/10. "Giorni attivi" vuoto vuol dire che il Mac non ha più aperto l'app da quando c'è il registro.</p>`;
+<p class="foot">Mac e PC Windows insieme: l'app su Windows chiede la prova allo stesso server e finisce nello stesso registro, che non salva il sistema, quindi qui "Mac" vuol dire computer. Un computer è il suo identificativo anonimo (8 caratteri). Le prove partono dal registro delle prove gratuite (TRIAL_LEDGER, da sempre); giorni attivi, paese e licenza dal registro accessi, attivo dal 17/10. "Giorni attivi" vuoto vuol dire che il Mac non ha più aperto l'app da quando c'è il registro.</p>`;
 }
 
 export function tabActivity(access: AccessRow[], now: number): string {
@@ -178,16 +180,16 @@ ${card("s12", "Cronologia", "ultimi 100 eventi, senza i controlli orari riusciti
 <p class="foot">Un Mac con licenza contatta il server ogni ora, uno in prova a ogni avvio dell'app: "attivo" vuol dire che l'app era aperta quel giorno.</p>`;
 }
 
-export function tabDownloads(site: { downloads: number; recent: { ts: number; arch: string; from: string; country: string }[] }, rel: ReturnType<typeof githubReleases> | null, now: number, prettySource: (s: string) => string): string {
+export function tabDownloads(site: { downloads: number; downloaders: number; people: Session[] }, rel: ReturnType<typeof githubReleases> | null, now: number): string {
   const dmg = rel ? rel.reduce((s, r) => s + r.dmgArm + r.dmgIntel, 0) : 0;
+  const win = rel ? rel.reduce((s, r) => s + r.win, 0) : 0;
   const upd = rel ? rel.reduce((s, r) => s + r.updates, 0) : 0;
   const latest = rel?.[0];
-  const archName = (a: string) => (a === "apple-silicon" ? "Apple Silicon" : a === "intel" ? "Intel" : a === "github-page" ? "pagina GitHub" : a);
-  const siteList = site.recent.length ? `<ul class="feed">${site.recent.map((r) => `<li style="--c:${C.indigo}"><i class="badge"></i><div><b>${esc(archName(r.arch))}</b><span>da ${esc(prettySource(r.from))} · ${flag(r.country)} ${esc(countryName(r.country))}</span></div><time>${esc(rome(r.ts))}</time></li>`).join("")}</ul>` : empty("Nessun download dal sito negli ultimi 30 giorni.");
-  const table = rel ? `<div class="scroll"><table class="table"><thead><tr><th>Release</th><th>Uscita</th><th>DMG Apple Silicon</th><th>DMG Intel</th><th>Aggiornamenti scaricati</th><th>Controlli updater</th></tr></thead><tbody>${rel.map((r) => `<tr><td><b>${esc(r.tag)}</b></td><td>${esc(r.date.split("-").reverse().join("/"))}</td><td>${esc(r.dmgArm)}</td><td>${esc(r.dmgIntel)}</td><td>${esc(r.updates)}</td><td>${esc(r.checks)}</td></tr>`).join("")}</tbody></table></div>` : empty("GitHub non raggiungibile e nessuna copia salvata.");
-  return `<section class="kpis" style="margin-top:16px">${kpi(C.indigo, "down", "Download dal sito, 30 giorni", site.downloads)}${kpi(C.blue, "down", "DMG scaricati da GitHub", dmg, "installazioni nuove, tutte le release")}${kpi(C.teal, "down", "Aggiornamenti scaricati", upd, "app già installate che si sono aggiornate")}${kpi(C.orange, "mac", `Controlli updater ${latest ? latest.tag : ""}`, latest ? latest.checks : 0, "volte che un'app ha cercato aggiornamenti")}</section>
-<div class="grid">${card("s5", "Ultimi download dal sito", "", siteList)}${card("s7", "Per release", "da GitHub", table)}</div>
-<p class="foot">I numeri di GitHub sono totali dall'uscita di ogni release e si aggiornano ogni 30 minuti. Il download dal sito conta il click sul pulsante; GitHub conta i file scaricati davvero, anche da chi non passa dal sito.</p>`;
+  const siteList = site.people.length ? personFeed(site.people, now) : empty("Nessun download dal sito negli ultimi 30 giorni.");
+  const table = rel ? `<div class="scroll"><table class="table"><thead><tr><th>Release</th><th>Uscita</th><th>DMG Apple Silicon</th><th>DMG Intel</th><th>Installer Windows</th><th>Aggiornamenti Mac</th><th>Controlli updater</th></tr></thead><tbody>${rel.map((r) => `<tr><td><b>${esc(r.tag)}</b></td><td>${esc(r.date.split("-").reverse().join("/"))}</td><td>${esc(r.dmgArm)}</td><td>${esc(r.dmgIntel)}</td><td>${esc(r.win)}</td><td>${esc(r.updates)}</td><td>${esc(r.checks)}</td></tr>`).join("")}</tbody></table></div>` : empty("GitHub non raggiungibile e nessuna copia salvata.");
+  return `<section class="kpis" style="margin-top:16px">${kpi(C.indigo, "down", "Persone che hanno scaricato dal sito", site.downloaders, `${site.downloads} clic sui pulsanti, 30 giorni`, "una persona = una scheda del browser; più clic della stessa persona contano uno")}${kpi(C.blue, "down", "DMG scaricati da GitHub", dmg, "tutte le release", "file scaricati davvero: contano anche i tuoi download e quelli di prova, e chi arriva dal sito")}${kpi(C.purple, "down", "Installer Windows da GitHub", win, "tutte le release", "come i DMG, più gli aggiornamenti delle app Windows, che scaricano lo stesso file")}${kpi(C.teal, "down", "Aggiornamenti Mac scaricati", upd, "tutte le release", "vengono da app già installate che si aggiornano da sole, non da persone nuove")}${kpi(C.orange, "mac", `Controlli updater ${latest ? latest.tag : ""}`, latest ? latest.checks : 0, "volte che un'app ha cercato aggiornamenti", "ogni app aperta controlla più volte al giorno: non sono persone")}</section>
+<div class="grid">${card("s5", "Chi ha scaricato dal sito", "una riga per persona", siteList)}${card("s7", "Per release", "da GitHub", table)}</div>
+<p class="foot">I numeri di GitHub sono totali dall'uscita di ogni release e si aggiornano ogni 30 minuti. Il download dal sito conta chi preme il pulsante; GitHub conta i file scaricati davvero, anche da chi non passa dal sito.</p>`;
 }
 
 export function tabSales(orders: Order[] | null, now: number): string {
@@ -218,4 +220,78 @@ export function tabSecurity(access: AccessRow[], now: number): string {
   return `<section class="kpis" style="margin-top:16px">${kpi(n(DAY) ? C.red : C.green, n(DAY) ? "alert" : "shield", "Rifiuti, 24 ore", n(DAY))}${kpi(n(7 * DAY) ? C.red : C.green, "shield", "Rifiuti, 7 giorni", n(7 * DAY))}${kpi(fake ? C.orange : C.green, "mac", "Prove finte bloccate", fake, "identificativo del Mac non valido")}${kpi(shared ? C.orange : C.green, "key", "Chiavi copiate su un altro Mac", shared, "bloccate dal controllo del Mac")}</section>
 <div class="grid">${card("s5", "Motivi", "ultimi 30 giorni", reasons)}${card("s7", "Tentativi rifiutati", "più recenti in alto", list)}</div>
 <p class="foot">Dal 17/10 il server lega ogni risposta al Mac che la chiede, rifiuta identificativi non validi e chiavi usate su un Mac diverso da quello attivato. Le protezioni dentro l'app (orologio, server finto, identità del Mac) arrivano con la prossima release.</p>`;
+}
+
+// ── Eventi: tutto quello che è successo, in ordine di tempo ──────────────────
+const PEOPLE_RULE = "una persona = una scheda del browser";
+
+export function tabEvents(sessions: Session[], access: AccessRow[], orders: Order[] | null, now: number): string {
+  type Ev = { ts: number; color: string; title: string; detail: string };
+  const evs: Ev[] = [];
+  for (const p of sessions) {
+    const where = `da ${prettySource(p.from)} · ${flag(p.country)} ${countryName(p.country)}`;
+    if (p.clicks) evs.push({ ts: p.views ? p.first : p.firstClick, color: C.indigo, title: p.views ? "Visita e download" : "Download dal sito",
+      detail: `${p.arches.map(archName).join(", ")} · ${where} · ${clicksText(p)}` });
+    else if (p.views) evs.push({ ts: p.first, color: C.blue, title: "Visita al sito", detail: `${where}${p.views > 1 ? ` · ${p.views} pagine` : ""}` });
+  }
+  for (const r of access) {
+    // i controlli orari e le riaperture in prova sono battito, non eventi; le vendite arrivano da Lemon Squeezy
+    if ((r.kind === "validate" && r.outcome === "ok") || (r.kind === "trial" && r.outcome === "active")) continue;
+    if (orders && (r.kind === "sale" || r.kind === "refund")) continue;
+    const e = eventLine(r);
+    evs.push({ ts: r.ts, color: e.tone === "ok" ? C.green : e.tone === "bad" ? C.red : e.tone === "warn" ? C.orange : C.orange,
+      title: e.title, detail: `${e.detail}${r.country ? ` · ${flag(r.country)} ${countryName(r.country)}` : ""}` });
+  }
+  for (const o of orders ?? []) {
+    const [title, color] = o.state === "pagato" ? ["Vendita", C.green] : o.state === "rimborsato" ? ["Rimborso", C.red] : ["Licenza regalata", C.gray];
+    evs.push({ ts: o.ts, color, title, detail: `ordine #${o.number} · ${money(o.cents, o.currency)} · ${o.email}` });
+  }
+  evs.sort((a, b) => b.ts - a.ts);
+  const week = (ts: number) => now - ts < 7 * DAY;
+  const visits7 = sessions.filter((p) => p.views && week(p.first)).length;
+  const people7 = sessions.filter((p) => p.clicks && week(p.firstClick)).length;
+  const trials7 = access.filter((r) => r.kind === "trial" && r.outcome === "new" && week(r.ts)).length;
+  const sales7 = (orders ?? []).filter((o) => o.state === "pagato" && week(o.ts)).length;
+  const list = evs.length
+    ? `<ul class="feed">${evs.slice(0, 200).map((e) => `<li style="--c:${e.color}"><i class="badge"></i><div><b>${esc(e.title)}</b><span>${esc(e.detail)}</span></div><time title="${esc(ago(e.ts, now))}">${esc(rome(e.ts))}</time></li>`).join("")}</ul>`
+    : empty("Nessun evento negli ultimi 30 giorni.");
+  return `<section class="kpis" style="margin-top:16px">${kpi(C.blue, "eye", "Visite, 7 giorni", visits7, "", PEOPLE_RULE)}${kpi(C.indigo, "down", "Persone che hanno scaricato, 7 giorni", people7, "", "più clic della stessa persona contano uno")}${kpi(C.orange, "mac", "Prove nuove, 7 giorni", trials7, "", "server licenze: Mac e PC Windows insieme")}${kpi(C.green, "money", "Vendite, 7 giorni", sales7, "", orders ? "ordini veri su Lemon Squeezy" : "Lemon Squeezy non leggibile ora")}</section>
+<div class="grid">${card("s12", "Cosa è successo", "ultimi 30 giorni, più recente in alto, ora di Roma", list)}</div>
+<p class="foot">Visite e download vengono dal sito (${PEOPLE_RULE}: una riga anche se ha premuto più pulsanti). Prove e licenze dal registro accessi del server licenze, attivo dal 17/10, senza i controlli orari riusciti. Vendite, rimborsi e licenze regalate da Lemon Squeezy, ordini di prova esclusi.</p>`;
+}
+
+// ── Social: views per reel e piattaforma, scritte in D1 da ~/LinerFM-Social/bin/metrics.mjs ──
+export interface SocialRow { ts: number; platform: string; item: string; title: string; views: number; likes: number; comments: number }
+const PLATFORM: Record<string, string> = { instagram: "Instagram", tiktok: "TikTok", "youtube-shorts": "YouTube Shorts" };
+const platformName = (p: string) => PLATFORM[p] ?? p;
+
+/** Ultima lettura per (piattaforma, video), con la differenza dalla lettura precedente (null alla prima). */
+export function latestSocial(rows: SocialRow[]): (SocialRow & { change: number | null })[] {
+  const by = new Map<string, SocialRow[]>();
+  for (const r of [...rows].sort((a, b) => a.ts - b.ts)) {
+    const k = `${r.platform}|${r.item}`;
+    by.set(k, [...(by.get(k) ?? []), r]);
+  }
+  return [...by.values()].map((list) => {
+    const last = list[list.length - 1], prev = list[list.length - 2];
+    return { ...last, change: prev ? last.views - prev.views : null };
+  }).sort((a, b) => b.views - a.views);
+}
+
+export function tabSocial(rows: SocialRow[], now: number): string {
+  if (!rows.length) return `<div class="grid">${card("s12", "Social", "", empty("Ancora nessuna lettura. Le views arrivano da ~/LinerFM-Social/bin/metrics.mjs, ogni mattina alle 09:25 e ogni 6 ore."))}</div>`;
+  const latest = latestSocial(rows);
+  const total = latest.reduce((s, r) => s + r.views, 0);
+  const lastRead = Math.max(...rows.map((r) => r.ts));
+  const platforms = [...new Set(latest.map((r) => r.platform))];
+  const kpis = platforms.map((p) => {
+    const mine = latest.filter((r) => r.platform === p);
+    const name = platformName(p);
+    return kpi(BRAND[name] ?? BRAND[name.split(" ")[0]] ?? C.gray, "eye", name, mine.reduce((s, r) => s + r.views, 0), `${mine.length} ${mine.length === 1 ? "video" : "video"}`, "views dell'ultima lettura, sommate");
+  }).join("");
+  const change = (c: number | null) => (c === null ? '<span class="muted">prima lettura</span>' : c === 0 ? '<span class="muted">uguale</span>' : `<span class="delta ${c > 0 ? "up" : "down"}">${c > 0 ? "+" : ""}${esc(c)}</span>`);
+  const table = `<div class="scroll"><table class="table"><thead><tr><th>Video</th><th>Dove</th><th>Views</th><th>Dalla lettura prima</th><th>Like</th><th>Commenti</th><th>Letto</th></tr></thead><tbody>${latest.map((r) => `<tr><td>${esc(r.title)}</td><td>${esc(platformName(r.platform))}</td><td><b>${esc(r.views)}</b></td><td>${change(r.change)}</td><td>${esc(r.likes)}</td><td>${esc(r.comments)}</td><td>${esc(rome(r.ts))}</td></tr>`).join("")}</tbody></table></div>`;
+  return `<section class="kpis" style="margin-top:16px">${kpi(C.purple, "eye", "Views in tutto", total, `ultima lettura ${ago(lastRead, now)}`, "somma dell'ultima lettura di ogni video, tutte le piattaforme")}${kpis}</section>
+<div class="grid">${card("s12", "Per video", "più visti in alto", table)}</div>
+<p class="foot">Le letture le fa il Mac (sessione Instagram, token TikTok, pagina pubblica di YouTube) con ~/LinerFM-Social/bin/metrics.mjs, ogni mattina alle 09:25 e ogni 6 ore, e le scrive qui. Le views sono quelle che dice la piattaforma: non sono persone e non portano per forza al sito.</p>`;
 }

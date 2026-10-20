@@ -30,3 +30,19 @@ CREATE TABLE IF NOT EXISTS cache (
   ts INTEGER NOT NULL,
   value TEXT NOT NULL
 );
+
+-- Righe di accesso nascoste dalla scheda Sicurezza col pulsante "Togli" (src/dashboard.ts dismiss).
+CREATE TABLE IF NOT EXISTS dismissed (id INTEGER PRIMARY KEY, ts INTEGER NOT NULL);
+
+-- Views dei reel, una riga per lettura, scritte da ~/LinerFM-Social/bin/metrics.mjs (bin/lib/socialdb.mjs,
+-- che crea anche la tabella alla prima scrittura). Le legge la scheda Social (src/admin.ts tabSocial).
+CREATE TABLE IF NOT EXISTS social (
+  ts INTEGER NOT NULL,      -- epoch ms, UTC, ora della lettura
+  platform TEXT NOT NULL,   -- instagram | tiktok | youtube-shorts
+  item TEXT NOT NULL,       -- id del calendario o del video TikTok
+  title TEXT NOT NULL,
+  views INTEGER NOT NULL,
+  likes INTEGER NOT NULL,
+  comments INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS social_ts ON social (ts);

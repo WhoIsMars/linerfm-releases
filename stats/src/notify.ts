@@ -35,16 +35,16 @@ async function post(url: string, embed: Embed, fetchImpl: typeof fetch): Promise
 
 // ── #downloads ──
 
-const ARCH: Record<string, string> = { "apple-silicon": "Apple silicon", intel: "Intel", "github-page": "Pagina GitHub" };
+const ARCH: Record<string, string> = { "apple-silicon": "Apple silicon", intel: "Intel", windows: "Windows", "github-page": "Pagina GitHub" };
 
 export function downloadEmbed(h: { ts: number; arch: string; src: string; ref: string; country: string }): Embed {
   const fields: Embed["fields"] = [
-    { name: "Mac", value: ARCH[h.arch] ?? (h.arch || "?"), inline: true },
+    { name: "Sistema", value: ARCH[h.arch] ?? (h.arch || "?"), inline: true },
     { name: "Da dove", value: prettySource(h.src || h.ref || "diretto"), inline: true },
   ];
   if (h.country) fields.push({ name: "Paese", value: `${flag(h.country)} ${countryName(h.country)}`, inline: true });
   fields.push({ name: "Quando", value: when(h.ts) });
-  return card("Download dal sito", "Qualcuno ha cliccato sul DMG di LinerFM.", 0x1db954, fields, h.ts, "LinerFM sito");
+  return card("Download dal sito", "Qualcuno ha premuto un pulsante di download di LinerFM.", 0x1db954, fields, h.ts, "LinerFM sito");
 }
 
 /** Dopo la risposta: annuncia il click se è il primo del visitatore oggi e il canale non è saturo. */
@@ -105,7 +105,7 @@ export function summaryEmbed(x: SummaryInput): Embed {
 
   const fields: Embed["fields"] = [
     { name: "Visite sito", value: `${views.length} (${new Set(views.map((v) => v.sid)).size} persone)`, inline: true },
-    { name: "Click download", value: String(downloads.size), inline: true },
+    { name: "Persone che hanno scaricato", value: String(downloads.size), inline: true },
     { name: "Fonti", value: top.length ? top.map(([s, n]) => `${s} ${n}`).join(", ") : "nessuna", inline: true },
     { name: "DMG scaricati", value: x.gh ? delta(x.gh.dmg, x.ghPrev?.dmg) : "GitHub non leggibile", inline: true },
     { name: "Aggiornamenti", value: x.gh ? (x.ghPrev ? `+${Math.max(0, x.gh.updates - x.ghPrev.updates)}` : `totale ${x.gh.updates}`) : "?", inline: true },
