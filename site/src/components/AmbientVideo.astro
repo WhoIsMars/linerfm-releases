@@ -47,13 +47,17 @@ const url = (path: string) => `${base}${path.replace(/^\//, "")}`;
     {webm && <source src={url(src)} type="video/mp4" />}
   </video>
   <button type="button" class="ambient-video__toggle" data-video-toggle aria-label="Pause video">
-    <svg data-icon="pause" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-      <rect x="3" y="2" width="4" height="12" rx="1"></rect>
-      <rect x="9" y="2" width="4" height="12" rx="1"></rect>
-    </svg>
-    <svg data-icon="play" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" hidden>
-      <path d="M4 2.5v11l9-5.5-9-5.5Z"></path>
-    </svg>
+    <span data-icon="pause">
+      <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <rect x="3" y="2" width="4" height="12" rx="1"></rect>
+        <rect x="9" y="2" width="4" height="12" rx="1"></rect>
+      </svg>
+    </span>
+    <span data-icon="play" hidden>
+      <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <path d="M4 2.5v11l9-5.5-9-5.5Z"></path>
+      </svg>
+    </span>
   </button>
   <figcaption class="sr-only">{description}</figcaption>
 </figure>
@@ -66,8 +70,8 @@ const url = (path: string) => `${base}${path.replace(/^\//, "")}`;
     const toggle = figure.querySelector<HTMLButtonElement>("[data-video-toggle]");
     if (!video || !toggle) return;
 
-    const pauseIcon = toggle.querySelector<SVGElement>('[data-icon="pause"]');
-    const playIcon = toggle.querySelector<SVGElement>('[data-icon="play"]');
+    const pauseIcon = toggle.querySelector<HTMLElement>('[data-icon="pause"]');
+    const playIcon = toggle.querySelector<HTMLElement>('[data-icon="play"]');
 
     const sync = () => {
       const paused = video.paused;

@@ -279,6 +279,8 @@ footer a[href]::after {
 .ambient-video__toggle:hover,
 .ambient-video__toggle:focus-visible { opacity: 1; background: rgba(5, 5, 5, .9); }
 .ambient-video__toggle svg { width: 16px; height: 16px; }
+/* :not([hidden]) perché un display dichiarato qui batterebbe l'attributo hidden. */
+.ambient-video__toggle [data-icon]:not([hidden]) { display: grid; }
 
 /* Con "Riduci trasparenza" attivo le superfici diventano solide, come nell'app. */
 @media (prefers-reduced-transparency: reduce) {
