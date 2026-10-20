@@ -71,10 +71,10 @@ export function windowOf(scheduledTime: number): { from: number; to: number } {
 
 const ROME_HM = new Intl.DateTimeFormat("it-IT", { timeZone: "Europe/Rome", hour: "2-digit", minute: "2-digit" });
 
-export interface GhTotals { dmg: number; updates: number }
+export interface GhTotals { dmg: number; win?: number; updates: number }
 export function ghTotals(list: GhRelease[]): GhTotals {
   const n = (re: RegExp) => list.reduce((s, r) => s + r.assets.filter((a) => re.test(a.name)).reduce((t, a) => t + a.download_count, 0), 0);
-  return { dmg: n(/\.dmg$/), updates: n(/\.app\.tar\.gz$/) };
+  return { dmg: n(/\.dmg$/), win: n(/-setup\.exe$/), updates: n(/\.app\.tar\.gz$/) };
 }
 
 type SaleRow = Pick<Order, "ts" | "cents" | "currency" | "state">;
@@ -108,6 +108,7 @@ export function summaryEmbed(x: SummaryInput): Embed {
     { name: "Persone che hanno scaricato", value: String(downloads.size), inline: true },
     { name: "Fonti", value: top.length ? top.map(([s, n]) => `${s} ${n}`).join(", ") : "nessuna", inline: true },
     { name: "DMG scaricati", value: x.gh ? delta(x.gh.dmg, x.ghPrev?.dmg) : "GitHub non leggibile", inline: true },
+    { name: "Installer Windows", value: x.gh ? delta(x.gh.win ?? 0, x.ghPrev?.win) : "?", inline: true },
     { name: "Aggiornamenti", value: x.gh ? (x.ghPrev ? `+${Math.max(0, x.gh.updates - x.ghPrev.updates)}` : `totale ${x.gh.updates}`) : "?", inline: true },
     { name: "Prove nuove", value: String(newTrials), inline: true },
     { name: "Mac attivi", value: String(new Set(ok.map((r) => r.device)).size), inline: true },

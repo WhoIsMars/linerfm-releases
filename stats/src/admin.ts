@@ -257,7 +257,7 @@ export function tabEvents(sessions: Session[], access: AccessRow[], orders: Orde
     : empty("Nessun evento negli ultimi 30 giorni.");
   return `<section class="kpis" style="margin-top:16px">${kpi(C.blue, "eye", "Visite, 7 giorni", visits7, "", PEOPLE_RULE)}${kpi(C.indigo, "down", "Persone che hanno scaricato, 7 giorni", people7, "", "più clic della stessa persona contano uno")}${kpi(C.orange, "mac", "Prove nuove, 7 giorni", trials7, "", "server licenze: Mac e PC Windows insieme")}${kpi(C.green, "money", "Vendite, 7 giorni", sales7, "", orders ? "ordini veri su Lemon Squeezy" : "Lemon Squeezy non leggibile ora")}</section>
 <div class="grid">${card("s12", "Cosa è successo", "ultimi 30 giorni, più recente in alto, ora di Roma", list)}</div>
-<p class="foot">Visite e download vengono dal sito (${PEOPLE_RULE}: una riga anche se ha premuto più pulsanti). Prove e licenze dal registro accessi del server licenze, attivo dal 17/10, senza i controlli orari riusciti. Vendite, rimborsi e licenze regalate da Lemon Squeezy, ordini di prova esclusi.</p>`;
+<p class="foot">Visite e download vengono dal sito (${PEOPLE_RULE}: una riga anche se ha premuto più pulsanti). Le tue visite contano anche qui, se non apri il sito una volta con ?notrack=1 da ogni browser che usi. Prove e licenze dal registro accessi del server licenze, attivo dal 17/10, senza i controlli orari riusciti. Vendite, rimborsi e licenze regalate da Lemon Squeezy, ordini di prova esclusi.</p>`;
 }
 
 // ── Social: views per reel e piattaforma, scritte in D1 da ~/LinerFM-Social/bin/metrics.mjs ──

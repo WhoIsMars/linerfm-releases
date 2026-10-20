@@ -168,3 +168,13 @@ describe("scheda Social", () => {
     expect(html).toContain("metrics.mjs");
   });
 });
+
+describe("riepilogo Discord ogni 6 ore", () => {
+  it("conta gli installer Windows accanto ai DMG", async () => {
+    const { ghTotals, summaryEmbed } = await import("../src/notify");
+    const t = ghTotals([{ tag_name: "v1.0.0", published_at: "", assets: [{ name: "LinerFM_1.0.0_x64-setup.exe", download_count: 5 }, { name: "LinerFM_1.0.0_x64.dmg", download_count: 2 }] }]);
+    expect(t).toEqual({ dmg: 2, win: 5, updates: 0 });
+    const e = summaryEmbed({ win: { from: NOW - 6 * 3_600_000, to: NOW }, hits: [], access: [], gh: t, ghPrev: { dmg: 2, updates: 0 } as never, orders: [] });
+    expect(e.fields.find((f) => f.name === "Installer Windows")?.value).toBe("totale 5"); // il riepilogo vecchio non li aveva
+  });
+});
