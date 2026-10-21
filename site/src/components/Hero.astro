@@ -1,7 +1,8 @@
 ---
 // Una sola immagine, la stessa delle bio e del primo fotogramma dei video: il
 // desktop che diventa la canzone. Titolo = la promessa, subito sotto la ripresa
-// vera del desktop dal vivo (Mac filmato col telefono). La presentazione da 48 s
+// vera del desktop dal vivo (Mac filmato col telefono). Il sottotitolo usa le parole delle card
+// live-desktop e widget di features.json. La presentazione da 48 s
 // resta raggiungibile da un link sotto la clip.
 //
 // La 1.0.0 per Windows non ha ancora il desktop dal vivo (arriva con la 1.1.0):
@@ -19,8 +20,8 @@ const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
       Your desktop plays the song you're on.
     </h1>
     <p class="mt-5 mx-auto lg:mx-0 text-fg-2 text-base md:text-lg max-w-2xl leading-relaxed text-pretty">
-      The wallpaper becomes the album, the lyrics rise line by line and the widget takes the colors of
-      the cover. Pay once, 10€. Try it free for 5 days.
+      Your wallpaper becomes the song: the artwork, the Spotify Canvas or the YouTube video plays under
+      your icons. Plus live lyrics and a widget that matches every album. Pay once, 10€. Try it free for 5 days.
     </p>
     {/* Solo su telefono (.phone-only in global.css): l'app non si installa lì, i pulsanti restano. */}
     <p class="phone-only mt-4 mx-auto max-w-sm text-fg-2 text-sm leading-snug text-pretty">
