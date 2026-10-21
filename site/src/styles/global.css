@@ -288,3 +288,10 @@ footer a[href]::after {
   .btn-ghost { background-color: #22222a; }
   .ambient-video__toggle { background: #0d0d10; backdrop-filter: none; }
 }
+
+/* ── Email da telefono (LeadForm.astro) ──────────────────────────────────── */
+/* Solo su telefoni e tablet: larghezza da telefono, o html.ua-mobile messa da
+   BaseLayout per gli iPad in orizzontale. Su desktop non occupa spazio. */
+.lead-mobile { display: none; }
+@media (max-width: 767px) { .lead-mobile { display: block; } }
+:root.ua-mobile .lead-mobile { display: block; }

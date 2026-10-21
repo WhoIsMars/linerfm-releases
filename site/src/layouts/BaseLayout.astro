@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import ConsentBanner from "../components/ConsentBanner.astro";
+import { isMobileUA } from "../lib/leads";
 const {
   title = "LinerFM: Spotify widget and live lyrics for Mac and Windows",
   description = "A notch player, live lyrics, a desktop widget that matches every album, a screensaver and AI playlists for Spotify, Apple Music and YouTube Music. Runs on Mac and Windows, no account. Try it free for 5 days.",
@@ -20,6 +21,9 @@ const appLd = JSON.stringify({
   url: new URL(base, Astro.site ?? "http://localhost").href,
   offers: { "@type": "Offer", price: "10.00", priceCurrency: "EUR" },
 });
+// Before the first paint, so an iPad in landscape gets the email form without a jump:
+// the same isMobileUA the unit tests cover, inlined as source.
+const uaScript = `document.documentElement.classList.toggle("ua-mobile",(${isMobileUA.toString()})(navigator.userAgent,navigator.maxTouchPoints||0))`;
 const og = new URL(`${base}${ogImage.replace(/^\//, "")}`, Astro.site ?? "http://localhost").href;
 ---
 <!doctype html>
@@ -28,6 +32,7 @@ const og = new URL(`${base}${ogImage.replace(/^\//, "")}`, Astro.site ?? "http:/
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="dark" />
+    <script is:inline set:html={uaScript} />
     <link rel="icon" type="image/png" sizes="32x32" href={`${base}favicon-32.png`} />
     <link rel="apple-touch-icon" sizes="180x180" href={`${base}apple-touch-icon.png`} />
     <title>{title}</title>

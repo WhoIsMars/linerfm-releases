@@ -5,6 +5,7 @@
 // vede LinerFM funzionare prima di leggere un elenco.
 import { CHECKOUT_URL } from "../config/links";
 import { mediaSize } from "../lib/media-dimensions";
+import LeadForm from "./LeadForm.astro";
 
 const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
 const video = mediaSize("video/explainer.mp4");
@@ -21,6 +22,8 @@ const video = mediaSize("video/explainer.mp4");
     <h1 class="mt-5 mx-auto text-[2.6rem] md:text-[3.6rem] font-semibold leading-[1.04] tracking-[-0.03em] text-balance max-w-[18ch]">
       Your desktop, finally curating itself.
     </h1>
+    {/* Solo su telefono: subito sotto il titolo, perché lì il resto del blocco finisce sotto la piega. */}
+    <LeadForm id="lead-email-top" class="mt-6" />
     <p class="mt-5 mx-auto text-fg-2 text-base md:text-lg max-w-2xl leading-relaxed text-pretty">
       LinerFM puts your music all over your desktop, on Mac and Windows: live lyrics,
       a widget that matches every album, and AI playlists made of real tracks. On the Mac you also get

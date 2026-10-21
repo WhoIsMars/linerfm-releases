@@ -6,3 +6,5 @@ site/.astro/
 
 # Worker statistiche del sito
 stats/node_modules
+test-results/
+playwright-report/

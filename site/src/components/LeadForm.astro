@@ -1,0 +1,68 @@
+---
+// "Send me the link" per chi arriva dal telefono: lì l'app non si installa, quindi lascia
+// l'email e riceve il link per il Mac o il PC. Nascosto su desktop (.lead-mobile in
+// global.css: larghezza sotto 768 px o html.ua-mobile messa da BaseLayout).
+// L'email va nel corpo di una POST al worker (src/lib/leads.ts), mai nell'URL: method="post"
+// tiene la query string vuota anche se lo script non parte.
+interface Props { id: string; class?: string }
+const { id, class: cls = "" } = Astro.props;
+---
+<div class:list={["lead-mobile", cls]}>
+  <form method="post" action="#" novalidate data-lead class="mx-auto max-w-sm text-left">
+    <div data-lead-fields>
+      <label for={id} class="sr-only">Your email</label>
+      <input
+        id={id}
+        name="email"
+        type="email"
+        inputmode="email"
+        autocomplete="email"
+        autocapitalize="off"
+        spellcheck="false"
+        required
+        maxlength="254"
+        placeholder="you@email.com"
+        class="block w-full rounded-control bg-panel-2 border border-control px-4 py-3 text-base text-fg placeholder:text-fg-3"
+      />
+      <button type="submit" class="btn-primary mt-3 block w-full font-semibold px-5 py-3 rounded-control">
+        Send me the link for my Mac or PC
+      </button>
+      <p role="alert" data-lead-error hidden class="mt-2 text-sm text-danger"></p>
+    </div>
+    <p role="status" data-lead-done hidden class="panel px-4 py-3 text-sm text-fg"></p>
+    <p class="mt-2 text-xs text-fg-3 text-center">Free for 5 days. We email you the download link, nothing else.</p>
+  </form>
+</div>
+
+<script>
+  import { isValidEmail, leadMessage, sendLead } from "../lib/leads";
+
+  for (const form of document.querySelectorAll<HTMLFormElement>("form[data-lead]")) {
+    const input = form.querySelector("input")!;
+    const button = form.querySelector("button")!;
+    const error = form.querySelector<HTMLElement>("[data-lead-error]")!;
+    const done = form.querySelector<HTMLElement>("[data-lead-done]")!;
+    const fields = form.querySelector<HTMLElement>("[data-lead-fields]")!;
+    form.addEventListener("submit", async (ev) => {
+      ev.preventDefault();
+      error.hidden = true;
+      if (!isValidEmail(input.value)) {
+        error.textContent = leadMessage(400).text;
+        error.hidden = false;
+        input.focus();
+        return;
+      }
+      button.disabled = true;
+      const r = await sendLead(input.value);
+      button.disabled = false;
+      if (r.ok) {
+        fields.hidden = true;
+        done.textContent = r.text;
+        done.hidden = false;
+      } else {
+        error.textContent = r.text;
+        error.hidden = false;
+      }
+    });
+  }
+</script>

@@ -21,7 +21,7 @@ export function optOutFromSearch(search: string): "on" | "off" | null {
   return v === "1" ? "on" : v === "0" ? "off" : null;
 }
 
-const clean = (s: string | null) => (s ?? "").toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 40);
+export const clean = (s: string | null) => (s ?? "").toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 40);
 
 export function hitPayload(o: {
   kind: "view" | "download"; pathname: string; referrer: string; search: string;
@@ -42,6 +42,11 @@ export function hitPayload(o: {
 
 function store(kind: "local" | "session"): Storage | null {
   try { return kind === "local" ? localStorage : sessionStorage; } catch { return null; }
+}
+
+/** The ?src= tag remembered for this tab by track(), '' when none. */
+export function rememberedSrc(): string {
+  return store("session")?.getItem(SRC_KEY) ?? "";
 }
 
 /**
