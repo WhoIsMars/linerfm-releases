@@ -289,13 +289,9 @@ footer a[href]::after {
   .ambient-video__toggle { background: #0d0d10; backdrop-filter: none; }
 }
 
-/* ── Email da telefono (LeadForm.astro) ──────────────────────────────────── */
-/* Solo su telefoni e tablet: larghezza da telefono, o html.ua-mobile messa da
-   BaseLayout per gli iPad in orizzontale. Su desktop non occupa spazio. */
-.lead-mobile { display: none; }
-@media (max-width: 767px) { .lead-mobile { display: block; } }
-:root.ua-mobile .lead-mobile { display: block; }
-/* Il contrario: installer, passi del primo avvio e "Try free" che porta a loro. Da telefono non
-   servono, l'app lì non si installa. !important perché vince sulle classi display di Tailwind. */
-@media (max-width: 767px) { .computer-only { display: none !important; } }
-:root.ua-mobile .computer-only { display: none !important; }
+/* ── Solo da telefono ─────────────────────────────────────────────────────── */
+/* La riga "LinerFM runs on Mac and Windows" su telefoni e tablet: larghezza da telefono, o
+   html.ua-mobile messa da BaseLayout per gli iPad in orizzontale. Su desktop non occupa spazio. */
+.phone-only { display: none; }
+@media (max-width: 767px) { .phone-only { display: block; } }
+:root.ua-mobile .phone-only { display: block; }

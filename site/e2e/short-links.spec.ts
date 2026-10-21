@@ -9,7 +9,7 @@ for (const [label, viewport] of [["375 px", { width: 375, height: 667 }], ["1280
     await page.route("**/linerfm-site-stats.piccoletto.workers.dev/**", (r) => r.fulfill({ status: 204 }));
     await page.goto("/tt");
     await expect(page).toHaveURL(/\/\?src=tiktok$/);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText(/Mac and PC/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Your desktop plays the song you're on.");
   });
 }
 

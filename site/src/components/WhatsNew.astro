@@ -36,18 +36,8 @@ const more = WHATS_NEW_IDS.slice(2).map(card);
   <p class="mt-5 mx-auto max-w-2xl text-center text-fg-2 md:text-lg leading-relaxed text-pretty">{live.d}</p>
   <p class="mt-4 w-fit mx-auto text-xs text-fg-3 px-2.5 py-1 rounded-full border border-hairline bg-panel">Mac only for now</p>
 
-  {/* Le due clip hanno la stessa altezza: 5fr per il quadrato, 4fr per il 4:5. */}
-  <div class="mt-12 md:mt-14 grid gap-4 md:grid-cols-[5fr_4fr] items-start">
-    <div class="panel p-2">
-      <AmbientVideo
-        src="video/clip-live-desktop.mp4"
-        webm="video/clip-live-desktop.webm"
-        poster="video/clip-live-desktop.jpg"
-        lazy
-        description="A MacBook desktop playing Juice WRLD: the wallpaper takes the colors of the artwork, a Cover Flow of recent albums slides under the clock, the player bar sits at the bottom and the up next list opens on the left."
-        videoClass="rounded-[10px] bg-ink-900"
-      />
-    </div>
+  {/* La ripresa del desktop dal vivo sul MacBook sta nell'hero: qui la seconda, su due schermi. */}
+  <div class="mt-12 md:mt-14 max-w-2xl mx-auto">
     <div class="panel p-2">
       <AmbientVideo
         src="video/clip-live-canvas.mp4"

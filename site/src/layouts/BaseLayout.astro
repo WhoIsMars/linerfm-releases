@@ -1,7 +1,7 @@
 ---
 import "../styles/global.css";
 import ConsentBanner from "../components/ConsentBanner.astro";
-import { isMobileUA } from "../lib/leads";
+import { isMobileUA } from "../lib/device";
 const {
   title = "LinerFM: Spotify widget and live lyrics for Mac and Windows",
   description = "A notch player, live lyrics, a desktop widget that matches every album, a screensaver and AI playlists for Spotify, Apple Music and YouTube Music. Runs on Mac and Windows, no account. Try it free for 5 days.",
@@ -21,7 +21,7 @@ const appLd = JSON.stringify({
   url: new URL(base, Astro.site ?? "http://localhost").href,
   offers: { "@type": "Offer", price: "10.00", priceCurrency: "EUR" },
 });
-// Before the first paint, so an iPad in landscape gets the email form without a jump:
+// Before the first paint, so an iPad in landscape gets the phone line without a jump:
 // the same isMobileUA the unit tests cover, inlined as source.
 const uaScript = `document.documentElement.classList.toggle("ua-mobile",(${isMobileUA.toString()})(navigator.userAgent,navigator.maxTouchPoints||0))`;
 const og = new URL(`${base}${ogImage.replace(/^\//, "")}`, Astro.site ?? "http://localhost").href;

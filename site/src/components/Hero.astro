@@ -1,74 +1,52 @@
 ---
-// Il prodotto si presenta da solo: titolo, due pulsanti e subito sotto la
-// presentazione orizzontale (48 s, resa dalla UI vera con brani e copertine
-// inventati). È il "See it in action" di prima, portato in cima: chi arriva
-// vede LinerFM funzionare prima di leggere un elenco.
+// Una sola immagine, la stessa delle bio e del primo fotogramma dei video: il
+// desktop che diventa la canzone. Titolo = la promessa, subito sotto la ripresa
+// vera del desktop dal vivo (Mac filmato col telefono). La presentazione da 48 s
+// resta raggiungibile da un link sotto la clip.
+//
+// La 1.0.0 per Windows non ha ancora il desktop dal vivo (arriva con la 1.1.0):
+// la riga sotto la clip lo dice. Da cambiare quando esce la 1.1.0.
 import { CHECKOUT_URL } from "../config/links";
-import { mediaSize } from "../lib/media-dimensions";
-import LeadForm from "./LeadForm.astro";
+import AmbientVideo from "./AmbientVideo.astro";
 
 const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
-const video = mediaSize("video/explainer.mp4");
 ---
 <section id="top" class="relative">
-  <div class="max-w-6xl mx-auto px-5 pt-14 md:pt-20 text-center">
-    <span class="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-panel border border-hairline text-fg-2">
-      <span class="status-dot"></span>
-      For Spotify, Apple Music and YouTube Music
-    </span>
-    <a href="#windows" class="ml-2 inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-panel border border-hairline text-fg-2 hover:text-fg hover:border-control">
-      New in 1.0 · Now on Windows <span aria-hidden="true">↓</span>
-    </a>
-    <h1 class="mt-5 mx-auto text-[2.6rem] md:text-[3.6rem] font-semibold leading-[1.04] tracking-[-0.03em] text-balance max-w-[18ch]">
-      Live lyrics and a music widget for your Mac and PC.
+  {/* Da computer testo e clip affiancati: l'immagine sta tutta nella prima schermata. */}
+  <div class="max-w-6xl mx-auto px-5 pt-14 md:pt-16 lg:grid lg:grid-cols-[1fr_1fr] lg:gap-12 lg:items-center">
+  <div class="text-center lg:text-left">
+    <h1 class="mx-auto lg:mx-0 text-[2.6rem] md:text-[3.6rem] font-semibold leading-[1.04] tracking-[-0.03em] text-balance max-w-[16ch]">
+      Your desktop plays the song you're on.
     </h1>
-    {/* Solo su telefono: prima dice perché chiediamo l'email, poi il campo, tutto sopra la piega. */}
-    <p class="lead-mobile mt-4 mx-auto max-w-sm text-fg-2 text-base leading-snug text-pretty">
-      LinerFM runs on Mac and Windows, not on phones. Get the link by email and open it on your computer.
+    <p class="mt-5 mx-auto lg:mx-0 text-fg-2 text-base md:text-lg max-w-2xl leading-relaxed text-pretty">
+      The wallpaper becomes the album, the lyrics rise line by line and the widget takes the colors of
+      the cover. Pay once, 10€. Try it free for 5 days.
     </p>
-    <LeadForm id="lead-email-top" class="mt-5" />
-    <p class="mt-5 mx-auto text-fg-2 text-base md:text-lg max-w-2xl leading-relaxed text-pretty">
-      LinerFM puts your music all over your desktop, on Mac and Windows: live lyrics,
-      a widget that matches every album, and AI playlists made of real tracks. On the Mac you also get
-      a player in the notch and a screensaver. Your listening data stays on your computer.
+    {/* Solo su telefono (.phone-only in global.css): l'app non si installa lì, i pulsanti restano. */}
+    <p class="phone-only mt-4 mx-auto max-w-sm text-fg-2 text-sm leading-snug text-pretty">
+      LinerFM runs on Mac and Windows. Open this page on your computer to install it.
     </p>
-    <div class="mt-8 flex flex-wrap justify-center gap-3">
-      <a href="#download" class="computer-only btn-primary font-semibold px-6 py-3 rounded-control">Try free for 5 days</a>
+    <div class="mt-8 flex flex-wrap justify-center lg:justify-start gap-3">
+      <a href="#download" class="btn-primary font-semibold px-6 py-3 rounded-control">Try free for 5 days</a>
       <a href={CHECKOUT_URL} class="lemonsqueezy-button btn-ghost font-semibold px-6 py-3 rounded-control">Buy · 10€</a>
     </div>
-    <p class="mt-5 text-xs text-fg-3 tracking-wide">No card for the trial · Mac &amp; Windows · No account · No telemetry</p>
+    <p class="mt-5 text-xs text-fg-3 tracking-wide">Spotify, Apple Music and YouTube Music · Mac &amp; Windows · No account · No card for the trial</p>
   </div>
 
-  <div class="max-w-5xl mx-auto px-5 mt-12 md:mt-14">
-    {/* Controlli nativi: coprono la pausa di WCAG 2.2.2 e lasciano accendere
-        l'audio a chi vuole sentire la musica del video. */}
-    <figure class="panel p-2 md:p-2.5 m-0">
-      <video
-        src={`${base}video/explainer.mp4`}
-        poster={`${base}video/explainer.jpg`}
-        width={video?.width}
-        height={video?.height}
-        autoplay
-        muted
-        loop
-        playsinline
-        controls
-        preload="metadata"
-        class="block w-full h-auto rounded-[10px] bg-ink-900"
-      ></video>
-      <figcaption class="sr-only">
-        A 48-second tour of LinerFM: the notch player and live lyrics, the desktop widget that
-        re-colors itself from the artwork, the terminal look, the screensaver, Command Shift K
-        search, AI playlists, skip-based cleanup and play counts.
-      </figcaption>
-    </figure>
+  <div class="max-w-2xl mx-auto mt-12 lg:mt-0 lg:max-w-none">
+    <div class="panel p-2 md:p-2.5">
+      <AmbientVideo
+        src="video/clip-live-desktop.mp4"
+        webm="video/clip-live-desktop.webm"
+        poster="video/clip-live-desktop.jpg"
+        description="A MacBook desktop playing Juice WRLD: the wallpaper takes the colors of the artwork, a Cover Flow of recent albums slides under the clock, the player bar sits at the bottom and the up next list opens on the left."
+        videoClass="rounded-[10px] bg-ink-900"
+      />
+    </div>
+    <p class="mt-4 text-xs text-fg-3 text-center text-pretty">
+      Real footage on a Mac. The live wallpaper is Mac only for now; on Windows you get the widget, lyrics and search.
+      <a href={`${base}video/explainer.mp4`} class="underline underline-offset-2 hover:text-fg">Watch the 48-second tour</a>
+    </p>
+  </div>
   </div>
 </section>
-
-<script>
-  // Con "Riduci movimento" il video resta sul poster finché non lo si avvia.
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    const v = document.querySelector<HTMLVideoElement>("#top video");
-    if (v) { v.autoplay = false; v.pause(); }
-  }
-</script>
