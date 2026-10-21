@@ -3,7 +3,7 @@
 //   #metrics   → riepilogo ogni 6 ore dal cron (scheduled): sito, GitHub, app, vendite
 // I numeri social non stanno qui: si leggono solo dal Mac (sessione IG, token TikTok),
 // li manda ~/LinerFM-Social/bin/metrics.mjs sullo stesso canale.
-import { TEST_SOURCES, prettySource, countryName, flag, money, type Row, type AccessRow } from "./dashboard";
+import { TEST_SOURCES, prettySource, countryName, flag, money, osSplit, osByDevice, type Row, type AccessRow } from "./dashboard";
 import { loadGithub, readOrders, type GhRelease, type Order } from "./admin";
 
 const H = 3_600_000;
@@ -95,7 +95,10 @@ export function summaryEmbed(x: SummaryInput): Embed {
 
   const access = x.access.filter((r) => inWin(r.ts));
   const ok = access.filter((r) => r.outcome !== "refused" && r.device);
-  const newTrials = access.filter((r) => r.kind === "trial" && r.outcome === "new").length;
+  const newTrials = access.filter((r) => r.kind === "trial" && r.outcome === "new");
+  const os = osByDevice(access);
+  // "3 (2 Mac, 1 Windows)": il numero, poi la divisione per sistema quando c'è qualcosa da dividere
+  const split = (devices: string[]) => (devices.length ? `${devices.length} (${osSplit(devices.map((d) => os.get(d) ?? ""))})` : "0");
 
   const delta = (cur: number, prev: number | undefined) => (prev === undefined ? `totale ${cur}` : `+${Math.max(0, cur - prev)} (totale ${cur})`);
   const sales = (list: SaleRow[]) => {
@@ -110,8 +113,8 @@ export function summaryEmbed(x: SummaryInput): Embed {
     { name: "DMG scaricati", value: x.gh ? delta(x.gh.dmg, x.ghPrev?.dmg) : "GitHub non leggibile", inline: true },
     { name: "Installer Windows", value: x.gh ? delta(x.gh.win ?? 0, x.ghPrev?.win) : "?", inline: true },
     { name: "Aggiornamenti", value: x.gh ? (x.ghPrev ? `+${Math.max(0, x.gh.updates - x.ghPrev.updates)}` : `totale ${x.gh.updates}`) : "?", inline: true },
-    { name: "Prove nuove", value: String(newTrials), inline: true },
-    { name: "Mac attivi", value: String(new Set(ok.map((r) => r.device)).size), inline: true },
+    { name: "Prove nuove", value: split(newTrials.map((r) => r.device)), inline: true },
+    { name: "Computer attivi", value: split([...new Set(ok.map((r) => r.device))]), inline: true },
     { name: "Rifiuti", value: String(access.filter((r) => r.outcome === "refused").length), inline: true },
     { name: "Vendite", value: x.orders ? sales(x.orders.filter((o) => inWin(o.ts))) : "non leggibili", inline: true },
     { name: "Totale vendite", value: x.orders ? sales(x.orders) : "?", inline: true },
@@ -127,7 +130,10 @@ export async function handleScheduled(env: NotifyEnv, scheduledTime: number, fet
   const all = <T>(sql: string) => env.DB.prepare(sql).bind(win.from).all<T>().then((r) => r.results ?? []).catch(() => [] as T[]);
   const [hits, access, gh, orders, prevRow] = await Promise.all([
     all<Row>("SELECT ts, kind, ref, src, arch, sid, country FROM hits WHERE ts > ?"),
-    all<AccessRow>("SELECT ts, kind, outcome, reason, device, key, country FROM access WHERE ts > ?"),
+    // senza la migrazione 0001_access_os.sql la colonna os non c'è: si rilegge senza, e ogni computer resta "non noto"
+    env.DB.prepare("SELECT ts, kind, outcome, reason, device, key, country, os FROM access WHERE ts > ?").bind(win.from).all<AccessRow>()
+      .catch(() => env.DB.prepare("SELECT ts, kind, outcome, reason, device, key, country FROM access WHERE ts > ?").bind(win.from).all<AccessRow>())
+      .then((r) => (r.results ?? []).map((x) => ({ ...x, os: x.os ?? "" }))).catch(() => [] as AccessRow[]),
     loadGithub(fetchImpl).then(ghTotals).catch(() => null),
     readOrders(fetchImpl, env.LS_API_KEY, env.LS_STORE_ID ?? "406309"),
     env.DB.prepare("SELECT ts, value FROM cache WHERE k = ?").bind("summary-gh").first<{ value: string }>().catch(() => null),

@@ -71,9 +71,21 @@ describe("summaryEmbed", () => {
 
   it("app usage: new trials and Macs that opened the app, refusals apart", () => {
     const f = fields(summaryEmbed(base));
-    expect(f["Prove nuove"]).toBe("1");
-    expect(f["Mac attivi"]).toBe("3");
+    expect(f["Prove nuove"]).toBe("1 (0 Mac, 0 Windows, 1 non noto)");
+    expect(f["Computer attivi"]).toBe("3 (0 Mac, 0 Windows, 3 non noti)");
     expect(f["Rifiuti"]).toBe("1");
+  });
+
+  it("splits new trials and active computers between Mac and Windows", () => {
+    const f = fields(summaryEmbed({ ...base, access: [
+      acc({ kind: "trial", outcome: "new", device: "m1", os: "macos" }),
+      acc({ kind: "trial", outcome: "new", device: "w1", os: "windows" }),
+      acc({ device: "w1", os: "" }),                 // riga senza sistema dello stesso PC: resta Windows
+      acc({ device: "w2", os: "windows" }),
+    ] }));
+    expect(f["Prove nuove"]).toBe("2 (1 Mac, 1 Windows)");
+    expect(f["Computer attivi"]).toBe("3 (1 Mac, 2 Windows)");
+    expect(fields(summaryEmbed({ ...base, access: [] }))["Prove nuove"]).toBe("0");
   });
 
   it("sales in the window count only paid orders; a free order is not revenue", () => {
@@ -172,5 +184,35 @@ describe("handleScheduled", () => {
     const { db } = fakeDB(); const posts: string[] = [];
     await handleScheduled({ DB: db }, TICK, (async (u: string) => { posts.push(String(u)); return Response.json([]); }) as typeof fetch);
     expect(posts).toEqual([]);
+  });
+});
+
+describe("handleScheduled reads access.os", () => {
+  const run = async (noOsColumn: boolean) => {
+    const sqls: string[] = []; const posted: string[] = [];
+    const rows = [acc({ kind: "trial", outcome: "new", device: "w1", os: "windows" })];
+    const db = { prepare: (sql: string) => ({ bind: () => ({
+      all: async () => {
+        if (!sql.includes("FROM access")) return { results: [] };
+        sqls.push(sql);
+        if (noOsColumn && /\bos\b/.test(sql)) throw new Error("D1_ERROR: no such column: os");
+        return { results: noOsColumn ? rows.map(({ os: _os, ...r }) => r) : rows };
+      },
+      first: async () => null, run: async () => ({}),
+    }) }) } as unknown as D1Database;
+    const f = (async (u: string, init?: RequestInit) => { if (String(u).includes("hook")) posted.push(String(init?.body)); return Response.json([]); }) as unknown as typeof fetch;
+    await handleScheduled({ DB: db, DISCORD_METRICS_WEBHOOK: "https://d.example/hook" } as never, TICK, f);
+    return { sqls, body: posted.join("") };
+  };
+
+  it("asks D1 for the os column and puts the platform in the summary", async () => {
+    const { sqls, body } = await run(false);
+    expect(sqls.some((s) => /SELECT[^]*\bos\b[^]*FROM access/.test(s))).toBe(true);
+    expect(body).toContain("1 (0 Mac, 1 Windows)");
+  });
+
+  it("without the os column it still counts, every computer unknown", async () => {
+    const { body } = await run(true);
+    expect(body).toContain("1 (0 Mac, 0 Windows, 1 non noto)");
   });
 });
