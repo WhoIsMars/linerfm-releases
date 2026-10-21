@@ -189,7 +189,7 @@ export const ago = (ts: number, now: number) => {
 };
 
 /** Il traffico di prova dell'owner e di Claude non è traffico. */
-export const TEST_SOURCES = new Set(["verifica", "test", "claude"]);
+export const TEST_SOURCES = new Set(["verifica", "test", "claude", "deploycheck"]);
 
 const SOURCE_NAMES: [RegExp, string][] = [
   [/^(www\.)?youtube(\.com)?$|^youtu\.be$|^m\.youtube\.com$/, "YouTube"], [/^(www\.)?tiktok(\.com)?$/, "TikTok"],

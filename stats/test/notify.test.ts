@@ -67,6 +67,15 @@ describe("summaryEmbed", () => {
     expect(fields(summaryEmbed({ ...base, hits }))["Visite sito"]).toBe("4 (3 persone, 1 da telefono o tablet)");
   });
 
+  it("downloads from a phone are counted apart: a phone cannot install LinerFM", () => {
+    const hits = [
+      row({ sid: "a", kind: "download", client: "desktop" }),
+      row({ sid: "b", kind: "download", client: "mobile" }), row({ sid: "b", kind: "download", client: "mobile" }),
+      row({ sid: "c", kind: "download", client: "" }),
+    ];
+    expect(fields(summaryEmbed({ ...base, hits }))["Persone che hanno scaricato"]).toBe("2 (+1 da telefono, che non installa)");
+  });
+
   it("GitHub downloads are the change since the previous summary", () => {
     const f = fields(summaryEmbed(base));
     expect(f["DMG scaricati"]).toBe("+3 (totale 40)");

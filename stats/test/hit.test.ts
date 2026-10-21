@@ -79,6 +79,19 @@ describe("handleHit", () => {
     expect(waits).toHaveLength(0);
   });
 
+  // Da telefono il file scaricato non si apre: si conta, ma #downloads non lo annuncia come un download vero.
+  it("stores a download from a phone without announcing it", async () => {
+    const { db, rows } = fakeDB();
+    const waits: Promise<unknown>[] = [];
+    const ctx = { waitUntil: (p: Promise<unknown>) => waits.push(p) } as unknown as ExecutionContext;
+    await handleHit(req({ ...VIEW, k: "download", a: "apple-silicon", d: "mobile" }), { DB: db }, "IT", 1, ctx);
+    expect(rows[0][1]).toBe("download");
+    expect(rows[0][8]).toBe("mobile");
+    expect(waits).toHaveLength(0);
+    await handleHit(req({ ...VIEW, k: "download", a: "apple-silicon", d: "desktop" }), { DB: db }, "IT", 2, ctx);
+    expect(waits).toHaveLength(1);
+  });
+
   it("refuses an unknown kind", async () => {
     const { db, rows } = fakeDB();
     expect((await handleHit(req({ ...VIEW, k: "purchase" }), { DB: db }, "IT", 1)).status).toBe(400);

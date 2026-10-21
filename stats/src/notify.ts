@@ -89,7 +89,9 @@ export function summaryEmbed(x: SummaryInput): Embed {
   const inWin = (ts: number) => ts > x.win.from && ts <= x.win.to;
   const hits = x.hits.filter((r) => inWin(r.ts) && !TEST_SOURCES.has(r.src));
   const views = hits.filter((r) => r.kind === "view");
-  const downloads = new Set(hits.filter((r) => r.kind === "download").map((r) => r.sid));
+  // da telefono il pulsante scarica un file che il telefono non apre: non è un download vero
+  const phoneDownloads = new Set(hits.filter((r) => r.kind === "download" && r.client === "mobile").map((r) => r.sid));
+  const downloads = new Set(hits.filter((r) => r.kind === "download" && r.client !== "mobile").map((r) => r.sid));
   const phones = new Set(views.filter((r) => r.client === "mobile").map((r) => r.sid));
   const sources = new Map<string, Set<string>>();
   for (const v of views) {
@@ -122,7 +124,7 @@ export function summaryEmbed(x: SummaryInput): Embed {
 
   const fields: Embed["fields"] = [
     { name: "Visite sito", value: `${views.length} (${new Set(views.map((v) => v.sid)).size} persone${phones.size ? `, ${phones.size} da telefono o tablet` : ""})`, inline: true },
-    { name: "Persone che hanno scaricato", value: String(downloads.size), inline: true },
+    { name: "Persone che hanno scaricato", value: `${downloads.size}${phoneDownloads.size ? ` (+${phoneDownloads.size} da telefono, che non installa)` : ""}`, inline: true },
     { name: "Fonti", value: top.length ? top.map(([s, n]) => `${s} ${n}`).join(", ") : "nessuna", inline: true },
     { name: "DMG scaricati", value: x.gh ? delta(x.gh.dmg, x.ghPrev?.dmg) : "GitHub non leggibile", inline: true },
     { name: "Installer Windows", value: x.gh ? delta(x.gh.win ?? 0, x.ghPrev?.win) : "?", inline: true },

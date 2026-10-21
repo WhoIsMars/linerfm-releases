@@ -45,7 +45,8 @@ export async function handleHit(req: Request, env: Env, country: string, now: nu
     .catch(() => env.DB.prepare("INSERT INTO hits (ts, kind, path, ref, src, arch, sid, country) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
       .bind(now, b.k, b.p, b.r, b.s, b.a, b.i, cc)
       .run());
-  if (b.k === "download" && ctx) {
+  // da telefono il file scaricato non si apre: si conta, ma non si annuncia come un download vero
+  if (b.k === "download" && client !== "mobile" && ctx) {
     ctx.waitUntil(announceDownload(env, { ts: now, arch: b.a as string, src: b.s as string, ref: b.r as string, sid: b.i as string, country: cc }, fetchImpl));
   }
   return reply(204, origin);
