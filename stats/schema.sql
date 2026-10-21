@@ -48,3 +48,15 @@ CREATE TABLE IF NOT EXISTS social (
   comments INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS social_ts ON social (ts);
+
+-- Email lasciate dal sito da chi arriva col telefono, per mandargli il link del download
+-- (src/lead.ts). Nessun IP: il limite per IP lo fa il binding LEAD_LIMIT di Cloudflare.
+-- Su un D1 esistente arriva da migrations/0002_leads.sql. Le legge scripts/leads.mjs.
+CREATE TABLE IF NOT EXISTS leads (
+  ts INTEGER NOT NULL,      -- epoch ms, UTC
+  email TEXT NOT NULL,      -- minuscolo, già validato
+  src TEXT NOT NULL,        -- ?src= / ?utm_source= della visita, '' se manca
+  country TEXT NOT NULL     -- stima di Cloudflare
+);
+CREATE UNIQUE INDEX IF NOT EXISTS leads_email ON leads (email);
+CREATE INDEX IF NOT EXISTS leads_ts ON leads (ts);

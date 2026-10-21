@@ -7,8 +7,8 @@ export interface Env { DB: D1Database; DISCORD_DOWNLOADS_WEBHOOK?: string }
 
 // The old GitHub Pages address stays allowed: it redirects to the custom domain, but tabs opened
 // before the switch still send from there.
-const ORIGINS = new Set(["https://linerfm.xyz", "https://www.linerfm.xyz", "https://whoismars.github.io"]);
-const BOT = /bot|crawl|spider|slurp|headless|preview|facebookexternalhit|embedly|lighthouse/i;
+export const ORIGINS = new Set(["https://linerfm.xyz", "https://www.linerfm.xyz", "https://whoismars.github.io"]);
+export const BOT = /bot|crawl|spider|slurp|headless|preview|facebookexternalhit|embedly|lighthouse/i;
 const FIELDS = {
   k: /^(view|download)$/,
   p: /^\/[^\s]{0,199}$/,

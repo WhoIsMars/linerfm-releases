@@ -88,6 +88,13 @@ describe("summaryEmbed", () => {
     expect(fields(summaryEmbed({ ...base, access: [] }))["Prove nuove"]).toBe("0");
   });
 
+  it("emails left from a phone: how many in the window and from which social", () => {
+    const leads = [{ ts: TICK - H, src: "tiktok" }, { ts: TICK - 2 * H, src: "tiktok" }, { ts: TICK - H, src: "" }, { ts: TICK - 7 * H, src: "x" }];
+    expect(fields(summaryEmbed({ ...base, leads }))["Email da telefono"]).toBe("3 (TikTok 2, Diretto o sconosciuto 1)");
+    expect(fields(summaryEmbed({ ...base, leads: [] }))["Email da telefono"]).toBe("0");
+    expect(fields(summaryEmbed({ ...base, leads: null }))["Email da telefono"]).toBe("non leggibili");
+  });
+
   it("sales in the window count only paid orders; a free order is not revenue", () => {
     const f = fields(summaryEmbed(base));
     expect(f["Vendite"]).toBe("1 (7,99 €)");
@@ -177,6 +184,7 @@ describe("handleScheduled", () => {
     expect(posts.map((p) => p.url)).toEqual(["https://d.example/metrics"]);
     const embed = JSON.parse(posts[0].body).embeds[0];
     expect(embed.fields.find((x: { name: string }) => x.name === "DMG scaricati").value).toBe("+3 (totale 4)");
+    expect(embed.fields.find((x: { name: string }) => x.name === "Email da telefono").value).toBe("0");
     expect(runs.some((r) => /INSERT OR REPLACE INTO cache/.test(r.sql) && r.v[0] === "summary-gh")).toBe(true);
   });
 

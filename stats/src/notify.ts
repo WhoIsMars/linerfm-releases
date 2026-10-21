@@ -78,7 +78,11 @@ export function ghTotals(list: GhRelease[]): GhTotals {
 }
 
 type SaleRow = Pick<Order, "ts" | "cents" | "currency" | "state">;
-export interface SummaryInput { win: { from: number; to: number }; hits: Row[]; access: AccessRow[]; gh: GhTotals | null; ghPrev: GhTotals | null; orders: SaleRow[] | null }
+export interface SummaryInput {
+  win: { from: number; to: number }; hits: Row[]; access: AccessRow[]; gh: GhTotals | null; ghPrev: GhTotals | null; orders: SaleRow[] | null;
+  /** Email lasciate da telefono (tabella leads, src/lead.ts); null se la tabella non si legge. */
+  leads?: { ts: number; src: string }[] | null;
+}
 
 export function summaryEmbed(x: SummaryInput): Embed {
   const inWin = (ts: number) => ts > x.win.from && ts <= x.win.to;
@@ -106,6 +110,14 @@ export function summaryEmbed(x: SummaryInput): Embed {
     return `${paid.length} (${eur(paid.reduce((s, o) => s + o.cents, 0), paid[0]?.currency ?? "EUR")})`;
   };
 
+  const leadsText = (list: { ts: number; src: string }[]) => {
+    const inside = list.filter((l) => inWin(l.ts));
+    if (!inside.length) return "0";
+    const by = new Map<string, number>();
+    for (const l of inside) { const k = prettySource(l.src || "diretto"); by.set(k, (by.get(k) ?? 0) + 1); }
+    return `${inside.length} (${[...by].sort((a, b) => b[1] - a[1]).map(([k, n]) => `${k} ${n}`).join(", ")})`;
+  };
+
   const fields: Embed["fields"] = [
     { name: "Visite sito", value: `${views.length} (${new Set(views.map((v) => v.sid)).size} persone)`, inline: true },
     { name: "Persone che hanno scaricato", value: String(downloads.size), inline: true },
@@ -118,6 +130,8 @@ export function summaryEmbed(x: SummaryInput): Embed {
     { name: "Rifiuti", value: String(access.filter((r) => r.outcome === "refused").length), inline: true },
     { name: "Vendite", value: x.orders ? sales(x.orders.filter((o) => inWin(o.ts))) : "non leggibili", inline: true },
     { name: "Totale vendite", value: x.orders ? sales(x.orders) : "?", inline: true },
+    // il link va mandato a mano: scripts/leads.mjs nella cartella stats
+    { name: "Email da telefono", value: x.leads === undefined ? "0" : x.leads === null ? "non leggibili" : leadsText(x.leads), inline: true },
   ];
   const title = `Numeri ${ROME_HM.format(new Date(x.win.from))} → ${ROME_HM.format(new Date(x.win.to))}`;
   return card(title, "Ultime 6 ore. Download GitHub e aggiornamenti: differenza dal riepilogo precedente.", 0x0a84ff, fields, x.win.to, "LinerFM numeri");
@@ -128,7 +142,7 @@ export async function handleScheduled(env: NotifyEnv, scheduledTime: number, fet
   if (!env.DISCORD_METRICS_WEBHOOK) return;
   const win = windowOf(scheduledTime);
   const all = <T>(sql: string) => env.DB.prepare(sql).bind(win.from).all<T>().then((r) => r.results ?? []).catch(() => [] as T[]);
-  const [hits, access, gh, orders, prevRow] = await Promise.all([
+  const [hits, access, gh, orders, prevRow, leads] = await Promise.all([
     all<Row>("SELECT ts, kind, ref, src, arch, sid, country FROM hits WHERE ts > ?"),
     // senza la migrazione 0001_access_os.sql la colonna os non c'è: si rilegge senza, e ogni computer resta "non noto"
     env.DB.prepare("SELECT ts, kind, outcome, reason, device, key, country, os FROM access WHERE ts > ?").bind(win.from).all<AccessRow>()
@@ -137,10 +151,12 @@ export async function handleScheduled(env: NotifyEnv, scheduledTime: number, fet
     loadGithub(fetchImpl).then(ghTotals).catch(() => null),
     readOrders(fetchImpl, env.LS_API_KEY, env.LS_STORE_ID ?? "406309"),
     env.DB.prepare("SELECT ts, value FROM cache WHERE k = ?").bind("summary-gh").first<{ value: string }>().catch(() => null),
+    // senza la migrazione 0002_leads.sql la tabella non c'è: "non leggibili", il resto del riepilogo parte lo stesso
+    env.DB.prepare("SELECT ts, src FROM leads WHERE ts > ?").bind(win.from).all<{ ts: number; src: string }>().then((r) => r.results ?? []).catch(() => null),
   ]);
   let ghPrev: GhTotals | null = null;
   try { ghPrev = prevRow ? (JSON.parse(prevRow.value) as GhTotals) : null; } catch { /* copia rovinata: si riparte dal totale */ }
-  await post(env.DISCORD_METRICS_WEBHOOK, summaryEmbed({ win, hits, access, gh, ghPrev, orders }), fetchImpl);
+  await post(env.DISCORD_METRICS_WEBHOOK, summaryEmbed({ win, hits, access, gh, ghPrev, orders, leads }), fetchImpl);
   if (gh) {
     await env.DB.prepare("INSERT OR REPLACE INTO cache (k, ts, value) VALUES (?, ?, ?)").bind("summary-gh", win.to, JSON.stringify(gh)).run().catch(() => undefined);
   }
