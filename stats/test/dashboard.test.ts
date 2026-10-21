@@ -77,7 +77,7 @@ describe("summarize", () => {
 
 import { summarizeAccess, type AccessRow } from "../src/dashboard";
 
-const a = (x: Partial<AccessRow>): AccessRow => ({ ts: NOW - 1000, kind: "trial", outcome: "new", reason: "", device: "0000aaaa", key: "", country: "IT", ...x });
+const a = (x: Partial<AccessRow>): AccessRow => ({ ts: NOW - 1000, kind: "trial", outcome: "new", reason: "", device: "0000aaaa", key: "", country: "IT", os: "", ...x });
 
 describe("summarizeAccess", () => {
   it("counts Macs on trial, expired trials that came back, live licenses and refusals", () => {

@@ -6,7 +6,7 @@ const DAY = 86_400_000;
 const NOW = Date.UTC(2026, 9, 17, 16, 0, 0);
 const S = Math.floor(NOW / 1000);
 const H1 = "a".repeat(64), H2 = "b".repeat(64), H3 = "c".repeat(64);
-const acc = (x: Record<string, unknown>) => ({ ts: NOW - 1000, kind: "trial", outcome: "active", reason: "", device: "aaaaaaaa", key: "", country: "IT", ...x });
+const acc = (x: Record<string, unknown>) => ({ ts: NOW - 1000, kind: "trial", outcome: "active", reason: "", device: "aaaaaaaa", key: "", country: "IT", os: "", ...x });
 
 describe("summarizeUsers", () => {
   it("joins the trial ledger and the access log into one row per Mac", () => {
