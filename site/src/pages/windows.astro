@@ -1,0 +1,87 @@
+---
+// Pagina per chi cerca "spotify widget windows" o "lyrics on desktop windows": ogni frase
+// viene dalla card "windows" di linerfm/docs/product-surface.json (1.0.0). Notch,
+// screensaver e live desktop restano Mac, e la pagina lo dice.
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Nav from "../components/Nav.astro";
+import AmbientVideo from "../components/AmbientVideo.astro";
+import DownloadButton from "../components/DownloadButton.tsx";
+import Footer from "../components/Footer.astro";
+import { CHECKOUT_URL } from "../config/links";
+
+const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
+const features = [
+  { t: "A desktop widget for Spotify", d: "A transparent, always-on now-playing widget on your desktop, following the song Spotify is playing." },
+  { t: "Lyrics across the top of the screen", d: "Synced lyrics float at the top of your screen while you work or play, for songs that have lyrics." },
+  { t: "Search from any app", d: "Press Ctrl+Alt+K, type a song, album or artist, press Enter. Spotify never comes to the front." },
+  { t: "Your stats and Last.fm", d: "Hours played, top artists and tracks, plays and skips for every song. Everything you play lands on your Last.fm profile." },
+  { t: "AI playlists", d: "Create or extend playlists from a prompt, powered by your own free Groq key." },
+  { t: "Updates on their own", d: "Updates install on their own, like on the Mac." },
+];
+const faq = [
+  { q: "Does it work on Windows 10 and Windows 11?", a: "Yes, both. It installs for your user only, no admin rights needed." },
+  { q: "Windows says it protected my PC. Is that normal?", a: "Yes. The installer isn't code signed yet, so SmartScreen warns on first run. Click \"More info\", then \"Run anyway\"." },
+  { q: "Which music services work on Windows?", a: "Spotify. On the Mac LinerFM also follows Apple Music and YouTube Music." },
+  { q: "Is everything from the Mac version there?", a: "Not yet. The notch, the screensaver and the live desktop are Mac only for now." },
+  { q: "Do I need Rainmeter or Wallpaper Engine?", a: "No. LinerFM is its own app: install it, connect Spotify, and the widget is on your desktop." },
+  { q: "How much is it?", a: "Free for 5 days, then 10 € once. No subscription, no account." },
+];
+const faqLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+});
+---
+<BaseLayout
+  title="Spotify widget for Windows 10 and 11, with lyrics on your desktop | LinerFM"
+  description="LinerFM puts a Spotify widget, synced lyrics across the top of the screen, Ctrl+Alt+K search and your listening stats on your Windows 10 or 11 desktop. Free for 5 days, then 10 € once."
+>
+  <script type="application/ld+json" set:html={faqLd} />
+  <Nav />
+  <main id="main-content">
+    <section class="max-w-5xl mx-auto px-5 pt-16 pb-10 grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <p class="text-sm text-fg-3">LinerFM for Windows</p>
+        <h1 class="mt-2 text-4xl md:text-5xl font-semibold tracking-[-0.03em]">A Spotify widget for your Windows desktop</h1>
+        <p class="mt-5 text-lg text-fg-2">The song that's playing, its lyrics across the top of the screen, and search from any app with Ctrl+Alt+K. For Windows 10 and 11.</p>
+        <div class="mt-8">
+          <DownloadButton client:load preferWindows />
+        </div>
+        <p class="mt-3 text-xs text-fg-3">Free for 5 days, then 10 € once. Already decided? <a href={CHECKOUT_URL} class="lemonsqueezy-button underline hover:text-fg">Buy now</a>.</p>
+      </div>
+      <AmbientVideo
+        src="video/clip-windows.mp4"
+        webm="video/clip-windows.webm"
+        poster="video/clip-windows.jpg"
+        description="LinerFM on a Windows desktop: the widget follows the song playing in Spotify."
+        maxWidth="460px"
+      />
+    </section>
+
+    <section class="max-w-5xl mx-auto px-5 py-12">
+      <h2 class="text-2xl font-semibold tracking-[-0.02em]">What you get on Windows</h2>
+      <ul class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {features.map((f) => (
+          <li class="panel p-5">
+            <h3 class="font-semibold">{f.t}</h3>
+            <p class="mt-2 text-sm text-fg-3">{f.d}</p>
+          </li>
+        ))}
+      </ul>
+      <p class="mt-6 text-sm text-fg-3">The notch, the screensaver and the live desktop are Mac only for now. <a href={base} class="underline hover:text-fg">See everything LinerFM does on the Mac</a>.</p>
+    </section>
+
+    <section class="max-w-3xl mx-auto px-5 py-12">
+      <h2 class="text-2xl font-semibold tracking-[-0.02em]">Questions</h2>
+      <dl class="mt-6 space-y-5">
+        {faq.map((f) => (
+          <div class="panel p-5">
+            <dt class="font-semibold">{f.q}</dt>
+            <dd class="mt-2 text-sm text-fg-3">{f.a}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  </main>
+  <Footer />
+</BaseLayout>

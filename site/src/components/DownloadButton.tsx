@@ -3,11 +3,11 @@ import { pickMacDmgs, pickWindowsExe, formatBytes, type MacDmgs, type DmgInfo, t
 import { RELEASES_API_URL, RELEASES_LATEST_URL } from "../config/links";
 import { track } from "../lib/stats";
 
-export default function DownloadButton() {
+export default function DownloadButton({ preferWindows = false }: { preferWindows?: boolean }) {
   const [dmgs, setDmgs] = useState<MacDmgs | null>(null);
   const [exe, setExe] = useState<DmgInfo | null>(null);
-  // Chi arriva da Windows vede per primo il suo installer.
-  const onWindows = typeof navigator !== "undefined" && /Windows/i.test(navigator.userAgent);
+  // Chi arriva da Windows, o sta sulla pagina /windows, vede per primo l'installer Windows.
+  const onWindows = preferWindows || (typeof navigator !== "undefined" && /Windows/i.test(navigator.userAgent));
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
