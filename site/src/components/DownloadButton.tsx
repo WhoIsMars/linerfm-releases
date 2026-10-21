@@ -1,17 +1,20 @@
 import { useEffect, useState } from "react";
-import { pickMacDmgs, formatBytes, type MacDmgs, type GithubRelease } from "../lib/release";
+import { pickMacDmgs, pickWindowsExe, formatBytes, type MacDmgs, type DmgInfo, type GithubRelease } from "../lib/release";
 import { RELEASES_API_URL, RELEASES_LATEST_URL } from "../config/links";
 import { track } from "../lib/stats";
 
 export default function DownloadButton() {
   const [dmgs, setDmgs] = useState<MacDmgs | null>(null);
+  const [exe, setExe] = useState<DmgInfo | null>(null);
+  // Chi arriva da Windows vede per primo il suo installer.
+  const onWindows = typeof navigator !== "undefined" && /Windows/i.test(navigator.userAgent);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let alive = true;
     fetch(RELEASES_API_URL, { headers: { Accept: "application/vnd.github+json" } })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((data: GithubRelease) => { if (alive) setDmgs(pickMacDmgs(data)); })
+      .then((data: GithubRelease) => { if (alive) { setDmgs(pickMacDmgs(data)); setExe(pickWindowsExe(data)); } })
       .catch(() => { if (alive) setFailed(true); });
     return () => { alive = false; };
   }, []);
@@ -45,8 +48,10 @@ export default function DownloadButton() {
 
   return (
     <div className="flex flex-wrap items-center justify-center gap-3">
-      <Btn label="Apple Silicon" arch="apple-silicon" info={dmgs.appleSilicon} primary />
+      {onWindows && exe && <Btn label="Windows" arch="windows" info={exe} primary />}
+      <Btn label="Apple Silicon" arch="apple-silicon" info={dmgs.appleSilicon} primary={!onWindows || !exe} />
       <Btn label="Intel" arch="intel" info={dmgs.intel} />
+      {!onWindows && exe && <Btn label="Windows" arch="windows" info={exe} />}
     </div>
   );
 }

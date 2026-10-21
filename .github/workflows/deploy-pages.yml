@@ -30,8 +30,8 @@ jobs:
       - run: npm run build
         working-directory: site
         env:
-          PUBLIC_SITE_URL: https://whoismars.github.io
-          PUBLIC_BASE_PATH: /linerfm-releases
+          PUBLIC_SITE_URL: https://linerfm.xyz
+          PUBLIC_BASE_PATH: /
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site/dist

@@ -4,14 +4,15 @@
 // architecture, a random per-tab id, country. No IP, no user agent, no cookie.
 import { STATS_URL } from "../config/links";
 
-const PUBLISHED_HOST = "whoismars.github.io";
+// The custom domain, plus the old GitHub Pages host (it redirects here, but the stats worker still accepts it).
+const PUBLISHED_HOSTS = new Set(["linerfm.xyz", "www.linerfm.xyz", "whoismars.github.io"]);
 const OPT_OUT_KEY = "lfm_notrack";
 const SID_KEY = "lfm_sid";
 const SRC_KEY = "lfm_src";
 
 /** Only real visitors on the published site: not localhost, not Playwright, not the owner. */
 export function shouldCount(o: { hostname: string; webdriver: boolean; optedOut: boolean }): boolean {
-  return o.hostname === PUBLISHED_HOST && !o.webdriver && !o.optedOut;
+  return PUBLISHED_HOSTS.has(o.hostname) && !o.webdriver && !o.optedOut;
 }
 
 /** `?notrack=1` excludes this browser for good, `?notrack=0` counts it again. */

@@ -1,6 +1,6 @@
 {
   "_generated": "da docs/product-surface.json nel repo linerfm — non modificare a mano, gira scripts/sync-product-surface.mjs",
-  "updated": "2026-10-06",
+  "updated": "2026-10-19",
   "cards": [
     {
       "id": "widget",
@@ -181,6 +181,42 @@
       "t": "Screens that use the whole window",
       "d": "A large now playing panel in the sidebar, Settings on a single page, and every screen laid out to fill the window instead of leaving empty space.",
       "since": "0.14.0"
+    },
+    {
+      "id": "live-desktop",
+      "t": "A live desktop",
+      "d": "Your wallpaper becomes the song: the artwork, the Spotify Canvas or the YouTube video plays under your icons, on every display. Add a player bar, a Cover Flow of recent albums and an up next list, and an edge light that can follow the beat. Turned on from the widget menu.",
+      "since": "1.0.0"
+    },
+    {
+      "id": "windows",
+      "t": "Now on Windows",
+      "d": "LinerFM runs on Windows 10 and 11: the widget, search, lyrics across the top of the screen, AI playlists, your stats and Last.fm, with Spotify. Updates install on their own, like on the Mac. The notch, the screensaver and the live desktop stay Mac only for now.",
+      "since": "1.0.0"
+    },
+    {
+      "id": "side-panel",
+      "t": "A side view on the screen edge",
+      "d": "A thin strip on the left edge of the screen that opens when your mouse touches it: artwork, controls, synced lyrics and the queue. Turned on from Settings.",
+      "since": "1.0.0"
+    },
+    {
+      "id": "vinyl-midnight-themes",
+      "t": "Vinyl and Midnight themes",
+      "d": "Two new looks for the notch, the volume HUD, karaoke, the screensaver and the side view, chosen once in Settings.",
+      "since": "1.0.0"
+    },
+    {
+      "id": "search-filters",
+      "t": "Search that knows what you want",
+      "d": "Press Tab to filter by songs, artists, albums or playlists, find your recent searches, see the best match up top and preview it before you play.",
+      "since": "1.0.0"
+    },
+    {
+      "id": "soundcloud",
+      "t": "SoundCloud on the widget",
+      "d": "Play SoundCloud in Chrome, from a track, a playlist or a Mix, and LinerFM follows it with sharp artwork and play, pause and skip.",
+      "since": "1.0.0"
     }
   ],
   "surfaces": [

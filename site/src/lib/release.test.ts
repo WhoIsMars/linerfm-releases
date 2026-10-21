@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { pickMacDmgs, formatBytes, type GithubRelease } from "./release";
+import { pickMacDmgs, pickWindowsExe, formatBytes, type GithubRelease } from "./release";
 
 const release: GithubRelease = {
   tag_name: "v0.6.0",
@@ -61,5 +61,26 @@ describe("formatBytes", () => {
   });
   it("formats kilobytes", () => {
     expect(formatBytes(823)).toBe("0.8 KB");
+  });
+});
+
+describe("pickWindowsExe", () => {
+  const win: GithubRelease = {
+    ...release,
+    tag_name: "v1.0.0",
+    assets: [
+      ...release.assets,
+      { name: "LinerFM_1.0.0_x64-setup.exe.sig", size: 400, browser_download_url: "https://x/setup.exe.sig" },
+      { name: "LinerFM_1.0.0_x64-setup.exe", size: 31000000, browser_download_url: "https://x/LinerFM_1.0.0_x64-setup.exe" },
+    ],
+  };
+
+  it("returns the Windows installer, not its signature", () => {
+    expect(pickWindowsExe(win)?.url).toBe("https://x/LinerFM_1.0.0_x64-setup.exe");
+    expect(pickWindowsExe(win)?.version).toBe("1.0.0");
+  });
+
+  it("is null for a release without a Windows build", () => {
+    expect(pickWindowsExe(release)).toBeNull();
   });
 });

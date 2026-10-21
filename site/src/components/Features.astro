@@ -5,6 +5,7 @@
 //
 // Le feature già raccontate in Showcase non si ripetono: qui c'è "tutto il resto".
 import data from "../data/features.json";
+import { WHATS_NEW_IDS } from "../data/whats-new";
 
 // Il badge "New" segue la versione piu' alta fra le card, non un numero scritto
 // a mano: scritto a mano resta indietro al primo rilascio che non aggiunge
@@ -15,6 +16,7 @@ const CURRENT = data.cards.map((f) => f.since).sort((a, b) => rank(a) - rank(b))
 const IN_SHOWCASE = new Set([
   "widget", "notch-hover", "dynamic-color", "search", "karaoke", "screensaver",
   "ai-playlists", "terminal-theme", "track-stats", "skip-based-removals",
+  ...WHATS_NEW_IDS,
 ]);
 // Una griglia sola, le novità dell'ultima versione in testa. I gruppi per tema
 // lasciavano righe a metà (4, 5, 4 e 7 card su tre colonne); 20 card su quattro
@@ -26,7 +28,7 @@ const cards = [
 ---
 <section id="features" class="max-w-6xl mx-auto px-5 py-24">
   <h2 class="text-3xl font-semibold tracking-[-0.02em] text-center">And everything around it</h2>
-  <p class="mt-3 text-center text-fg-3">The details that make it feel like it belongs on a Mac.</p>
+  <p class="mt-3 text-center text-fg-3">The details that make it feel like it belongs on your desktop.</p>
 
   <div class="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
     {cards.map((f) => (
