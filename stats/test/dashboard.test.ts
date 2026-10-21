@@ -73,6 +73,12 @@ describe("summarize", () => {
     expect(s.days[s.days.length - 1]).toEqual({ day: "2026-10-17", visits: 3, downloads: 2 });
     expect(s.days).toHaveLength(30);
   });
+
+  it("a Buy click (kind checkout) is neither a visit nor a download", () => {
+    const s = summarize([v("a"), { ...v("a"), kind: "checkout" }, { ...v("z"), kind: "checkout" }], NOW);
+    expect(s.visits).toBe(1);
+    expect(s.downloads).toBe(0);
+  });
 });
 
 import { summarizeAccess, type AccessRow } from "../src/dashboard";

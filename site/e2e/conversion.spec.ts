@@ -99,3 +99,10 @@ test("every Buy link passes the visit's channel to the checkout", async ({ page 
     expect(q.get("embed")).toBe("1");
   }
 });
+
+test("a Buy link carries the channel remembered for the tab", async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem("lfm_src", "reddit-macapps"));
+  await page.goto("/");
+  const href = await page.locator("#top a.lemonsqueezy-button").first().getAttribute("href");
+  expect(new URL(href!).searchParams.get("checkout[custom][src]")).toBe("reddit-macapps");
+});
