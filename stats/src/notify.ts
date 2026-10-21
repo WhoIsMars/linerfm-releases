@@ -9,7 +9,7 @@ import { loadGithub, readOrders, type GhRelease, type Order } from "./admin";
 const H = 3_600_000;
 const DAY = 24 * H;
 const DOWNLOADS_PER_HOUR = 20;
-const ICON = "https://whoismars.github.io/linerfm-releases/icon-512.png";
+const ICON = "https://linerfm.xyz/icon-512.png";
 
 export interface NotifyEnv { DB: D1Database; DISCORD_DOWNLOADS_WEBHOOK?: string; DISCORD_METRICS_WEBHOOK?: string; LS_API_KEY?: string; LS_STORE_ID?: string }
 
