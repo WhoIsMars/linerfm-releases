@@ -86,3 +86,16 @@ test.describe("on a desktop (1280 px, Mac)", () => {
     await expect(dl.getByText("Open the link on your Mac or PC", { exact: false })).toBeHidden();
   });
 });
+
+// Ogni Buy porta all'ordine Lemon Squeezy il canale della visita: senza, una vendita non dice da dove arriva.
+// Playwright non viene contato (navigator.webdriver), quindi qui il canale è "direct".
+test("every Buy link passes the visit's channel to the checkout", async ({ page }) => {
+  await page.goto("/?src=reddit-macapps");
+  const links = page.locator("a.lemonsqueezy-button");
+  expect(await links.count()).toBeGreaterThan(0);
+  for (const href of await links.evaluateAll((as) => as.map((a) => (a as HTMLAnchorElement).href))) {
+    const q = new URL(href).searchParams;
+    expect(q.get("checkout[custom][src]")).toBe("direct");
+    expect(q.get("embed")).toBe("1");
+  }
+});

@@ -55,8 +55,21 @@ const og = new URL(`${base}${ogImage.replace(/^\//, "")}`, Astro.site ?? "http:/
     <a class="skip-link" href="#main-content">Skip to main content</a>
     <slot />
     <script>
-      import { track } from "../lib/stats";
+      import { track, rememberedSrc, rememberedSid, checkoutAttribution } from "../lib/stats";
       track("view");
+      // Ogni Buy porta all'ordine il canale della visita (?src=) e l'id della scheda; il clic conta come "checkout".
+      // Riscritto subito, perché lemon.js può leggere gli href al caricamento, e di nuovo al clic.
+      const attribute = (a: HTMLAnchorElement) => {
+        a.href = checkoutAttribution(a.href, { src: rememberedSrc(), sid: rememberedSid() });
+      };
+      document.querySelectorAll<HTMLAnchorElement>("a.lemonsqueezy-button").forEach(attribute);
+      (window as unknown as { LemonSqueezy?: { Refresh?: () => void } }).LemonSqueezy?.Refresh?.();
+      document.addEventListener("click", (ev) => {
+        const a = (ev.target as Element | null)?.closest?.("a.lemonsqueezy-button") as HTMLAnchorElement | null;
+        if (!a) return;
+        attribute(a);
+        track("checkout");
+      }, true);
     </script>
     <ConsentBanner />
   </body>

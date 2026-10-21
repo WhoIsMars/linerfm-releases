@@ -1,5 +1,39 @@
 import { describe, expect, it } from "vitest";
-import { shouldCount, hitPayload, optOutFromSearch } from "./stats";
+import { shouldCount, hitPayload, optOutFromSearch, checkoutAttribution } from "./stats";
+
+describe("checkoutAttribution", () => {
+  const LS = "https://linerfm.lemonsqueezy.com/checkout/buy/70b5030a?embed=1";
+  const get = (href: string, k: string) => new URL(href).searchParams.get(`checkout[custom][${k}]`);
+
+  it("passes the visit's source and session id to the order as custom data", () => {
+    const href = checkoutAttribution(LS, { src: "reddit-macapps", sid: "0123456789abcdef" });
+    expect(get(href, "src")).toBe("reddit-macapps");
+    expect(get(href, "sid")).toBe("0123456789abcdef");
+    expect(new URL(href).searchParams.get("embed")).toBe("1");
+  });
+  it("keeps the TikTok fields already on the link", () => {
+    const href = checkoutAttribution(`${LS}&checkout%5Bcustom%5D%5Bttclid%5D=abc`, { src: "tiktok", sid: "" });
+    expect(get(href, "ttclid")).toBe("abc");
+    expect(get(href, "src")).toBe("tiktok");
+  });
+  it("says 'direct' when the visit has no source, and drops an empty session id", () => {
+    const href = checkoutAttribution(`${LS}&checkout%5Bcustom%5D%5Bsid%5D=old`, { src: "", sid: "" });
+    expect(get(href, "src")).toBe("direct");
+    expect(get(href, "sid")).toBe(null);
+  });
+  it("cleans the source like the stats beacon does", () => {
+    expect(get(checkoutAttribution(LS, { src: "IG<script>", sid: "" }), "src")).toBe("igscript");
+  });
+});
+
+describe("hitPayload for a checkout open", () => {
+  it("is its own kind and carries no architecture", () => {
+    const p = hitPayload({ kind: "checkout", pathname: "/", referrer: "", search: "", ownHost: "linerfm.xyz", sid: "abc123def456", sessionSrc: "youtube", arch: "intel" });
+    expect(p.k).toBe("checkout");
+    expect(p.s).toBe("youtube");
+    expect(p.a).toBe("");
+  });
+});
 
 describe("shouldCount", () => {
   const ok = { hostname: "whoismars.github.io", webdriver: false, optedOut: false };

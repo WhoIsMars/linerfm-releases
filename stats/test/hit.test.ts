@@ -67,6 +67,24 @@ describe("handleHit", () => {
     expect(rows[0][5]).toBe("apple-silicon");
   });
 
+  // Il clic su Buy: dice da quale canale arriva chi apre il checkout, senza annunciarlo come download.
+  it("stores a checkout open with its source and does not announce it as a download", async () => {
+    const { db, rows } = fakeDB();
+    const waits: Promise<unknown>[] = [];
+    const ctx = { waitUntil: (p: Promise<unknown>) => waits.push(p) } as unknown as ExecutionContext;
+    const res = await handleHit(req({ ...VIEW, k: "checkout", s: "reddit-macapps" }), { DB: db }, "US", 1, ctx);
+    expect(res.status).toBe(204);
+    expect(rows[0][1]).toBe("checkout");
+    expect(rows[0][4]).toBe("reddit-macapps");
+    expect(waits).toHaveLength(0);
+  });
+
+  it("refuses an unknown kind", async () => {
+    const { db, rows } = fakeDB();
+    expect((await handleHit(req({ ...VIEW, k: "purchase" }), { DB: db }, "IT", 1)).status).toBe(400);
+    expect(rows).toHaveLength(0);
+  });
+
   it("accepts the custom domain and answers with its own origin for CORS", async () => {
     for (const origin of ["https://linerfm.xyz", "https://www.linerfm.xyz"]) {
       const { db, rows } = fakeDB();

@@ -23,8 +23,23 @@ export function optOutFromSearch(search: string): "on" | "off" | null {
 
 export const clean = (s: string | null) => (s ?? "").toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 40);
 
+export type HitKind = "view" | "download" | "checkout";
+
+/**
+ * The Buy link with the visit's ?src= tag and tab id as Lemon Squeezy custom data, so an order says which
+ * channel it came from (the 15/10 sale was attributed to YouTube only by its timestamp). Same data the
+ * beacon already sends: no cookie, nothing personal. Other params (embed, TikTok fields) are kept.
+ */
+export function checkoutAttribution(href: string, o: { src: string; sid: string }): string {
+  const u = new URL(href);
+  u.searchParams.set("checkout[custom][src]", clean(o.src) || "direct");
+  if (o.sid) u.searchParams.set("checkout[custom][sid]", o.sid);
+  else u.searchParams.delete("checkout[custom][sid]");
+  return u.toString();
+}
+
 export function hitPayload(o: {
-  kind: "view" | "download"; pathname: string; referrer: string; search: string;
+  kind: HitKind; pathname: string; referrer: string; search: string;
   ownHost: string; sid: string; sessionSrc: string; arch?: string; mobile?: boolean;
 }) {
   let r = "";
@@ -50,13 +65,18 @@ export function rememberedSrc(): string {
   return store("session")?.getItem(SRC_KEY) ?? "";
 }
 
+/** The random tab id set by track(), '' when this visit is not counted (localhost, ?notrack=1). */
+export function rememberedSid(): string {
+  return store("session")?.getItem(SID_KEY) ?? "";
+}
+
 /**
  * Fire-and-forget hit. text/plain keeps it a simple request (no CORS preflight);
  * keepalive lets a DMG click survive the navigation to GitHub. Not sendBeacon:
  * on the live site Chrome's beacons got HTTP 503 from workers.dev every time
  * (2026-10-09), while this same fetch got 204.
  */
-export function track(kind: "view" | "download", arch?: string): void {
+export function track(kind: HitKind, arch?: string): void {
   const local = store("local");
   const session = store("session");
   const opt = optOutFromSearch(location.search);
