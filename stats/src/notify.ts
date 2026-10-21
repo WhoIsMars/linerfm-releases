@@ -9,6 +9,7 @@ import { loadGithub, readOrders, type GhRelease, type Order } from "./admin";
 const H = 3_600_000;
 const DAY = 24 * H;
 const DOWNLOADS_PER_HOUR = 20;
+const LEAD_DAYS = 30;
 const ICON = "https://linerfm.xyz/icon-512.png";
 
 export interface NotifyEnv { DB: D1Database; DISCORD_DOWNLOADS_WEBHOOK?: string; DISCORD_METRICS_WEBHOOK?: string; LS_API_KEY?: string; LS_STORE_ID?: string }
@@ -139,6 +140,8 @@ export function summaryEmbed(x: SummaryInput): Embed {
 
 /** Il cron: legge tutto, manda un riepilogo, salva il totale GitHub per la differenza della volta dopo. */
 export async function handleScheduled(env: NotifyEnv, scheduledTime: number, fetchImpl: typeof fetch = fetch): Promise<void> {
+  // Le email da telefono restano al massimo 30 giorni (pagina privacy del sito), con o senza Discord.
+  await env.DB.prepare("DELETE FROM leads WHERE ts < ?").bind(scheduledTime - LEAD_DAYS * DAY).run().catch(() => undefined);
   if (!env.DISCORD_METRICS_WEBHOOK) return;
   const win = windowOf(scheduledTime);
   const all = <T>(sql: string) => env.DB.prepare(sql).bind(win.from).all<T>().then((r) => r.results ?? []).catch(() => [] as T[]);

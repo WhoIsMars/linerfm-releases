@@ -188,6 +188,13 @@ describe("handleScheduled", () => {
     expect(runs.some((r) => /INSERT OR REPLACE INTO cache/.test(r.sql) && r.v[0] === "summary-gh")).toBe(true);
   });
 
+  it("deletes emails older than 30 days on every tick, as the privacy page promises", async () => {
+    const { db, runs } = fakeDB();
+    await handleScheduled({ DB: db }, TICK, (async () => Response.json([])) as typeof fetch);
+    const del = runs.find((r) => /DELETE FROM leads WHERE ts < \?/.test(r.sql));
+    expect(del?.v).toEqual([TICK - 30 * 24 * H]);
+  });
+
   it("does nothing without the webhook", async () => {
     const { db } = fakeDB(); const posts: string[] = [];
     await handleScheduled({ DB: db }, TICK, (async (u: string) => { posts.push(String(u)); return Response.json([]); }) as typeof fetch);
