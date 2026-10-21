@@ -26,8 +26,38 @@ describe("handleHit", () => {
     const { db, rows } = fakeDB();
     const res = await handleHit(req(VIEW, { "CF-Connecting-IP": "1.2.3.4" }), { DB: db }, "IT", 1_700_000_000_000);
     expect(res.status).toBe(204);
-    expect(rows).toEqual([[1_700_000_000_000, "view", "/linerfm-releases/", "www.reddit.com", "tiktok", "", "0123456789abcdef", "IT"]]);
+    expect(rows).toEqual([[1_700_000_000_000, "view", "/linerfm-releases/", "www.reddit.com", "tiktok", "", "0123456789abcdef", "IT", ""]]);
     expect(JSON.stringify(rows)).not.toContain("1.2.3.4");
+  });
+
+  it("stores whether the visit came from a phone or a computer, '' from tabs opened before the field existed", async () => {
+    const { db, rows } = fakeDB();
+    await handleHit(req({ ...VIEW, d: "mobile" }), { DB: db }, "IT", 1);
+    await handleHit(req({ ...VIEW, d: "desktop" }), { DB: db }, "IT", 1);
+    await handleHit(req(VIEW), { DB: db }, "IT", 1);
+    expect(rows.map((r) => r[8])).toEqual(["mobile", "desktop", ""]);
+  });
+
+  it("refuses a device value that is not mobile or desktop", async () => {
+    const { db, rows } = fakeDB();
+    for (const d of ["phone", "Mozilla/5.0 (iPhone)", 1]) {
+      expect((await handleHit(req({ ...VIEW, d }), { DB: db }, "IT", 1)).status).toBe(400);
+    }
+    expect(rows).toHaveLength(0);
+  });
+
+  // Il worker può partire prima della migrazione 0003: la visita si salva lo stesso, senza il dispositivo.
+  it("still stores the visit when the hits table has no client column yet", async () => {
+    const rows: unknown[][] = [];
+    const db = {
+      prepare: (sql: string) => ({ bind: (...v: unknown[]) => ({ run: async () => {
+        if (sql.includes("client")) throw new Error("D1_ERROR: table hits has no column named client");
+        rows.push(v); return {};
+      } }) }),
+    } as unknown as D1Database;
+    const res = await handleHit(req({ ...VIEW, d: "mobile" }), { DB: db }, "IT", 1);
+    expect(res.status).toBe(204);
+    expect(rows).toHaveLength(1);
   });
 
   it("stores a download with its architecture", async () => {

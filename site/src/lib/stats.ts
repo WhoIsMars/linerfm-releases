@@ -1,7 +1,7 @@
 // Visit and download counting for the published site, without cookies.
 // Sends one small beacon per page view and per DMG click to the stats worker
 // (`stats/` in this repo). Stored server side: path, referrer host, ?src= tag,
-// architecture, a random per-tab id, country. No IP, no user agent, no cookie.
+// architecture, phone/tablet or computer, a random per-tab id, country. No IP, no user agent, no cookie.
 import { STATS_URL } from "../config/links";
 
 // The custom domain, plus the old GitHub Pages host (it redirects here, but the stats worker still accepts it).
@@ -25,7 +25,7 @@ export const clean = (s: string | null) => (s ?? "").toLowerCase().replace(/[^a-
 
 export function hitPayload(o: {
   kind: "view" | "download"; pathname: string; referrer: string; search: string;
-  ownHost: string; sid: string; sessionSrc: string; arch?: string;
+  ownHost: string; sid: string; sessionSrc: string; arch?: string; mobile?: boolean;
 }) {
   let r = "";
   try { const h = new URL(o.referrer).hostname; if (h !== o.ownHost) r = h; } catch { /* no referrer */ }
@@ -37,6 +37,7 @@ export function hitPayload(o: {
     s: clean(q.get("src") ?? q.get("utm_source")) || o.sessionSrc,
     a: o.kind === "download" ? clean(o.arch ?? "") : "",
     i: o.sid,
+    d: o.mobile ? "mobile" : "desktop",
   };
 }
 
@@ -68,6 +69,8 @@ export function track(kind: "view" | "download", arch?: string): void {
   const p = hitPayload({
     kind, pathname: location.pathname, referrer: document.referrer, search: location.search,
     ownHost: location.hostname, sid, sessionSrc: session?.getItem(SRC_KEY) ?? "", arch,
+    // html.ua-mobile is set by BaseLayout from isMobileUA: phones and tablets, iPads included
+    mobile: document.documentElement.classList.contains("ua-mobile"),
   });
   if (p.s) session?.setItem(SRC_KEY, p.s);
   const body = new Blob([JSON.stringify(p)], { type: "text/plain" });

@@ -62,6 +62,11 @@ describe("summaryEmbed", () => {
     expect(f["Fonti"]).toContain("Reddit");
   });
 
+  it("says how many visitors came from a phone or tablet, once the device is known", () => {
+    const hits = [row({ sid: "a", client: "mobile" }), row({ sid: "a", client: "mobile" }), row({ sid: "b", client: "desktop" }), row({ sid: "c", client: "" })];
+    expect(fields(summaryEmbed({ ...base, hits }))["Visite sito"]).toBe("4 (3 persone, 1 da telefono o tablet)");
+  });
+
   it("GitHub downloads are the change since the previous summary", () => {
     const f = fields(summaryEmbed(base));
     expect(f["DMG scaricati"]).toBe("+3 (totale 40)");

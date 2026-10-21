@@ -5,7 +5,7 @@ import { TABS, navHtml, summarizeUsers, readLedger, cachedJson, loadGithub, gith
 // without the secret the page stays closed. Nothing is cached or indexed.
 export interface Env { DB: D1Database; DASH_PASSWORD?: string; DASH_LINK_TOKEN?: string; LS_API_KEY?: string; LS_STORE_ID?: string; TRIAL_LEDGER?: KVNamespace }
 
-export interface Row { ts: number; kind: string; ref: string; src: string; arch: string; sid: string; country: string }
+export interface Row { ts: number; kind: string; ref: string; src: string; arch: string; sid: string; country: string; client?: string }
 
 export const DAY = 86_400_000;
 const RELEASES = "https://api.github.com/repos/WhoIsMars/linerfm-releases/releases?per_page=10";

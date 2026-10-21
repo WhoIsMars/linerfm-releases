@@ -295,3 +295,7 @@ footer a[href]::after {
 .lead-mobile { display: none; }
 @media (max-width: 767px) { .lead-mobile { display: block; } }
 :root.ua-mobile .lead-mobile { display: block; }
+/* Il contrario: installer, passi del primo avvio e "Try free" che porta a loro. Da telefono non
+   servono, l'app lì non si installa. !important perché vince sulle classi display di Tailwind. */
+@media (max-width: 767px) { .computer-only { display: none !important; } }
+:root.ua-mobile .computer-only { display: none !important; }

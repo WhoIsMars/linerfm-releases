@@ -47,6 +47,10 @@ describe("hitPayload", () => {
   it("falls back to the source seen earlier in the same session", () => {
     expect(hitPayload({ ...base, sessionSrc: "youtube" }).s).toBe("youtube");
   });
+  it("says whether the visit comes from a phone or tablet or from a computer, never the user agent", () => {
+    expect(hitPayload({ ...base, mobile: true }).d).toBe("mobile");
+    expect(hitPayload({ ...base, mobile: false }).d).toBe("desktop");
+  });
   it("carries the architecture only on downloads", () => {
     expect(hitPayload({ ...base, kind: "download", arch: "intel" }).a).toBe("intel");
     expect(hitPayload({ ...base, arch: "intel" }).a).toBe("");
@@ -63,7 +67,7 @@ describe("track", () => {
     const beacon = vi.fn(() => true);
     vi.stubGlobal("location", { hostname: "whoismars.github.io", pathname: "/linerfm-releases/", search: "?src=tiktok" });
     vi.stubGlobal("navigator", { webdriver: false, sendBeacon: beacon });
-    vi.stubGlobal("document", { referrer: "" });
+    vi.stubGlobal("document", { referrer: "", documentElement: { classList: { contains: (c: string) => c === "ua-mobile" } } });
     vi.stubGlobal("localStorage", mem());
     vi.stubGlobal("sessionStorage", mem());
     vi.stubGlobal("fetch", fetchSpy);
@@ -73,7 +77,7 @@ describe("track", () => {
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     const [, init] = fetchSpy.mock.calls[0] as unknown as [string, RequestInit];
     expect(init).toMatchObject({ method: "POST", keepalive: true, credentials: "omit" });
-    expect(JSON.parse(await (init.body as Blob).text())).toMatchObject({ k: "download", a: "intel", s: "tiktok" });
+    expect(JSON.parse(await (init.body as Blob).text())).toMatchObject({ k: "download", a: "intel", s: "tiktok", d: "mobile" });
     vi.unstubAllGlobals();
   });
 });

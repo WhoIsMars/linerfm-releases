@@ -1,5 +1,5 @@
 // POST /hit: one row per page view or DMG click on the published site.
-// Stores no IP and no user agent; the country is Cloudflare's guess (request.cf.country).
+// Stores no IP and no user agent (only mobile or desktop, decided by the site); the country is Cloudflare's guess (request.cf.country).
 // A DMG click is also announced on Discord #downloads, after the response (notify.ts).
 import { announceDownload } from "./notify";
 
@@ -17,6 +17,9 @@ const FIELDS = {
   a: /^[a-z0-9_-]{0,20}$/,
   i: /^[a-f0-9]{8,32}$/,
 } as const;
+// Telefono o tablet contro computer, deciso dal sito (html.ua-mobile): mai lo user agent.
+// Facoltativo: le schede aperte prima di questo campo non lo mandano.
+const CLIENT = /^(mobile|desktop)$/;
 
 const reply = (status: number, origin = "https://linerfm.xyz") =>
   new Response(null, { status, headers: { "Access-Control-Allow-Origin": origin, Vary: "Origin" } });
@@ -32,11 +35,18 @@ export async function handleHit(req: Request, env: Env, country: string, now: nu
   for (const [f, re] of Object.entries(FIELDS)) {
     if (typeof b[f] !== "string" || !re.test(b[f] as string)) return reply(400, origin);
   }
-  await env.DB.prepare("INSERT INTO hits (ts, kind, path, ref, src, arch, sid, country) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
-    .bind(now, b.k, b.p, b.r, b.s, b.a, b.i, country.slice(0, 2))
-    .run();
+  if (b.d !== undefined && (typeof b.d !== "string" || !CLIENT.test(b.d))) return reply(400, origin);
+  const client = (b.d as string | undefined) ?? "";
+  const cc = country.slice(0, 2);
+  // senza la migrazione 0003_hits_client.sql la colonna client non c'è: la visita si salva senza
+  await env.DB.prepare("INSERT INTO hits (ts, kind, path, ref, src, arch, sid, country, client) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+    .bind(now, b.k, b.p, b.r, b.s, b.a, b.i, cc, client)
+    .run()
+    .catch(() => env.DB.prepare("INSERT INTO hits (ts, kind, path, ref, src, arch, sid, country) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+      .bind(now, b.k, b.p, b.r, b.s, b.a, b.i, cc)
+      .run());
   if (b.k === "download" && ctx) {
-    ctx.waitUntil(announceDownload(env, { ts: now, arch: b.a as string, src: b.s as string, ref: b.r as string, sid: b.i as string, country: country.slice(0, 2) }, fetchImpl));
+    ctx.waitUntil(announceDownload(env, { ts: now, arch: b.a as string, src: b.s as string, ref: b.r as string, sid: b.i as string, country: cc }, fetchImpl));
   }
   return reply(204, origin);
 }

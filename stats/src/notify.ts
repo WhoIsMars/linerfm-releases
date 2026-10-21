@@ -90,6 +90,7 @@ export function summaryEmbed(x: SummaryInput): Embed {
   const hits = x.hits.filter((r) => inWin(r.ts) && !TEST_SOURCES.has(r.src));
   const views = hits.filter((r) => r.kind === "view");
   const downloads = new Set(hits.filter((r) => r.kind === "download").map((r) => r.sid));
+  const phones = new Set(views.filter((r) => r.client === "mobile").map((r) => r.sid));
   const sources = new Map<string, Set<string>>();
   for (const v of views) {
     const s = prettySource(v.src || v.ref || "diretto");
@@ -120,7 +121,7 @@ export function summaryEmbed(x: SummaryInput): Embed {
   };
 
   const fields: Embed["fields"] = [
-    { name: "Visite sito", value: `${views.length} (${new Set(views.map((v) => v.sid)).size} persone)`, inline: true },
+    { name: "Visite sito", value: `${views.length} (${new Set(views.map((v) => v.sid)).size} persone${phones.size ? `, ${phones.size} da telefono o tablet` : ""})`, inline: true },
     { name: "Persone che hanno scaricato", value: String(downloads.size), inline: true },
     { name: "Fonti", value: top.length ? top.map(([s, n]) => `${s} ${n}`).join(", ") : "nessuna", inline: true },
     { name: "DMG scaricati", value: x.gh ? delta(x.gh.dmg, x.ghPrev?.dmg) : "GitHub non leggibile", inline: true },
@@ -146,7 +147,9 @@ export async function handleScheduled(env: NotifyEnv, scheduledTime: number, fet
   const win = windowOf(scheduledTime);
   const all = <T>(sql: string) => env.DB.prepare(sql).bind(win.from).all<T>().then((r) => r.results ?? []).catch(() => [] as T[]);
   const [hits, access, gh, orders, prevRow, leads] = await Promise.all([
-    all<Row>("SELECT ts, kind, ref, src, arch, sid, country FROM hits WHERE ts > ?"),
+    // senza la migrazione 0003_hits_client.sql la colonna client non c'è: si rilegge senza
+    all<Row>("SELECT ts, kind, ref, src, arch, sid, country, client FROM hits WHERE ts > ?")
+      .then((r) => (r.length ? r : all<Row>("SELECT ts, kind, ref, src, arch, sid, country FROM hits WHERE ts > ?"))),
     // senza la migrazione 0001_access_os.sql la colonna os non c'è: si rilegge senza, e ogni computer resta "non noto"
     env.DB.prepare("SELECT ts, kind, outcome, reason, device, key, country, os FROM access WHERE ts > ?").bind(win.from).all<AccessRow>()
       .catch(() => env.DB.prepare("SELECT ts, kind, outcome, reason, device, key, country FROM access WHERE ts > ?").bind(win.from).all<AccessRow>())
