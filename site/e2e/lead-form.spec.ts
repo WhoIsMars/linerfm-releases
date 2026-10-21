@@ -37,6 +37,33 @@ test.describe("on a phone (375 px, iPhone)", () => {
     await expect(dl.getByRole("button", { name: BUTTON })).toBeVisible();
   });
 
+  test("the cookie banner does not cover the form on first load", async ({ page }) => {
+    await mockLead(page);
+    await page.goto("/");
+    // First visit: no consent stored yet, so the banner is up.
+    await expect(page.getByRole("region", { name: "Cookie consent" })).toBeVisible();
+    const button = page.locator("#top").getByRole("button", { name: BUTTON });
+    const box = await button.boundingBox();
+    expect(box).not.toBeNull();
+    const { x, y, width, height } = box!;
+    // The element on top at the centre of the button is the button itself, not the banner.
+    const onTop = await page.evaluate(
+      ([cx, cy]) => {
+        const el = document.elementFromPoint(cx, cy);
+        return el?.closest("button")?.textContent?.trim() ?? el?.tagName ?? null;
+      },
+      [x + width / 2, y + height / 2],
+    );
+    expect(onTop).toBe(BUTTON);
+    // The email box above it must be reachable too.
+    const field = await page.locator("#top").getByRole("textbox", { name: "Your email" }).boundingBox();
+    const fieldOnTop = await page.evaluate(
+      ([cx, cy]) => document.elementFromPoint(cx, cy)?.tagName ?? null,
+      [field!.x + field!.width / 2, field!.y + field!.height / 2],
+    );
+    expect(fieldOnTop).toBe("INPUT");
+  });
+
   test("sends email and ?src= in a POST body, never in a URL", async ({ page }) => {
     const calls = await mockLead(page);
     await page.goto("/?src=tiktok");

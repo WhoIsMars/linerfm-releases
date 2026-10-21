@@ -5,23 +5,31 @@
 // Qualsiasi elemento con [data-cookie-settings] riapre il banner (privacy page).
 const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
 ---
+<!-- Sotto i 640 px il banner è compatto (testo breve, padding stretti) per lasciare libero
+     il modulo email sotto il titolo; da sm in su è quello di prima, invariato. -->
 <div
   id="tt-consent"
   role="region"
   aria-label="Cookie consent"
   hidden
-  class="fixed inset-x-0 bottom-0 z-50 px-4 pb-4"
+  class="fixed inset-x-0 bottom-0 z-50 px-2 pb-2 sm:px-4 sm:pb-4"
 >
-  <div class="mx-auto max-w-2xl rounded-2xl border border-white/12 bg-ink-800/95 backdrop-blur p-5 shadow-2xl">
-    <p class="text-sm text-white/80">
-      We'd like to use the TikTok pixel to measure which ads bring people here and whether they buy.
-      It sets a cookie and, if you buy, shares a hashed email and the order total with TikTok.
-      The app itself stays 100% local either way.
+  <div class="mx-auto max-w-2xl rounded-2xl border border-white/12 bg-ink-800/95 backdrop-blur p-3 sm:p-5 shadow-2xl">
+    <p class="text-xs sm:text-sm text-white/80">
+      <span class="sm:hidden">
+        Can we use the TikTok pixel? It sets a cookie to measure our ads and, if you buy,
+        shares a hashed email and the total with TikTok. The app stays 100% local.
+      </span>
+      <span class="hidden sm:inline">
+        We'd like to use the TikTok pixel to measure which ads bring people here and whether they buy.
+        It sets a cookie and, if you buy, shares a hashed email and the order total with TikTok.
+        The app itself stays 100% local either way.
+      </span>
       <a href={`${base}privacy/`} class="underline underline-offset-2 text-white">Details</a>
     </p>
-    <div class="mt-4 flex gap-3">
-      <button type="button" data-consent="denied" class="btn-ghost flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold">Decline</button>
-      <button type="button" data-consent="granted" class="btn-ghost flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold">Accept</button>
+    <div class="mt-2 sm:mt-4 flex gap-3">
+      <button type="button" data-consent="denied" class="btn-ghost flex-1 rounded-xl px-4 py-2 sm:py-2.5 text-sm font-semibold">Decline</button>
+      <button type="button" data-consent="granted" class="btn-ghost flex-1 rounded-xl px-4 py-2 sm:py-2.5 text-sm font-semibold">Accept</button>
     </div>
   </div>
 </div>
