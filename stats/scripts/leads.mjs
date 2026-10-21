@@ -22,7 +22,7 @@ ${DOWNLOAD}
 
 It's free for 5 days, no card and no account. Open it on your computer and pick Mac or Windows.
 
-Mars, LinerFM`;
+LinerFM`;
 
 const ROME = new Intl.DateTimeFormat("it-IT", { timeZone: "Europe/Rome", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 const rome = (ts) => ROME.format(new Date(ts)).replace(",", "");
