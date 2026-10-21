@@ -37,6 +37,24 @@ describe("handleHit", () => {
     expect(rows[0][5]).toBe("apple-silicon");
   });
 
+  it("accepts the custom domain and answers with its own origin for CORS", async () => {
+    for (const origin of ["https://linerfm.xyz", "https://www.linerfm.xyz"]) {
+      const { db, rows } = fakeDB();
+      const res = await handleHit(req(VIEW, { Origin: origin }), { DB: db }, "IT", 1);
+      expect(res.status).toBe(204);
+      expect(res.headers.get("Access-Control-Allow-Origin")).toBe(origin);
+      expect(rows).toHaveLength(1);
+    }
+  });
+
+  it("refuses look-alike hosts of the custom domain", async () => {
+    const { db, rows } = fakeDB();
+    for (const origin of ["http://linerfm.xyz", "https://linerfm.xyz.evil.example", "https://evillinerfm.xyz"]) {
+      expect((await handleHit(req(VIEW, { Origin: origin }), { DB: db }, "IT", 1)).status).toBe(403);
+    }
+    expect(rows).toHaveLength(0);
+  });
+
   it("refuses other origins", async () => {
     const { db, rows } = fakeDB();
     const res = await handleHit(req(VIEW, { Origin: "https://evil.example" }), { DB: db }, "IT", 1);

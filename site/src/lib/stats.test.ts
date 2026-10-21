@@ -6,6 +6,10 @@ describe("shouldCount", () => {
   it("counts a real visitor on the published site", () => {
     expect(shouldCount(ok)).toBe(true);
   });
+  it("counts the custom domain, with and without www", () => {
+    expect(shouldCount({ ...ok, hostname: "linerfm.xyz" })).toBe(true);
+    expect(shouldCount({ ...ok, hostname: "www.linerfm.xyz" })).toBe(true);
+  });
   it("skips localhost and previews", () => {
     expect(shouldCount({ ...ok, hostname: "localhost" })).toBe(false);
     expect(shouldCount({ ...ok, hostname: "127.0.0.1" })).toBe(false);
