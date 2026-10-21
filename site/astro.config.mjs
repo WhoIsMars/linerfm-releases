@@ -12,6 +12,7 @@ const BASE = process.env.PUBLIC_BASE_PATH || "/linerfm-releases";
 export default defineConfig({
   site: SITE,
   base: BASE,
-  integrations: [react(), sitemap()],
+  // /tt è solo un rimando per la bio di TikTok: fuori dalla sitemap.
+  integrations: [react(), sitemap({ filter: (page) => !/\/tt\/?$/.test(page) })],
   vite: { plugins: [tailwindcss()] },
 });

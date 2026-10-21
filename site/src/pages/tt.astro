@@ -1,0 +1,23 @@
+---
+// Indirizzo corto per la bio di TikTok, dove il link non si clicca: chi scrive
+// linerfm.xyz/tt arriva sulla home con ?src=tiktok, e track() conta la visita come TikTok.
+// Nessun layout: la pagina vive il tempo del rimando, e non va indicizzata.
+const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
+const target = `${base}?src=tiktok`;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta http-equiv="refresh" content={`0; url=${target}`} />
+    <link rel="canonical" href={new URL(base, Astro.site).href} />
+    <title>LinerFM</title>
+    <script is:inline define:vars={{ target }}>location.replace(target);</script>
+    <style>body { background: #000; color: #fff; font-family: system-ui, sans-serif; }</style>
+  </head>
+  <body>
+    <p><a href={target}>LinerFM</a></p>
+  </body>
+</html>
