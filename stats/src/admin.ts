@@ -1,7 +1,7 @@
 // Schede del pannello admin oltre alla Panoramica: Utenti, Attività, Download, Vendite, Sicurezza.
 // Stesso accesso della dashboard (link segreto o password), stesso guscio grafico (shell).
 import {
-  C, BRAND, DAY, esc, rome, ago, countryName, flag, money, icon, eventLine, reasonText, dayOf, archName, clicksText, personFeed, prettySource,
+  C, BRAND, DAY, osSplit, osByDevice, esc, rome, ago, countryName, flag, money, icon, eventLine, reasonText, dayOf, archName, clicksText, personFeed, prettySource,
   type AccessRow, type Session,
 } from "./dashboard";
 
@@ -12,7 +12,7 @@ const HASH = /^[0-9a-f]{64}$/;
 export interface LedgerEntry { hash: string; started_at: number }
 
 export interface User {
-  device: string; state: "trial" | "expired" | "license"; key: string; daysLeft: number; activeDays: number;
+  device: string; os: string; state: "trial" | "expired" | "license"; key: string; daysLeft: number; activeDays: number;
   country: string; firstSeen: number; lastSeen: number; started: number;
 }
 
@@ -22,7 +22,7 @@ export function summarizeUsers(ledger: LedgerEntry[], access: AccessRow[], now: 
   const get = (device: string) => {
     let u = users.get(device);
     if (!u) {
-      u = { device, state: "trial", key: "", daysLeft: 0, activeDays: 0, country: "", firstSeen: 0, lastSeen: 0, started: 0, days: new Set(), lastTrial: "", real: false };
+      u = { device, os: "", state: "trial", key: "", daysLeft: 0, activeDays: 0, country: "", firstSeen: 0, lastSeen: 0, started: 0, days: new Set(), lastTrial: "", real: false };
       users.set(device, u);
     }
     return u;
@@ -45,6 +45,7 @@ export function summarizeUsers(ledger: LedgerEntry[], access: AccessRow[], now: 
     if (r.country) u.country = r.country;
     if ((r.kind === "validate" || r.kind === "activate") && r.outcome === "ok" && r.key) u.key = r.key;
     if (r.kind === "trial") u.lastTrial = r.outcome;
+    if (r.os) u.os = r.os;
   }
   return [...users.values()].filter((u) => u.real).map((u) => {
     const ends = u.started + TRIAL_DAYS * DAY;
@@ -157,14 +158,15 @@ const stateOf = (st: User["state"]): [string, string] => ({ trial: ["In prova", 
 export function tabUsers(users: User[], now: number): string {
   const n = (st: User["state"]) => users.filter((u) => u.state === st).length;
   const active7 = users.filter((u) => now - u.lastSeen < 7 * DAY).length;
+  const system = (os: string) => (os === "macos" ? "Mac" : os === "windows" ? "Windows" : "");
   const rows = users.map((u) => {
     const [label, color] = stateOf(u.state);
     const trial = u.state === "license" ? "" : u.state === "trial" ? (u.daysLeft ? `${u.daysLeft} ${u.daysLeft === 1 ? "giorno" : "giorni"} rimasti` : "in corso") : u.started ? `finita il ${rome(u.started + TRIAL_DAYS * DAY).slice(0, 5)}` : "finita";
-    return `<tr><td class="mono">${esc(u.device)}</td><td><span class="state" style="--c:${color}">${label}</span></td><td>${u.key ? `<span class="mono">····${esc(u.key)}</span>` : `<span class="muted">${esc(trial)}</span>`}</td><td>${esc(u.activeDays || "")}</td><td>${esc(rome(u.firstSeen))}</td><td>${esc(ago(u.lastSeen, now))}</td><td>${u.country ? `${flag(u.country)} ${esc(countryName(u.country))}` : '<span class="muted">non noto</span>'}</td></tr>`;
+    return `<tr><td class="mono">${esc(u.device)}</td><td>${system(u.os) ? esc(system(u.os)) : '<span class="muted">non noto</span>'}</td><td><span class="state" style="--c:${color}">${label}</span></td><td>${u.key ? `<span class="mono">····${esc(u.key)}</span>` : `<span class="muted">${esc(trial)}</span>`}</td><td>${esc(u.activeDays || "")}</td><td>${esc(rome(u.firstSeen))}</td><td>${esc(ago(u.lastSeen, now))}</td><td>${u.country ? `${flag(u.country)} ${esc(countryName(u.country))}` : '<span class="muted">non noto</span>'}</td></tr>`;
   }).join("");
-  return `<section class="kpis" style="margin-top:16px">${kpi(C.blue, "mac", "Mac in tutto", users.length, `${active7} attivi negli ultimi 7 giorni`)}${kpi(C.orange, "mac", "In prova", n("trial"))}${kpi(C.gray, "mac", "Prova finita, senza licenza", n("expired"))}${kpi(C.green, "key", "Con licenza", n("license"))}</section>
-<div class="grid">${card("s12", "Tutti i Mac", "dal più recente", users.length ? `<div class="scroll"><table class="table"><thead><tr><th>Mac</th><th>Stato</th><th>Licenza o prova</th><th>Giorni attivi</th><th>Primo accesso</th><th>Ultimo accesso</th><th>Paese</th></tr></thead><tbody>${rows}</tbody></table></div>` : empty("Ancora nessun Mac ha aperto l'app."))}</div>
-<p class="foot">Mac e PC Windows insieme: l'app su Windows chiede la prova allo stesso server e finisce nello stesso registro, che non salva il sistema, quindi qui "Mac" vuol dire computer. Un computer è il suo identificativo anonimo (8 caratteri). Le prove partono dal registro delle prove gratuite (TRIAL_LEDGER, da sempre); giorni attivi, paese e licenza dal registro accessi, attivo dal 17/10. "Giorni attivi" vuoto vuol dire che il Mac non ha più aperto l'app da quando c'è il registro.</p>`;
+  return `<section class="kpis" style="margin-top:16px">${kpi(C.blue, "mac", "Computer in tutto", users.length, `${active7} attivi negli ultimi 7 giorni`, osSplit(users.map((u) => u.os)))}${kpi(C.orange, "mac", "In prova", n("trial"))}${kpi(C.gray, "mac", "Prova finita, senza licenza", n("expired"))}${kpi(C.green, "key", "Con licenza", n("license"))}</section>
+<div class="grid">${card("s12", "Tutti i computer", "dal più recente", users.length ? `<div class="scroll"><table class="table"><thead><tr><th>Computer</th><th>Sistema</th><th>Stato</th><th>Licenza o prova</th><th>Giorni attivi</th><th>Primo accesso</th><th>Ultimo accesso</th><th>Paese</th></tr></thead><tbody>${rows}</tbody></table></div>` : empty("Ancora nessun computer ha aperto l'app."))}</div>
+<p class="foot">Mac e PC Windows chiedono la prova allo stesso server. Il sistema lo scrive il registro accessi dal 21/10, quando l'app lo manda: "non noto" vuol dire un'app uscita prima, o un computer che non ha più aperto l'app da allora. Un computer è il suo identificativo anonimo (8 caratteri). Le prove partono dal registro delle prove gratuite (TRIAL_LEDGER, da sempre); giorni attivi, paese e licenza dal registro accessi, attivo dal 17/10. "Giorni attivi" vuoto vuol dire che il computer non ha più aperto l'app da quando c'è il registro.</p>`;
 }
 
 export function tabActivity(access: AccessRow[], now: number): string {
@@ -250,12 +252,14 @@ export function tabEvents(sessions: Session[], access: AccessRow[], orders: Orde
   const week = (ts: number) => now - ts < 7 * DAY;
   const visits7 = sessions.filter((p) => p.views && week(p.first)).length;
   const people7 = sessions.filter((p) => p.clicks && week(p.firstClick)).length;
-  const trials7 = access.filter((r) => r.kind === "trial" && r.outcome === "new" && week(r.ts)).length;
+  const newTrials = access.filter((r) => r.kind === "trial" && r.outcome === "new" && week(r.ts));
+  const trials7 = newTrials.length;
+  const osOf = osByDevice(access);
   const sales7 = (orders ?? []).filter((o) => o.state === "pagato" && week(o.ts)).length;
   const list = evs.length
     ? `<ul class="feed">${evs.slice(0, 200).map((e) => `<li style="--c:${e.color}"><i class="badge"></i><div><b>${esc(e.title)}</b><span>${esc(e.detail)}</span></div><time title="${esc(ago(e.ts, now))}">${esc(rome(e.ts))}</time></li>`).join("")}</ul>`
     : empty("Nessun evento negli ultimi 30 giorni.");
-  return `<section class="kpis" style="margin-top:16px">${kpi(C.blue, "eye", "Visite, 7 giorni", visits7, "", PEOPLE_RULE)}${kpi(C.indigo, "down", "Persone che hanno scaricato, 7 giorni", people7, "", "più clic della stessa persona contano uno")}${kpi(C.orange, "mac", "Prove nuove, 7 giorni", trials7, "", "server licenze: Mac e PC Windows insieme")}${kpi(C.green, "money", "Vendite, 7 giorni", sales7, "", orders ? "ordini veri su Lemon Squeezy" : "Lemon Squeezy non leggibile ora")}</section>
+  return `<section class="kpis" style="margin-top:16px">${kpi(C.blue, "eye", "Visite, 7 giorni", visits7, "", PEOPLE_RULE)}${kpi(C.indigo, "down", "Persone che hanno scaricato, 7 giorni", people7, "", "più clic della stessa persona contano uno")}${kpi(C.orange, "mac", "Prove nuove, 7 giorni", trials7, "", `server licenze: ${osSplit(newTrials.map((r) => osOf.get(r.device) ?? ""))}`)}${kpi(C.green, "money", "Vendite, 7 giorni", sales7, "", orders ? "ordini veri su Lemon Squeezy" : "Lemon Squeezy non leggibile ora")}</section>
 <div class="grid">${card("s12", "Cosa è successo", "ultimi 30 giorni, più recente in alto, ora di Roma", list)}</div>
 <p class="foot">Visite e download vengono dal sito (${PEOPLE_RULE}: una riga anche se ha premuto più pulsanti). Le tue visite contano anche qui, se non apri il sito una volta con ?notrack=1 da ogni browser che usi. Prove e licenze dal registro accessi del server licenze, attivo dal 17/10, senza i controlli orari riusciti. Vendite, rimborsi e licenze regalate da Lemon Squeezy, ordini di prova esclusi.</p>`;
 }

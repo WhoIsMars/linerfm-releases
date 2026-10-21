@@ -89,7 +89,7 @@ describe("una riga sotto ogni numero dice da dove viene", () => {
     const html = await (await handleDashboard(req(), { DB: fakeDb({ hits: REAL }), DASH_PASSWORD: "pw", LS_API_KEY: "k" }, NOW, ls([order]))).text();
     expect(html).toContain("ordini veri su Lemon Squeezy");
     expect(html).toContain("una visita = una scheda del browser");
-    expect(html).toContain("Mac e PC Windows insieme");
+    expect(html).toContain("0 Mac, 0 Windows"); // le prove divise per sistema
     expect(html).toContain("registro accessi del server licenze");
   });
 
@@ -100,10 +100,10 @@ describe("una riga sotto ogni numero dice da dove viene", () => {
     expect(html).toContain("Installer Windows");
   });
 
-  it("Utenti: il registro prove viene dal KV e non distingue Mac e Windows", async () => {
+  it("Utenti: il registro prove viene dal KV, il sistema dal registro accessi", async () => {
     const html = await (await handleDashboard(req("?tab=utenti"), { DB: fakeDb({}), DASH_PASSWORD: "pw" }, NOW, ls([]))).text();
     expect(html).toContain("TRIAL_LEDGER");
-    expect(html).toContain("Mac e PC Windows insieme");
+    expect(html).toContain("Il sistema lo scrive il registro accessi dal 21/10");
   });
 
   it("nessun trattino lungo nella pagina", async () => {
@@ -116,8 +116,8 @@ describe("una riga sotto ogni numero dice da dove viene", () => {
 
 describe("scheda Eventi", () => {
   const access = [
-    { ts: NOW - 6 * 3_600_000, kind: "trial", outcome: "new", reason: "", device: "abcd1234", key: "", country: "TT" },
-    { ts: NOW - 5 * 3_600_000, kind: "validate", outcome: "ok", reason: "", device: "abcd1234", key: "6685", country: "TT" },
+    { ts: NOW - 6 * 3_600_000, kind: "trial", outcome: "new", reason: "", device: "abcd1234", key: "", country: "TT", os: "" },
+    { ts: NOW - 5 * 3_600_000, kind: "validate", outcome: "ok", reason: "", device: "abcd1234", key: "6685", country: "TT", os: "" },
   ];
 
   it("visite, download, prove nuove e vendite in ordine di tempo, ora di Roma", () => {

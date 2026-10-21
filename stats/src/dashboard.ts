@@ -90,7 +90,22 @@ export function summarize(rows: Row[], now: number) {
 }
 
 // ── Accessi all'app (tabella `access`, scritta dal worker licenze) ───────────
-export interface AccessRow { id?: number; ts: number; kind: string; outcome: string; reason: string; device: string; key: string; country: string }
+// os: "macos" | "windows", '' per le righe di prima della colonna (21/10) e le app che non lo mandano ancora
+export interface AccessRow { id?: number; ts: number; kind: string; outcome: string; reason: string; device: string; key: string; country: string; os: string }
+
+/** "2 Mac, 1 Windows", più "N non noti" quando qualche computer non ha detto il suo sistema. */
+export function osSplit(oses: string[]): string {
+  const n = (o: string) => oses.filter((x) => x === o).length;
+  const unknown = oses.filter((x) => x !== "macos" && x !== "windows").length;
+  return `${n("macos")} Mac, ${n("windows")} Windows${unknown ? `, ${unknown} ${unknown === 1 ? "non noto" : "non noti"}` : ""}`;
+}
+
+/** L'ultimo sistema dichiarato da ogni computer: una riga vuota dopo una piena non lo cancella. */
+export function osByDevice(rows: AccessRow[]): Map<string, string> {
+  const m = new Map<string, string>();
+  for (const r of rows) if (r.device && r.os) m.set(r.device, r.os);
+  return m;
+}
 
 /** Prove, licenze vive, rifiuti, vendite. Una licenza è "viva" se si è rivalidata nelle ultime 48 ore. */
 export function summarizeAccess(rows: AccessRow[], now: number) {
@@ -110,10 +125,15 @@ export function summarizeAccess(rows: AccessRow[], now: number) {
     if (r.kind === "sale") sales.push(r.reason);
   }
   const trials = [...lastTrial.values()];
+  const os = osByDevice(rows);
+  const live = trials.filter((t) => t.outcome === "new" || t.outcome === "active");
   // le rivalide orarie riuscite sono rumore: nella cronologia restano solo il resto
   const recent = rows.filter((r) => !(r.kind === "validate" && r.outcome === "ok")).slice(-40).reverse();
   return {
-    trialing: trials.filter((t) => t.outcome === "new" || t.outcome === "active").length,
+    trialing: live.length,
+    trialingOs: live.map((t) => os.get(t.device) ?? ""),
+    // tutti i computer passati dalla prova, anche finita: il passo "aprono l'app" del percorso
+    trialsOs: trials.filter((t) => t.outcome === "new" || t.outcome === "active" || t.outcome === "expired").map((t) => os.get(t.device) ?? ""),
     expiredBack: trials.filter((t) => t.outcome === "expired").length,
     liveLicenses: [...licenses.values()].filter((l) => now - l.lastOk < 2 * DAY).length,
     refused7d,
@@ -367,7 +387,7 @@ function page(s: ReturnType<typeof summarize>, x: ReturnType<typeof summarizeAcc
     { color: C.indigo, icon: "down", label: "Persone che hanno scaricato, 7 giorni", value: d7, foot: delta(d7, d7p) || `${s.downloaders} in 30 giorni, ${s.downloads} clic sui pulsanti`,
       why: "chi ha premuto almeno un pulsante di download sul sito; più clic della stessa persona contano uno, e un clic non vuol dire installato", spark: dlByDay },
     { color: C.orange, icon: "mac", label: "Computer in prova", value: x.trialing, foot: x.expiredBack ? `${x.expiredBack} con la prova finita hanno riaperto l'app` : "prove gratuite in corso",
-      why: "dal registro accessi del server licenze (attivo dal 17/10), ultimi 30 giorni: Mac e PC Windows insieme, il server non li distingue" },
+      why: `dal registro accessi del server licenze (attivo dal 17/10), ultimi 30 giorni: ${osSplit(x.trialingOs)}; "non noto" = app uscite prima che il sistema venisse inviato, o righe di prima del 21/10` },
     { color: C.teal, icon: "key", label: "Licenze attive", value: x.liveLicenses, foot: "controllate nelle ultime 48 ore", why: "app con licenza che hanno contattato il server licenze" },
     refused24
       ? { color: C.red, icon: "alert", label: "Rifiuti, 24 ore", value: refused24, foot: "accessi negati: guarda la cronologia", why: "richieste respinte dal server licenze" }
@@ -395,7 +415,7 @@ function page(s: ReturnType<typeof summarize>, x: ReturnType<typeof summarizeAcc
   const fMax = Math.max(1, ...funnelSteps.map((f) => f.n));
   const funnel = funnelSteps.map((f, i) => {
     const prev = i ? funnelSteps[i - 1].n : 0;
-    const conv = i === 1 ? `${s.downloads} clic sui pulsanti${prev ? `, ${Math.round((f.n / prev) * 100)}% delle visite` : ""}` : i === 2 ? "registrati dal 17/10, Mac e PC Windows insieme" : i && prev ? `${Math.round((f.n / prev) * 100)}% del passo prima` : i ? "" : "ultimi 30 giorni";
+    const conv = i === 1 ? `${s.downloads} clic sui pulsanti${prev ? `, ${Math.round((f.n / prev) * 100)}% delle visite` : ""}` : i === 2 ? `registrati dal 17/10: ${osSplit(x.trialsOs)}` : i && prev ? `${Math.round((f.n / prev) * 100)}% del passo prima` : i ? "" : "ultimi 30 giorni";
     return `<li style="--c:${f.color}"><div class="fl"><span>${esc(f.label)}</span><b>${esc(f.n)}</b></div><div class="track"><i style="width:${Math.max(2, Math.round((f.n / fMax) * 100))}%"></i></div><small>${esc(conv)}</small></li>`;
   }).join("");
 
@@ -478,8 +498,11 @@ export async function handleDashboard(req: Request, env: Env, now: number, fetch
   const tab = TABS.some(([k]) => k === tabParam) ? tabParam : "panoramica";
   const since = now - 30 * DAY;
   const store = env.LS_STORE_ID ?? "406309";
-  const accessQ = () => env.DB.prepare("SELECT rowid AS id, ts, kind, outcome, reason, device, key, country FROM access WHERE ts > ? AND rowid NOT IN (SELECT id FROM dismissed) ORDER BY ts").bind(since).all<AccessRow>()
-    .then((r) => r.results ?? []).catch(() => [] as AccessRow[]);
+  const accessSql = (cols: string) => `SELECT rowid AS id, ts, kind, outcome, reason, device, key, country${cols} FROM access WHERE ts > ? AND rowid NOT IN (SELECT id FROM dismissed) ORDER BY ts`;
+  // senza la migrazione 0001_access_os.sql la colonna os non c'è: si rilegge senza, e ogni computer resta "non noto"
+  const accessQ = () => env.DB.prepare(accessSql(", os")).bind(since).all<AccessRow>()
+    .catch(() => env.DB.prepare(accessSql("")).bind(since).all<AccessRow>())
+    .then((r) => (r.results ?? []).map((x) => ({ ...x, os: x.os ?? "" }))).catch(() => [] as AccessRow[]);
   const hitsQ = () => env.DB.prepare("SELECT ts, kind, ref, src, arch, sid, country FROM hits WHERE ts > ? ORDER BY ts").bind(since).all<Row>()
     .then((r) => (r.results ?? []).filter((x) => !TEST_SOURCES.has(x.src))).catch(() => [] as Row[]);
   const ghQ = () => cachedJson<GhRelease[]>(env.DB, "github-releases", now, 30 * 60_000, () => loadGithub(fetchImpl));

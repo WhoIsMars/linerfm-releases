@@ -6,7 +6,7 @@ const NOW = Date.UTC(2026, 9, 18, 8, 0, 0);
 const AUTH = { Authorization: "Basic " + btoa("x:pw") };
 const ORIGIN = "https://stats.example";
 const noFetch = (async () => Response.json([])) as unknown as typeof fetch;
-const refused = (id: number, reason: string) => ({ id, ts: NOW - 3_600_000, kind: "trial", outcome: "refused", reason, device: "verifica", key: "", country: "IT" });
+const refused = (id: number, reason: string) => ({ id, ts: NOW - 3_600_000, kind: "trial", outcome: "refused", reason, device: "verifica", key: "", country: "IT", os: "" });
 
 function fakeDB() {
   const runs: { sql: string; v: unknown[] }[] = [];

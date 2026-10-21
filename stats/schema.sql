@@ -13,6 +13,7 @@ CREATE INDEX IF NOT EXISTS hits_ts ON hits (ts);
 
 -- Accessi all'app, scritti dal worker licenze (linerfm/worker/src/access.ts).
 -- Della chiave solo gli ultimi 4 caratteri, del Mac i primi 8 dell'hash.
+-- Su un D1 esistente la colonna os arriva da migrations/0001_access_os.sql.
 CREATE TABLE IF NOT EXISTS access (
   ts INTEGER NOT NULL,      -- epoch ms, UTC
   kind TEXT NOT NULL,       -- trial | activate | validate | deactivate | reset | sale | refund | disabled
@@ -20,7 +21,8 @@ CREATE TABLE IF NOT EXISTS access (
   reason TEXT NOT NULL,
   device TEXT NOT NULL,
   key TEXT NOT NULL,
-  country TEXT NOT NULL
+  country TEXT NOT NULL,
+  os TEXT NOT NULL DEFAULT ''  -- macos | windows, '' prima della 0001 e per i client vecchi
 );
 CREATE INDEX IF NOT EXISTS access_ts ON access (ts);
 

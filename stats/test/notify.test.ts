@@ -27,7 +27,7 @@ describe("downloadEmbed", () => {
 });
 
 const row = (a: Record<string, unknown>) => ({ ts: TICK - H, kind: "view", ref: "", src: "", arch: "", sid: "s1", country: "IT", ...a });
-const acc = (a: Record<string, unknown>) => ({ ts: TICK - H, kind: "validate", outcome: "ok", reason: "", device: "d1", key: "K", country: "IT", ...a });
+const acc = (a: Record<string, unknown>) => ({ ts: TICK - H, kind: "validate", outcome: "ok", reason: "", device: "d1", key: "K", country: "IT", os: "", ...a });
 
 describe("summaryEmbed", () => {
   const base = {
