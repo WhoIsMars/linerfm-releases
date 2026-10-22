@@ -1,41 +1,38 @@
 ---
-// Una sola immagine, la stessa delle bio e del primo fotogramma dei video: il
-// desktop che diventa la canzone. Titolo = la promessa, subito sotto la ripresa
-// vera del desktop dal vivo (Mac filmato col telefono). Il sottotitolo usa le parole delle card
-// live-desktop e widget di features.json. La presentazione da 48 s
-// resta raggiungibile da un link sotto la clip.
-//
-// La 1.0.0 per Windows non ha ancora il desktop dal vivo (arriva con la 1.1.0):
-// la riga sotto la clip lo dice. Da cambiare quando esce la 1.1.0.
+// Una sola immagine, la stessa delle bio e del primo fotogramma dei video: il desktop che
+// diventa la canzone. Dal 22/10 (confronto con iBaila) il titolo è grande e centrato e la
+// ripresa vera prende tutta la colonna sotto di lui: il prodotto è la cosa più grande della
+// pagina. Una sola azione piena, la prova; l'acquisto è una riga di testo sotto.
 import { CHECKOUT_URL } from "../config/links";
 import AmbientVideo from "./AmbientVideo.astro";
 
 const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
 ---
 <section id="top" class="relative">
-  {/* Da computer testo e clip affiancati: l'immagine sta tutta nella prima schermata. */}
-  <div class="max-w-6xl mx-auto px-5 pt-14 md:pt-16 lg:grid lg:grid-cols-[1fr_1fr] lg:gap-12 lg:items-center">
-  <div class="text-center lg:text-left">
-    <h1 class="mx-auto lg:mx-0 text-[2.6rem] md:text-[3.6rem] font-semibold leading-[1.04] tracking-[-0.03em] text-balance max-w-[16ch]">
+  <div class="max-w-6xl mx-auto px-5 pt-16 md:pt-24 text-center">
+    <h1 class="display mx-auto max-w-[14ch]">
       Your desktop plays the song you're on.
     </h1>
-    <p class="mt-5 mx-auto lg:mx-0 text-fg-2 text-base md:text-lg max-w-2xl leading-relaxed text-pretty">
+    <p class="mt-6 mx-auto max-w-[58ch] text-fg-2 text-base md:text-lg leading-relaxed text-pretty">
       Your wallpaper becomes the song: the artwork, the Spotify Canvas or the YouTube video plays under
-      your icons. Plus live lyrics and a widget that matches every album. Pay once, 10€. Try it free for 5 days.
+      your icons. Plus live lyrics and a widget that matches every album, on your Mac or PC.
     </p>
     {/* Solo su telefono (.phone-only in global.css): l'app non si installa lì, i pulsanti restano. */}
     <p class="phone-only mt-4 mx-auto max-w-sm text-fg-2 text-sm leading-snug text-pretty">
       LinerFM runs on Mac and Windows. Open this page on your computer to install it.
     </p>
-    <div class="mt-8 flex flex-wrap justify-center lg:justify-start gap-3">
-      <a href="#download" class="btn-primary font-semibold px-6 py-3 rounded-control">Try free for 5 days</a>
-      <a href={CHECKOUT_URL} class="lemonsqueezy-button btn-ghost font-semibold px-6 py-3 rounded-control">Buy · 10€</a>
+    <div class="mt-9 flex flex-col items-center gap-3">
+      <a href="#download" class="btn-primary font-semibold text-base px-7 py-3.5 rounded-full">Try free for 5 days</a>
+      <p class="text-sm text-fg-3">
+        Then 10€ once, no subscription.
+        <a href={CHECKOUT_URL} class="lemonsqueezy-button text-fg-2 underline underline-offset-4 hover:text-fg">Buy · 10€</a>
+      </p>
     </div>
-    <p class="mt-5 text-xs text-fg-3 tracking-wide">Spotify, Apple Music and YouTube Music · Mac &amp; Windows · No account · No card for the trial</p>
+    <p class="mt-6 text-xs text-fg-3 tracking-wide">Spotify, Apple Music and YouTube Music · Mac &amp; Windows · No account · No card for the trial</p>
   </div>
 
-  <div class="max-w-2xl mx-auto mt-12 lg:mt-0 lg:max-w-none">
-    <div class="panel p-2 md:p-2.5">
+  <div class="max-w-6xl mx-auto px-3 md:px-5 mt-14 md:mt-16">
+    <div class="lit panel p-1.5 md:p-2.5" style={`--art:url(${base}video/clip-live-desktop.jpg)`}>
       <AmbientVideo
         src="video/clip-live-desktop.mp4"
         webm="video/clip-live-desktop.webm"
@@ -48,6 +45,5 @@ const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
       Real footage on a Mac. The live wallpaper runs on Windows too.
       <a href={`${base}video/explainer.mp4`} class="underline underline-offset-2 hover:text-fg">Watch the 48-second tour</a>
     </p>
-  </div>
   </div>
 </section>

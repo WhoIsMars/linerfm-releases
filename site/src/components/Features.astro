@@ -26,11 +26,11 @@ const cards = [
 const first = cards.slice(0, SHOWN);
 const rest = cards.slice(SHOWN);
 ---
-<section id="features" class="max-w-6xl mx-auto px-5 py-20">
-  <h2 class="text-3xl font-semibold tracking-[-0.02em] text-center">And everything around it</h2>
-  <p class="mt-3 text-center text-fg-3">The details that make it feel like it belongs on your desktop.</p>
+<section id="features" class="max-w-6xl mx-auto px-5 pt-28 md:pt-36">
+  <p class="eyebrow">More</p>
+  <h2 class="display-2 mt-4 max-w-[18ch]">And everything around it. <span class="display-dim">{cards.length} more details.</span></h2>
 
-  <div class="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+  <div class="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
     {first.map((f) => (
       <div class="panel-quiet p-5">
         {f.since === CURRENT && (

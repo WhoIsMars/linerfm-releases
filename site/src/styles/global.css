@@ -295,3 +295,50 @@ footer a[href]::after {
 .phone-only { display: none; }
 @media (max-width: 767px) { .phone-only { display: block; } }
 :root.ua-mobile .phone-only { display: block; }
+
+/* ── Titoli da vetrina (22/10, confronto con iBaila) ─────────────────────────────
+   Stesso font di sistema dell'app, ma a scala di copertina: pesante, stretto, righe
+   corte. Il secondo tono è grigio (.display-dim), mai un gradiente né un colore: il
+   verde resta delle azioni. L'etichetta sopra (.eyebrow) dice di cosa parla la sezione. */
+.display {
+  font-size: clamp(2.6rem, 7.2vw, 5.6rem);
+  line-height: 0.98;
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+.display-2 {
+  font-size: clamp(2.2rem, 5.2vw, 4.2rem);
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+.display-dim { color: var(--color-fg-3); }
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-fg-3);
+}
+
+/* ── Schermo acceso (22/10) ──────────────────────────────────────────────────────
+   Dietro ogni ripresa, la sua stessa immagine sfocata: la luce che esce dallo schermo
+   ha i colori della copertina che sta suonando, come il desktop dal vivo e la sua luce
+   sul bordo. Nessun colore scelto a mano, e mai il verde. L'immagine arriva da
+   --art (il poster del video). */
+.lit { position: relative; isolation: isolate; }
+.lit::before {
+  content: "";
+  position: absolute;
+  inset: -4% -3%;
+  z-index: -1;
+  border-radius: 48px;
+  background: var(--art) center / cover no-repeat;
+  filter: blur(56px) saturate(1.3);
+  opacity: 0.5;
+  pointer-events: none;
+}
+.lit-soft::before { opacity: 0.32; filter: blur(48px) saturate(1.2); }
+@media (prefers-reduced-transparency: reduce) { .lit::before { display: none; } }

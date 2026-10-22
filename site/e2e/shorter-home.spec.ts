@@ -2,6 +2,8 @@ import { test, expect } from "@playwright/test";
 
 // 22/10: la home aveva 9 sezioni e il prezzo arrivava dopo il 72% della pagina (8.159 px su 11.377 a 1280 px).
 // Accorciata a 7: WhatsNew e Promise tolte, 8 feature in vista e le altre dietro "See all".
+// Stesso giorno, dopo il confronto con iBaila: 8 sezioni con "Works with", titoli a scala di copertina;
+// il limite che conta resta il prezzo prima del 65% della pagina.
 test.beforeEach(async ({ page }) => {
   await page.route("**/linerfm-site-stats.piccoletto.workers.dev/**", (r) => r.fulfill({ status: 204 }));
   await page.route("**/api.github.com/**", (r) => r.fulfill({ status: 503 }));
@@ -10,14 +12,14 @@ test.beforeEach(async ({ page }) => {
 test.describe("on a desktop (1280 px)", () => {
   test.use({ viewport: { width: 1280, height: 800 } });
 
-  test("the price comes before 65% of the page, in at most 7 sections", async ({ page }) => {
+  test("the price comes before 65% of the page, in at most 8 sections", async ({ page }) => {
     await page.goto("/");
     const r = await page.evaluate(() => ({
       sections: document.querySelectorAll("main > section").length,
       height: document.documentElement.scrollHeight,
       pricing: document.querySelector("#pricing")!.getBoundingClientRect().top + scrollY,
     }));
-    expect(r.sections).toBeLessThanOrEqual(7);
+    expect(r.sections).toBeLessThanOrEqual(8);
     expect(r.pricing / r.height).toBeLessThan(0.65);
   });
 
@@ -67,4 +69,41 @@ test("a comparison names its sources and the day they were read", async ({ page 
   await expect(page.getByRole("table")).toBeVisible();
   await expect(page.getByText("checked on 22 October 2026", { exact: false })).toBeVisible();
   await expect(page.getByRole("link", { name: "Boring Notch on GitHub" })).toHaveAttribute("href", "https://github.com/TheBoredTeam/boring.notch");
+});
+
+// Dal confronto con iBaila (22/10): una sola azione piena nell'hero, con cosa funziona, i passi prima del download.
+test.describe("after the iBaila comparison (1280 px)", () => {
+  test.use({ viewport: { width: 1280, height: 800 } });
+
+  test("the hero has one filled button, the trial; Buy is a text link", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("#top .btn-primary")).toHaveCount(1);
+    await expect(page.locator("#top .btn-primary")).toHaveText("Try free for 5 days");
+    await expect(page.locator("#top .btn-ghost")).toHaveCount(0);
+  });
+
+  test("Works with names the four sources and both systems", async ({ page }) => {
+    await page.goto("/");
+    const w = page.locator("#works-with");
+    for (const name of ["Spotify", "Apple Music", "YouTube Music", "SoundCloud", "Mac", "Windows"]) {
+      await expect(w.getByRole("heading", { name, exact: true }).or(w.getByText(name, { exact: true }))).toBeVisible();
+    }
+  });
+
+  test("the security warning is step 2 of the setup, before the download buttons", async ({ page }) => {
+    await page.goto("/");
+    const steps = page.locator("#download ol > li h3");
+    await expect(steps).toHaveText(["Download", "Open it once", "Connect your music", "Press play"]);
+  });
+
+  test("the cookie banner sits in a corner and leaves the hero button free", async ({ page }) => {
+    await page.goto("/");
+    const banner = page.locator("#tt-consent");
+    await expect(banner).toBeVisible();
+    const b = (await banner.boundingBox())!;
+    const btn = (await page.locator("#top .btn-primary").boundingBox())!;
+    const overlaps = b.x < btn.x + btn.width && btn.x < b.x + b.width && b.y < btn.y + btn.height && btn.y < b.y + b.height;
+    expect(overlaps).toBe(false);
+    expect(b.width).toBeLessThanOrEqual(400);
+  });
 });

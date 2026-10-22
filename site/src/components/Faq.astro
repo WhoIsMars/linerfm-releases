@@ -1,4 +1,5 @@
 ---
+import { DISCORD_URL } from "../config/links";
 // Prima le obiezioni che fermano un download (sicurezza, avvisi, prova, rimborsi), poi il resto.
 // L'id va nell'evento faq_open (BaseLayout): dice quale domanda apre chi non scarica. Max 20 caratteri.
 const faqs = [
@@ -14,12 +15,16 @@ const faqs = [
   { id: "data", q: "Where does my data go?", a: "Nowhere. No account, no telemetry. Your listening data and keys stay on your computer." },
 ];
 ---
-<section id="faq" class="max-w-3xl mx-auto px-5 py-20">
-  <h2 class="text-3xl font-semibold tracking-[-0.02em] text-center">FAQ</h2>
-  <div class="mt-10 divide-y divide-hairline border-y border-hairline">
+<section id="faq" class="max-w-6xl mx-auto px-5 pt-28 md:pt-36 pb-20 grid md:grid-cols-[1fr_1.6fr] gap-10 md:gap-16 scroll-mt-16">
+  <div class="md:sticky md:top-24 self-start">
+    <p class="eyebrow">FAQ</p>
+    <h2 class="display-2 mt-4">Questions, <span class="display-dim">answered.</span></h2>
+    <p class="mt-5 text-sm text-fg-3 leading-relaxed max-w-[34ch]">Something else? Ask on <a href={DISCORD_URL} class="underline underline-offset-2 hover:text-fg">Discord</a>.</p>
+  </div>
+  <div class="space-y-3">
     {faqs.map((f) => (
-      <details class="group py-4" data-faq={f.id}>
-        <summary class="flex items-center justify-between cursor-pointer list-none font-medium">
+      <details class="group panel-quiet px-5 py-4" data-faq={f.id}>
+        <summary class="flex items-center justify-between gap-4 cursor-pointer list-none font-medium">
           {f.q}
           <span class="text-fg-3 group-open:rotate-45 transition-transform text-xl leading-none" aria-hidden="true">+</span>
         </summary>

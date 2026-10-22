@@ -2,6 +2,9 @@
 import { CHECKOUT_URL } from "../config/links";
 // Le tre promesse che prima stavano in una sezione a sé (Promise, tolta il 22/10)
 // sono entrate qui: con cosa funziona e dove restano i dati stanno accanto al prezzo.
+// Dal 22/10 (confronto con iBaila): titolo grande, icona dell'app, prezzo a scala di
+// copertina, una riga di fiducia sotto il pulsante. Lemon Squeezy è il Merchant of Record
+// (privacy.astro), quindi le tasse le gestisce lui.
 const perks = [
   "One-time purchase, no subscription",
   "Works with Spotify, Apple Music and YouTube Music",
@@ -9,25 +12,34 @@ const perks = [
   "One active device at a time, move your license anytime",
   "Runs locally, no account and no telemetry",
 ];
+const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
 ---
-<section id="pricing" class="max-w-3xl mx-auto px-5 py-20">
-  <h2 class="text-3xl font-semibold tracking-[-0.02em] text-center">Simple pricing</h2>
-  {/* La card era verde su verde: il prezzo si perdeva dentro il colore del
-      pulsante. Ora è un pannello come gli altri, e il verde resta un punto solo,
-      quello su cui si clicca. */}
-  <div class="mt-10 panel p-8 md:p-10">
-    <div class="flex items-baseline gap-2">
-      <span class="text-5xl font-semibold tracking-[-0.03em] tabular-nums">10€</span>
-      <span class="text-fg-3">one-time</span>
+<section id="pricing" class="max-w-6xl mx-auto px-5 pt-28 md:pt-36 pb-8 scroll-mt-16">
+  <div class="text-center">
+    <p class="eyebrow">Pricing</p>
+    <h2 class="display-2 mt-4 mx-auto max-w-[16ch]">10€, once. <span class="display-dim">Every feature, both systems.</span></h2>
+  </div>
+  <div class="mt-14 mx-auto max-w-md lit lit-soft panel p-8 md:p-10" style={`--art:url(${base}video/clip-live-desktop.jpg)`}>
+    <div class="flex items-center gap-3">
+      <img src={`${base}icon-512.png`} alt="" width="44" height="44" class="w-11 h-11" loading="lazy" />
+      <div>
+        <p class="font-semibold">LinerFM</p>
+        <p class="text-xs text-fg-3">for Mac and Windows</p>
+      </div>
+    </div>
+    <div class="mt-7 flex items-baseline gap-2">
+      <span class="text-6xl font-bold tracking-[-0.045em] tabular-nums">10€</span>
+      <span class="text-fg-3 leading-tight">once.<br />No subscription.</span>
     </div>
     <ul class="mt-7 space-y-3">
       {perks.map((p) => (
         <li class="flex items-start gap-3 text-sm text-fg-2">
-          <span class="mt-0.5 text-mint-300" aria-hidden="true">✓</span><span>{p}</span>
+          <span class="mt-0.5 text-fg-3" aria-hidden="true">✓</span><span>{p}</span>
         </li>
       ))}
     </ul>
-    <a href={CHECKOUT_URL} class="lemonsqueezy-button btn-primary mt-8 block text-center font-semibold px-6 py-3.5 rounded-control">Buy LinerFM · 10€</a>
-    <p class="mt-4 text-center text-xs text-fg-3">5-day free trial, no card needed. After the trial a license is required: there is no limited free tier.</p>
+    <a href={CHECKOUT_URL} class="lemonsqueezy-button btn-primary mt-8 block text-center font-semibold px-6 py-3.5 rounded-full">Buy LinerFM · 10€</a>
+    <p class="mt-4 text-center text-xs text-fg-3">Secure checkout by Lemon Squeezy, taxes handled for you.</p>
+    <p class="mt-1 text-center text-xs text-fg-3">5-day free trial first, no card needed. After the trial a license is required: there is no limited free tier.</p>
   </div>
 </section>

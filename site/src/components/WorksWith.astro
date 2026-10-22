@@ -1,0 +1,53 @@
+---
+// Con cosa funziona, in un colpo d'occhio (22/10, sul modello della sezione "Works with" di
+// iBaila). Ogni frase viene da FAQ e card di features.json: Apple Music è seguita su widget,
+// notch e tray solo su Mac; YouTube Music e SoundCloud suonano nel browser.
+import { ICONS } from "../data/brand-icons";
+
+const sources = [
+  { name: "Spotify", where: "App", icon: ICONS.spotify, d: "The full source: search, your playlists, Canvas videos and the AI tools. What you pick plays straight in Spotify." },
+  { name: "Apple Music", where: "App, on the Mac", icon: ICONS.applemusic, d: "Followed on the widget, the notch and the tray, on the Mac. Keep listening in the Music app." },
+  { name: "YouTube Music", where: "In your browser", icon: ICONS.youtubemusic, d: "Search, your playlists, your likes and the AI tools. You sign in to YouTube Music in Chrome, nothing to paste." },
+  { name: "SoundCloud", where: "In your browser", icon: ICONS.soundcloud, d: "Play a track, a playlist or a Mix in Chrome, and LinerFM follows it with sharp artwork and play, pause and skip." },
+];
+const systems = [
+  { name: "Mac", req: "macOS 11 or later, Apple Silicon and Intel", icon: ICONS.apple },
+  { name: "Windows", req: "Windows 10 and 11, 64-bit", icon: ICONS.windows },
+];
+---
+<section id="works-with" class="max-w-6xl mx-auto px-5 pt-28 md:pt-36" aria-labelledby="works-title">
+  <p class="eyebrow">Works with</p>
+  <h2 id="works-title" class="display-2 mt-4 max-w-[16ch]">
+    Wherever you listen. <span class="display-dim">Four sources, one app.</span>
+  </h2>
+  <p class="mt-6 max-w-[58ch] text-fg-2 leading-relaxed text-pretty">
+    Pick your source once and the whole app follows it.
+  </p>
+
+  <ul class="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    {sources.map((s) => (
+      <li class="panel-quiet p-6 flex flex-col">
+        <svg viewBox="0 0 24 24" width="28" height="28" class="text-fg" fill="currentColor" aria-hidden="true"><path d={s.icon} /></svg>
+        <h3 class="mt-5 font-semibold text-lg">{s.name}</h3>
+        <p class="mt-1 eyebrow !tracking-[0.1em] !text-[0.68rem]">{s.where}</p>
+        <p class="mt-3 text-sm text-fg-3 leading-relaxed">{s.d}</p>
+      </li>
+    ))}
+  </ul>
+
+  <div class="mt-4 panel grid md:grid-cols-[1.3fr_1fr_1fr] divide-y md:divide-y-0 md:divide-x divide-hairline">
+    <div class="p-6 md:p-7">
+      <h3 class="font-semibold text-lg">On your Mac, and on your PC.</h3>
+      <p class="mt-2 text-sm text-fg-3 leading-relaxed">The same widget, lyrics, search and live desktop on both. On Windows the notch becomes a bar at the top of the screen.</p>
+    </div>
+    {systems.map((o) => (
+      <div class="p-6 md:p-7 flex items-center gap-4">
+        <svg viewBox="0 0 24 24" width="26" height="26" class="shrink-0 text-fg" fill="currentColor" aria-hidden="true"><path d={o.icon} /></svg>
+        <div>
+          <p class="font-semibold">{o.name}</p>
+          <p class="text-sm text-fg-3">{o.req}</p>
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
