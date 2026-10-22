@@ -1,0 +1,121 @@
+---
+// Pagina per chi arriva da una ricerca ("spotify lyrics desktop", "notchnook alternative"...):
+// stessa struttura di /windows, un'idea sola, la ripresa vera, cosa si ottiene, un confronto
+// onesto se c'è, le domande, i due pulsanti. Le frasi su LinerFM vengono dalle card di
+// features.json; quelle sugli altri prodotti dalle fonti elencate in `compare.sources`,
+// lette il giorno scritto in `compare.checked`. Mai dire che un altro "non ha" qualcosa:
+// solo che la sua pagina non lo dice.
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Nav from "./Nav.astro";
+import AmbientVideo from "./AmbientVideo.astro";
+import Footer from "./Footer.astro";
+import { CHECKOUT_URL } from "../config/links";
+
+interface Item { t: string; d: string }
+interface Compare {
+  them: string;
+  rows: [string, string, string][];
+  verdict: string;
+  checked: string;
+  sources: { t: string; url: string }[];
+}
+interface Props {
+  title: string;
+  description: string;
+  eyebrow: string;
+  h1: string;
+  lead: string;
+  clip: { src: string; webm?: string; alt: string };
+  featuresTitle: string;
+  features: Item[];
+  compare?: Compare;
+  faq: { q: string; a: string }[];
+}
+const { title, description, eyebrow, h1, lead, clip, featuresTitle, features, compare, faq } = Astro.props;
+const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
+const faqLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+});
+---
+<BaseLayout title={title} description={description}>
+  <script type="application/ld+json" set:html={faqLd} />
+  <Nav />
+  <main id="main-content">
+    <section class="max-w-5xl mx-auto px-5 pt-16 pb-10 grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <p class="text-sm text-fg-3">{eyebrow}</p>
+        <h1 class="mt-2 text-4xl md:text-5xl font-semibold tracking-[-0.03em] text-balance">{h1}</h1>
+        <p class="mt-5 text-lg text-fg-2 text-pretty">{lead}</p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href={`${base}#download`} class="btn-primary font-semibold px-6 py-3 rounded-control">Try free for 5 days</a>
+          <a href={CHECKOUT_URL} class="lemonsqueezy-button btn-ghost font-semibold px-6 py-3 rounded-control">Buy · 10€</a>
+        </div>
+        <p class="mt-3 text-xs text-fg-3">Mac &amp; Windows · No account · No card for the trial</p>
+      </div>
+      <div class="panel p-2">
+        <AmbientVideo src={clip.src} webm={clip.webm} poster={clip.src.replace(/\.mp4$/, ".jpg")} description={clip.alt} videoClass="rounded-[10px] bg-ink-900" />
+      </div>
+    </section>
+
+    <section class="max-w-5xl mx-auto px-5 py-12">
+      <h2 class="text-2xl font-semibold tracking-[-0.02em]">{featuresTitle}</h2>
+      <ul class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {features.map((f) => (
+          <li class="panel p-5">
+            <h3 class="font-semibold">{f.t}</h3>
+            <p class="mt-2 text-sm text-fg-3">{f.d}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    {compare && (
+      <section class="max-w-5xl mx-auto px-5 py-12" aria-labelledby="compare-title">
+        <h2 id="compare-title" class="text-2xl font-semibold tracking-[-0.02em]">LinerFM and {compare.them}, side by side</h2>
+        <div class="mt-6 panel overflow-x-auto">
+          <table class="w-full text-sm text-left">
+            <thead class="text-fg-3">
+              <tr class="border-b border-hairline">
+                <th scope="col" class="p-4 font-medium"></th>
+                <th scope="col" class="p-4 font-semibold text-fg">LinerFM</th>
+                <th scope="col" class="p-4 font-semibold text-fg">{compare.them}</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-hairline">
+              {compare.rows.map(([label, us, them]) => (
+                <tr>
+                  <th scope="row" class="p-4 font-medium text-fg-2 align-top">{label}</th>
+                  <td class="p-4 text-fg-2 align-top">{us}</td>
+                  <td class="p-4 text-fg-3 align-top">{them}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p class="mt-6 text-fg-2 leading-relaxed text-pretty">{compare.verdict}</p>
+        <p class="mt-4 text-xs text-fg-3">
+          {compare.them} facts checked on {compare.checked} from:
+          {compare.sources.map((s, i) => (
+            <>{i > 0 && ", "}<a href={s.url} class="underline hover:text-fg" rel="nofollow noopener">{s.t}</a></>
+          ))}. Prices and features change: their own page has the final word.
+        </p>
+      </section>
+    )}
+
+    <section class="max-w-3xl mx-auto px-5 py-12">
+      <h2 class="text-2xl font-semibold tracking-[-0.02em]">Questions</h2>
+      <dl class="mt-6 space-y-5">
+        {faq.map((f) => (
+          <div class="panel p-5">
+            <dt class="font-semibold">{f.q}</dt>
+            <dd class="mt-2 text-sm text-fg-3">{f.a}</dd>
+          </div>
+        ))}
+      </dl>
+      <p class="mt-8 text-sm text-fg-3"><a href={base} class="underline hover:text-fg">See everything LinerFM does</a>.</p>
+    </section>
+  </main>
+  <Footer />
+</BaseLayout>

@@ -1,0 +1,43 @@
+---
+// Per chi cerca "spotify widget windows 11 rainmeter". Fatti letti il 22/10/2026 su rainmeter.net
+// e nella documentazione della misura NowPlaying (Spotify non è tra i player elencati).
+import LandingPage from "../../components/LandingPage.astro";
+---
+<LandingPage
+  title="A Spotify widget for Windows without Rainmeter skins | LinerFM"
+  description="Rainmeter is free and endlessly customizable, but Spotify is not one of the players its NowPlaying measure lists. LinerFM is a Spotify widget with lyrics that works after install. Windows 10 and 11."
+  eyebrow="Compare"
+  h1="Rainmeter for Spotify, or something that just works"
+  lead="Rainmeter can draw anything, if you find or write the right skin. LinerFM does one thing: the song on your desktop, with its lyrics, the moment you connect Spotify."
+  clip={{ src: "video/clip-windows.mp4", webm: "video/clip-windows.webm", alt: "LinerFM on Windows 11: the widget follows the song, the lyrics run across the top of the screen, and the widget changes look from its menu" }}
+  featuresTitle="What LinerFM does on Windows"
+  features={[
+    { t: "A Spotify widget", d: "A transparent, always-on now-playing widget that re-colors itself from each album." },
+    { t: "Lyrics across the top", d: "Synced lyrics float at the top of the screen while you work or play." },
+    { t: "Search from any app", d: "Ctrl+Alt+K, type a song, album or artist, Enter. Spotify never comes to the front." },
+    { t: "A live desktop", d: "Your wallpaper becomes the song: the artwork or the Spotify Canvas plays under your icons." },
+    { t: "Several looks", d: "From the widget menu: a cover card, a full poster, the terminal theme or a slim bar." },
+    { t: "Updates on their own", d: "Install once, for your user only, no admin rights. Updates install on their own." },
+  ]}
+  compare={{
+    them: "Rainmeter",
+    rows: [
+      ["Price", "10€ once, after a free 5-day trial", "Free (GNU GPL v2)"],
+      ["Runs on", "Windows 10 and 11, and macOS 11 or later", "Windows 7 to 11"],
+      ["Spotify", "Built in: connect it and the widget follows", "Not one of the players its NowPlaying measure lists"],
+      ["Lyrics", "Synced, across the top of the screen", "NowPlaying can fetch lyrics for local files tagged with artist and title"],
+      ["Setup", "Install, connect, done", "Pick or write a skin, then configure it"],
+    ],
+    verdict: "If you love building your desktop piece by piece, Rainmeter is free and has no limits. If you want the song, its lyrics and its colors on your desktop without hunting for skins, LinerFM works the moment you install it.",
+    checked: "22 October 2026",
+    sources: [
+      { t: "rainmeter.net", url: "https://www.rainmeter.net/" },
+      { t: "NowPlaying measure docs", url: "https://docs.rainmeter.net/manual/measures/nowplaying/" },
+    ],
+  }}
+  faq={[
+    { q: "Do I need Rainmeter or Wallpaper Engine for LinerFM?", a: "No. LinerFM is its own app: install it, connect Spotify, and the widget is on your desktop." },
+    { q: "Windows says it protected my PC. Is that normal?", a: "Yes. The installer isn't code signed yet, so SmartScreen warns on first run. Click \"More info\", then \"Run anyway\"." },
+    { q: "How much is it?", a: "Free for 5 days with every feature, no card. Then 10€ once, no subscription." },
+  ]}
+/>

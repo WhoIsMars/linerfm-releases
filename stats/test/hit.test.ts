@@ -92,6 +92,14 @@ describe("handleHit", () => {
     expect(waits).toHaveLength(1);
   });
 
+  // Dove si fermano le persone che non scaricano: arrivo al prezzo e domanda della FAQ aperta.
+  it("stores reaching the price and opening a FAQ question, with the question id", async () => {
+    const { db, rows } = fakeDB();
+    expect((await handleHit(req({ ...VIEW, k: "pricing_view" }), { DB: db }, "IT", 1)).status).toBe(204);
+    expect((await handleHit(req({ ...VIEW, k: "faq_open", a: "warning-mac" }), { DB: db }, "IT", 2)).status).toBe(204);
+    expect(rows.map((r) => [r[1], r[5]])).toEqual([["pricing_view", ""], ["faq_open", "warning-mac"]]);
+  });
+
   it("refuses an unknown kind", async () => {
     const { db, rows } = fakeDB();
     expect((await handleHit(req({ ...VIEW, k: "purchase" }), { DB: db }, "IT", 1)).status).toBe(400);

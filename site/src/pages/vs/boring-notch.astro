@@ -1,0 +1,41 @@
+---
+// "LinerFM o Boring Notch": confronto onesto. Boring Notch è gratis e GPL: non si dice che è
+// peggiore, si dice per chi è meglio. Fatti letti il 22/10/2026 dal README del repo e dall'API
+// release di GitHub (v2.7.3, 24/11/2025). Testi: il README non li cita, quindi "not mentioned".
+import LandingPage from "../../components/LandingPage.astro";
+---
+<LandingPage
+  title="LinerFM vs Boring Notch: which notch app for music? | LinerFM"
+  description="Boring Notch is a free, open-source notch app for Mac. LinerFM is a paid music app for Mac and Windows with synced lyrics, a widget and a live wallpaper. Here is which one fits you."
+  eyebrow="Compare"
+  h1="LinerFM or Boring Notch"
+  lead="Both put music in your MacBook notch. Boring Notch is free and does a bit of everything. LinerFM is all about the song: lyrics, colors, a widget and a wallpaper that plays it."
+  clip={{ src: "video/clip-notch.mp4", alt: "The notch opens into a player with transport controls, then a synced lyric line appears under it" }}
+  featuresTitle="What LinerFM adds around the notch"
+  features={[
+    { t: "Synced lyrics", d: "A karaoke line under the notch, in four styles, that follows the song line by line." },
+    { t: "A widget that matches every album", d: "The desktop widget re-colors itself from each cover as the tracks change." },
+    { t: "A live desktop", d: "Your wallpaper becomes the song: the artwork, the Spotify Canvas or the YouTube video plays under your icons." },
+    { t: "Search from any app", d: "⌘⇧K, type a song, Enter. Spotify never comes to the front." },
+    { t: "Windows too", d: "The same app on Windows 10 and 11, with a top bar in place of the notch." },
+    { t: "Your playlists, cleaned", d: "AI playlists from a prompt, and the songs you keep skipping spotted for you." },
+  ]}
+  compare={{
+    them: "Boring Notch",
+    rows: [
+      ["Price", "10€ once, after a free 5-day trial", "Free and open source (GPL-3.0), donations welcome"],
+      ["Runs on", "macOS 11 or later, Windows 10 and 11", "macOS 14 Sonoma or later"],
+      ["Music in the notch", "Player with controls and a seek bar", "Music controls with a visualizer"],
+      ["Synced lyrics", "Under the notch, in four styles", "Not mentioned in its README"],
+      ["Widget, live wallpaper, screensaver", "Yes", "Not mentioned in its README"],
+      ["Calendar, file shelf, camera mirror", "No", "Yes"],
+    ],
+    verdict: "Pick Boring Notch if you want a free, open-source notch that also holds your calendar, files and a camera mirror. Pick LinerFM if music is the point: lyrics while you work, colors from the album, a wallpaper that plays the song, and the same app on Windows.",
+    checked: "22 October 2026",
+    sources: [{ t: "Boring Notch on GitHub", url: "https://github.com/TheBoredTeam/boring.notch" }],
+  }}
+  faq={[
+    { q: "Is LinerFM open source?", a: "No. It is a paid app made by one developer, and it runs entirely on your computer: no account, no telemetry." },
+    { q: "How much is LinerFM?", a: "Free for 5 days with every feature, no card. Then 10€ once, no subscription." },
+  ]}
+/>

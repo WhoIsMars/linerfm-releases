@@ -1,0 +1,41 @@
+---
+// Per chi cerca "notchnook alternative". Il sito di NotchNook (lo.cafe) non rispondeva il
+// 22/10/2026: il prezzo viene da due recensioni, citate. Nient'altro su NotchNook è affermato.
+import LandingPage from "../../components/LandingPage.astro";
+---
+<LandingPage
+  title="A NotchNook alternative for music: lyrics and a widget, 10€ once | LinerFM"
+  description="Looking for a NotchNook alternative focused on music? LinerFM puts a player and synced lyrics in your notch, a widget on your desktop and the song on your wallpaper. Mac and Windows, 10€ once."
+  eyebrow="Compare"
+  h1="A NotchNook alternative for music"
+  lead="If what you want from the notch is the song, LinerFM does that and goes further: synced lyrics under the notch, a widget that matches every album, and a wallpaper that plays the song."
+  clip={{ src: "video/clip-live-desktop.mp4", webm: "video/clip-live-desktop.webm", alt: "A MacBook desktop playing Juice WRLD: the wallpaper takes the colors of the artwork, a Cover Flow of recent albums slides under the clock and the player bar sits at the bottom." }}
+  featuresTitle="What you get with LinerFM"
+  features={[
+    { t: "A player in the notch", d: "Transport, a draggable seek bar and quick actions, in three themes." },
+    { t: "Synced lyrics", d: "A karaoke line under the notch, in four styles." },
+    { t: "A live desktop", d: "Your wallpaper becomes the song: the artwork, the Spotify Canvas or the YouTube video plays under your icons." },
+    { t: "A widget that matches every album", d: "The desktop widget re-colors itself from each cover as the tracks change." },
+    { t: "Search from any app", d: "⌘⇧K, type a song, Enter. Spotify never comes to the front." },
+    { t: "Mac and Windows", d: "The same app on Windows 10 and 11, with a top bar in place of the notch." },
+  ]}
+  compare={{
+    them: "NotchNook",
+    rows: [
+      ["Price", "10€ once, after a free 5-day trial", "Reported at $25 once or $3 a month"],
+      ["Runs on", "macOS 11 or later, Windows 10 and 11", "Mac"],
+      ["Focus", "Music: lyrics, widget, wallpaper, playlists", "A general-purpose notch"],
+    ],
+    verdict: "NotchNook is a general notch app. LinerFM is a music app: if you mostly want to see and control the song, with its lyrics and colors, it costs 10€ once and runs on Windows too.",
+    checked: "22 October 2026 (NotchNook's own site did not load that day)",
+    sources: [
+      { t: "iMore review", url: "https://www.imore.com/apps/mac-apps/this-dollar25-app-gives-my-macbook-pro-a-dynamic-island-and-it-was-worth-every-penny" },
+      { t: "Lowyat", url: "https://lowyat.net/2024/327211/notchnook-dynamic-island-macbooks-us25" },
+    ],
+  }}
+  faq={[
+    { q: "Does LinerFM work with Apple Music?", a: "Yes, on the Mac: the widget, the notch and the tray follow Apple Music. Spotify and YouTube Music work too." },
+    { q: "Is there a subscription?", a: "No. 10€ once, after a free 5-day trial with every feature and no card." },
+    { q: "Why does macOS warn me on first launch?", a: "LinerFM isn't notarized by Apple yet (it's a solo project). The download page shows the three clicks to open it." },
+  ]}
+/>

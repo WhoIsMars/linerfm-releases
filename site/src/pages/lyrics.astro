@@ -1,0 +1,28 @@
+---
+// Per chi cerca "spotify lyrics desktop" (autocomplete Google, LinerFM-Social research 2026-10-21-seo.md).
+// Le frasi su LinerFM vengono dalle card karaoke, side-panel, screensaver e windows di features.json.
+import LandingPage from "../components/LandingPage.astro";
+---
+<LandingPage
+  title="Spotify lyrics on your desktop, Mac and Windows | LinerFM"
+  description="Synced Spotify lyrics outside the Spotify window: under the notch on a Mac, across the top of the screen on Windows, in four styles. Free for 5 days, then 10€ once."
+  eyebrow="Lyrics on your desktop"
+  h1="Spotify lyrics on your desktop"
+  lead="The lyrics follow the song line by line, outside the Spotify window: under the notch on a Mac, across the top of the screen on Windows. You keep working, the words keep coming."
+  clip={{ src: "video/clip-notch.mp4", alt: "The notch opens into a player with transport controls, then a synced lyric line appears under it" }}
+  featuresTitle="Where the lyrics show up"
+  features={[
+    { t: "Under the notch", d: "A synced karaoke line in a strip below the notch, in four typographic styles. ⇧⌘T turns it on and off." },
+    { t: "Across the top on Windows", d: "On Windows 10 and 11 the lyrics float at the top of the screen while you work or play." },
+    { t: "In a side view", d: "A thin strip on the left edge of the screen opens when your mouse touches it: artwork, controls, synced lyrics and the queue." },
+    { t: "On the screensaver", d: "Full screen artwork and lyrics when you step away, on every display you have connected." },
+    { t: "Colors from the artwork", d: "Every surface re-colors itself from the album art of the track that is playing." },
+    { t: "Nothing to set up", d: "No account and no server: LinerFM runs on your computer." },
+  ]}
+  faq={[
+    { q: "Do lyrics show for every song?", a: "For songs that have lyrics available." },
+    { q: "Does it work on Windows?", a: "Yes, on Windows 10 and 11. There the lyrics run across the top of the screen, since there is no notch." },
+    { q: "Do I have to keep the Spotify window open?", a: "No. The lyrics stay on your desktop whatever app is in front." },
+    { q: "How much is it?", a: "Free for 5 days with every feature, no card. Then 10€ once, no subscription." },
+  ]}
+/>

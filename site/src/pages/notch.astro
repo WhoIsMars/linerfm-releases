@@ -1,0 +1,28 @@
+---
+// Per chi cerca "spotify notch macbook". Le frasi vengono dalle card notch-hover, karaoke,
+// dynamic-color, volume-hud, multi-display e menubar-track di features.json.
+import LandingPage from "../components/LandingPage.astro";
+---
+<LandingPage
+  title="Spotify in your MacBook notch, with live lyrics | LinerFM"
+  description="Turn the MacBook notch into a music player: hover for the track, controls and a seek bar, with synced lyrics right under it. Spotify, Apple Music and YouTube Music. Free for 5 days."
+  eyebrow="Notch player for Mac"
+  h1="Spotify in your MacBook notch"
+  lead="Hover the notch for the track, the controls and a seek bar you can drag. Right under it, the lyrics follow the song line by line."
+  clip={{ src: "video/clip-notch.mp4", alt: "The notch opens into a player with transport controls, then a synced lyric line appears under it" }}
+  featuresTitle="What the notch does"
+  features={[
+    { t: "A player in the notch", d: "Transport, a draggable seek bar and quick actions, in three themes." },
+    { t: "Live lyrics under it", d: "A synced karaoke line in a strip below the notch, in four typographic styles." },
+    { t: "Colors from the artwork", d: "Every surface re-colors itself from the album art of the track that is playing." },
+    { t: "A volume HUD to match", d: "A custom volume overlay themed after the album art, replacing the macOS one." },
+    { t: "Every display", d: "Toggle each screen's notch independently, and duplicate the widget where you want it." },
+    { t: "The track in the menu bar", d: "What is playing, next to the menu bar icon. Trimmed to fit, and it never scrolls." },
+  ]}
+  faq={[
+    { q: "Which music apps does it follow?", a: "Spotify, Apple Music and YouTube Music. Pick your source once and the whole app follows it." },
+    { q: "What about Windows?", a: "On Windows 10 and 11 the notch becomes a bar at the top of the screen: move the pointer to the top center for controls, lyrics and Canvas video." },
+    { q: "Which Macs?", a: "macOS 11 or later, in two native builds: Apple Silicon and Intel." },
+    { q: "How much is it?", a: "Free for 5 days with every feature, no card. Then 10€ once, no subscription." },
+  ]}
+/>

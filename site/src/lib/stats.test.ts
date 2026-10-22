@@ -89,6 +89,16 @@ describe("hitPayload", () => {
     expect(hitPayload({ ...base, kind: "download", arch: "intel" }).a).toBe("intel");
     expect(hitPayload({ ...base, arch: "intel" }).a).toBe("");
   });
+  // Dove si fermano le persone che non scaricano: chi arriva al prezzo, quale domanda della FAQ apre.
+  it("counts reaching the price as its own kind, with no detail", () => {
+    const p = hitPayload({ ...base, kind: "pricing_view", arch: "intel" });
+    expect(p.k).toBe("pricing_view");
+    expect(p.a).toBe("");
+  });
+  it("says which FAQ question was opened, cleaned and within the worker's 20 characters", () => {
+    expect(hitPayload({ ...base, kind: "faq_open", arch: "Is-it-SAFE?" }).a).toBe("is-it-safe");
+    expect(hitPayload({ ...base, kind: "faq_open", arch: "a-very-long-question-id-indeed" }).a).toHaveLength(20);
+  });
 });
 
 describe("track", () => {

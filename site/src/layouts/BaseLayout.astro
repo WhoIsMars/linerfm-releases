@@ -70,6 +70,19 @@ const og = new URL(`${base}${ogImage.replace(/^\//, "")}`, Astro.site ?? "http:/
         attribute(a);
         track("checkout");
       }, true);
+      // Dove si fermano le persone che non scaricano: chi arriva al prezzo (una volta per pagina) e quale domanda apre.
+      const pricing = document.getElementById("pricing");
+      if (pricing && "IntersectionObserver" in window) {
+        const seen = new IntersectionObserver((entries) => {
+          if (!entries.some((e) => e.isIntersecting)) return;
+          seen.disconnect();
+          track("pricing_view");
+        }, { threshold: 0.4 });
+        seen.observe(pricing);
+      }
+      document.querySelectorAll<HTMLDetailsElement>("details[data-faq]").forEach((d) => {
+        d.addEventListener("toggle", () => { if (d.open) track("faq_open", d.dataset.faq); });
+      });
     </script>
     <ConsentBanner />
   </body>
