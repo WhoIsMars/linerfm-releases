@@ -19,9 +19,19 @@ test("the title is the one promise, shown by the live desktop footage", async ({
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(PROMISE);
   const hero = page.locator("#top");
   await expect(hero.locator("video source[src$='clip-live-desktop.mp4']")).toHaveCount(1);
-  // la 1.0.0 su Windows non ha il desktop dal vivo: il sito lo dice dove lo mostra
-  await expect(hero.getByText("live wallpaper is Mac only for now", { exact: false })).toBeVisible();
+  // dalla 1.1.0 il desktop dal vivo c'e' anche su Windows: il sito lo dice dove lo mostra
+  await expect(hero.getByText("The live wallpaper runs on Windows too", { exact: false })).toBeVisible();
 });
+
+// Dalla 1.1.0 Windows ha notch (come striscia in alto), screensaver e desktop dal vivo:
+// nessuna pagina deve piu' dirli solo Mac.
+for (const path of ["/", "/windows"]) {
+  test(`${path} no longer says the notch, screensaver or live desktop are Mac only`, async ({ page }) => {
+    await page.goto(path);
+    const text = await page.locator("body").innerText();
+    expect(text).not.toMatch(/Mac only/i);
+  });
+}
 
 test("the live desktop footage is shown once, in the hero", async ({ page }) => {
   await page.goto("/");

@@ -1,7 +1,7 @@
 ---
 // Pagina per chi cerca "spotify widget windows" o "lyrics on desktop windows": ogni frase
-// viene dalla card "windows" di linerfm/docs/product-surface.json (1.0.0). Notch,
-// screensaver e live desktop restano Mac, e la pagina lo dice.
+// viene dalla card "windows" di linerfm/docs/product-surface.json (1.1.0). Dalla 1.1.0
+// Windows ha anche screensaver, HUD del volume, desktop dal vivo e la striscia in alto.
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Nav from "../components/Nav.astro";
 import AmbientVideo from "../components/AmbientVideo.astro";
@@ -16,13 +16,16 @@ const features = [
   { t: "Search from any app", d: "Press Ctrl+Alt+K, type a song, album or artist, press Enter. Spotify never comes to the front." },
   { t: "Your stats and Last.fm", d: "Hours played, top artists and tracks, plays and skips for every song. Everything you play lands on your Last.fm profile." },
   { t: "AI playlists", d: "Create or extend playlists from a prompt, powered by your own free Groq key." },
+  { t: "A top bar in place of the notch", d: "Move the pointer to the top center of the screen for playback controls, lyrics and Canvas video." },
+  { t: "A live desktop", d: "Your wallpaper becomes the song: the artwork or the Spotify Canvas plays under your icons, with a player bar you can click." },
+  { t: "Screensaver and volume HUD", d: "Full-screen artwork when the PC sits idle, and a volume overlay that replaces the one of Windows." },
   { t: "Updates on their own", d: "Updates install on their own, like on the Mac." },
 ];
 const faq = [
   { q: "Does it work on Windows 10 and Windows 11?", a: "Yes, both. It installs for your user only, no admin rights needed." },
   { q: "Windows says it protected my PC. Is that normal?", a: "Yes. The installer isn't code signed yet, so SmartScreen warns on first run. Click \"More info\", then \"Run anyway\"." },
-  { q: "Which music services work on Windows?", a: "Spotify. On the Mac LinerFM also follows Apple Music and YouTube Music." },
-  { q: "Is everything from the Mac version there?", a: "Not yet. The notch, the screensaver and the live desktop are Mac only for now." },
+  { q: "Which music services work on Windows?", a: "Spotify, and YouTube, YouTube Music and SoundCloud playing in your browser." },
+  { q: "Is everything from the Mac version there?", a: "Almost. Since 1.1.0 you get the screensaver, the volume HUD, the live desktop and a top bar in place of the notch. Only the track next to the menu bar icon stays on the Mac." },
   { q: "Do I need Rainmeter or Wallpaper Engine?", a: "No. LinerFM is its own app: install it, connect Spotify, and the widget is on your desktop." },
   { q: "How much is it?", a: "Free for 5 days, then 10 € once. No subscription, no account." },
 ];
@@ -68,7 +71,7 @@ const faqLd = JSON.stringify({
           </li>
         ))}
       </ul>
-      <p class="mt-6 text-sm text-fg-3">The notch, the screensaver and the live desktop are Mac only for now. <a href={base} class="underline hover:text-fg">See everything LinerFM does on the Mac</a>.</p>
+      <p class="mt-6 text-sm text-fg-3">On Windows the notch becomes a bar at the top of the screen; the rest works like on the Mac. <a href={base} class="underline hover:text-fg">See everything LinerFM does</a>.</p>
     </section>
 
     <section class="max-w-3xl mx-auto px-5 py-12">

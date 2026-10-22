@@ -1,222 +1,364 @@
 {
   "_generated": "da docs/product-surface.json nel repo linerfm — non modificare a mano, gira scripts/sync-product-surface.mjs",
-  "updated": "2026-10-19",
+  "updated": "2026-10-22",
   "cards": [
     {
       "id": "widget",
       "t": "Desktop widget",
       "d": "A transparent, always-on now-playing widget with looping track canvases.",
-      "since": "0.1.0"
+      "since": "0.1.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "notch-hover",
       "t": "Notch bar",
       "d": "Hover the notch for transport, a draggable seek bar and quick actions, in three themes.",
-      "since": "0.7.0"
+      "since": "0.7.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "dynamic-color",
       "t": "Artwork colors",
       "d": "Every surface re-colors itself from the album art of the track that is playing.",
-      "since": "0.3.0"
+      "since": "0.3.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "search",
       "t": "Spotlight-style search",
       "d": "Hit a shortcut, type a song, album or artist, press enter. Spotify never comes to the front.",
-      "since": "0.6.0"
+      "since": "0.6.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "karaoke",
       "t": "Live lyrics",
       "d": "Synced karaoke line in a strip below the notch, in four typographic styles.",
-      "since": "0.7.0"
+      "since": "0.7.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "screensaver",
       "t": "Music screensaver",
       "d": "Full screen artwork and lyrics when you step away, on every display you have connected, each one placed exactly on its own screen.",
-      "since": "0.7.0"
+      "since": "0.7.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "multi-display",
       "t": "Independent displays",
       "d": "Duplicate the widget, choose screensaver displays, and toggle each screen's notch independently.",
-      "since": "0.10.1"
+      "since": "0.10.1",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "volume-hud",
       "t": "Volume HUD",
       "d": "A custom volume overlay themed after the album art, replacing the macOS one.",
-      "since": "0.7.0"
+      "since": "0.7.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "youtube",
       "t": "YouTube in its own window",
       "d": "Play a YouTube link in a floating LinerFM window, or leave it in your browser. Either way the widget, the notch and the lyrics follow along.",
-      "since": "0.9.0"
+      "since": "0.9.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "youtube-music",
       "t": "Your YouTube Music library",
       "d": "Search, playlists, likes, Discover and the AI tools all work on YouTube Music, not only Spotify. Pick the source once and the whole app follows it.",
-      "since": "0.9.0"
+      "since": "0.9.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "discord-presence",
       "t": "Discord presence",
       "d": "Show what you are listening to on your Discord profile. One toggle, on by default.",
-      "since": "0.8.0"
+      "since": "0.8.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "ai-playlists",
       "t": "AI playlist tools",
       "d": "Create or extend playlists from a prompt, powered by your own free Groq key.",
-      "since": "0.5.0"
+      "since": "0.5.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "discover",
       "t": "Find a playlist by describing it",
       "d": "Describe the mood you want and LinerFM finds real playlists that match, then pulls the tracks into yours.",
-      "since": "0.9.0"
+      "since": "0.9.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "previews",
       "t": "Hear it before you add it",
       "d": "Tap play on any result for a 30 second taste. Whatever you were listening to pauses, then picks back up where it left off.",
-      "since": "0.9.0"
+      "since": "0.9.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "curator",
       "t": "LinerFM AI",
       "d": "Local AI learns what you skip and keeps your playlists in shape.",
-      "since": "0.4.0"
+      "since": "0.4.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "local",
       "t": "100% local",
       "d": "No account, no telemetry, no server. Your listening data never leaves your Mac.",
-      "since": "0.1.0"
+      "since": "0.1.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "listening-stats",
       "t": "Your listening",
       "d": "Hours played, top artists and tracks, the times of day you press play, and what you have quietly cooled off on. Save a card you can post.",
-      "since": "0.10.0"
+      "since": "0.10.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "onboarding",
       "t": "Guided setup",
       "d": "Four steps that check every key and connection while you paste them, so nothing fails silently a week later.",
-      "since": "0.10.0"
+      "since": "0.10.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "connect-devices",
       "t": "Play on any device",
       "d": "Move the music to a phone, a speaker or another Mac from the widget, and see what plays next in the queue.",
-      "since": "0.10.0"
+      "since": "0.10.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "lastfm",
       "t": "Last.fm scrobbling",
       "d": "Everything you play lands on your Last.fm profile, with an offline queue that catches up on its own.",
-      "since": "0.10.0"
+      "since": "0.10.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "shortcuts",
       "t": "Your own shortcuts",
       "d": "Remap every global shortcut, or drive LinerFM from a script with linerfm:// links.",
-      "since": "0.10.0"
+      "since": "0.10.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "menubar-track",
       "t": "Track in the menu bar",
       "d": "What is playing, next to the menu bar icon. Trimmed to fit, and it never scrolls.",
-      "since": "0.10.0"
+      "since": "0.10.0",
+      "platforms": [
+        "mac"
+      ]
     },
     {
       "id": "new-look",
       "t": "A real Mac app",
       "d": "A glass sidebar, a library of covers, and Settings in panes like System Settings.",
-      "since": "0.11.0"
+      "since": "0.11.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "auto-updates",
       "t": "Updates find you",
       "d": "LinerFM checks for new versions on its own and tells you in the menu bar and in Settings.",
-      "since": "0.11.0"
+      "since": "0.11.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "track-stats",
       "t": "Every song, with its numbers",
       "d": "See how many times each song in a playlist was played or skipped, when you last played it and how often you cut it short.",
-      "since": "0.12.0"
+      "since": "0.12.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "skip-based-removals",
       "t": "Removals that follow your skips",
       "d": "LinerFM suggests removing songs you keep skipping or never play, tells you the numbers, and leaves recent additions alone.",
-      "since": "0.12.0"
+      "since": "0.12.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "fits-any-screen",
       "t": "A window that fits any screen",
       "d": "The main window adapts from a small window to a very large display: the action bar stays in place and long titles wrap instead of being cut.",
-      "since": "0.12.0"
+      "since": "0.12.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "terminal-theme",
       "t": "A terminal theme for the widget",
       "d": "Turn the widget into a terminal-style player: tabs for now playing, queue, library, lyrics, stats and devices, keyboard navigation, and typed commands like vol 40 or seek 1:30. Search follows the same look.",
-      "since": "0.13.0"
+      "since": "0.13.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "app-follows-widget-theme",
       "t": "The whole app follows your widget theme",
       "d": "Pick Cinematic and the windows fill with the colors of the track; pick Terminal and they turn into a monospaced console, like the widget.",
-      "since": "0.14.0"
+      "since": "0.14.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "full-window-screens",
       "t": "Screens that use the whole window",
       "d": "A large now playing panel in the sidebar, Settings on a single page, and every screen laid out to fill the window instead of leaving empty space.",
-      "since": "0.14.0"
+      "since": "0.14.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "live-desktop",
       "t": "A live desktop",
       "d": "Your wallpaper becomes the song: the artwork, the Spotify Canvas or the YouTube video plays under your icons, on every display. Add a player bar, a Cover Flow of recent albums and an up next list, and an edge light that can follow the beat. Turned on from the widget menu.",
-      "since": "1.0.0"
+      "since": "1.0.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "windows",
       "t": "Now on Windows",
-      "d": "LinerFM runs on Windows 10 and 11: the widget, search, lyrics across the top of the screen, AI playlists, your stats and Last.fm, with Spotify. Updates install on their own, like on the Mac. The notch, the screensaver and the live desktop stay Mac only for now.",
-      "since": "1.0.0"
+      "d": "LinerFM runs on Windows 10 and 11: the widget, search, a top bar in place of the notch, synced lyrics, the screensaver, the volume HUD, the live desktop and the side panel, AI playlists, your stats and Last.fm. Windows Hello can lock it at launch, and updates install on their own, like on the Mac.",
+      "since": "1.0.0",
+      "platforms": [
+        "windows"
+      ]
     },
     {
       "id": "side-panel",
       "t": "A side view on the screen edge",
       "d": "A thin strip on the left edge of the screen that opens when your mouse touches it: artwork, controls, synced lyrics and the queue. Turned on from Settings.",
-      "since": "1.0.0"
+      "since": "1.0.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "vinyl-midnight-themes",
       "t": "Vinyl and Midnight themes",
       "d": "Two new looks for the notch, the volume HUD, karaoke, the screensaver and the side view, chosen once in Settings.",
-      "since": "1.0.0"
+      "since": "1.0.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "search-filters",
       "t": "Search that knows what you want",
       "d": "Press Tab to filter by songs, artists, albums or playlists, find your recent searches, see the best match up top and preview it before you play.",
-      "since": "1.0.0"
+      "since": "1.0.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     },
     {
       "id": "soundcloud",
       "t": "SoundCloud on the widget",
       "d": "Play SoundCloud in Chrome, from a track, a playlist or a Mix, and LinerFM follows it with sharp artwork and play, pause and skip.",
-      "since": "1.0.0"
+      "since": "1.0.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     }
   ],
   "surfaces": [

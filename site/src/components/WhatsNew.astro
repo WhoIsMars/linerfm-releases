@@ -18,11 +18,8 @@ const card = (id: string) => {
 };
 const live = card("live-desktop");
 const win = card("windows");
-// L'ultima frase della card Windows dice cosa resta solo Mac: va in una riga a
-// parte, discreta, invece che in mezzo al testo.
-const MAC_ONLY = "The notch, the screensaver and the live desktop stay Mac only for now.";
-const winBody = win.d.replace(MAC_ONLY, "").trim();
-const winMacOnly = win.d.includes(MAC_ONLY) ? MAC_ONLY : undefined;
+// Dalla 1.1.0 la card Windows non ha piu' una frase "solo Mac" da staccare.
+const winBody = win.d;
 
 const more = WHATS_NEW_IDS.slice(2).map(card);
 ---
@@ -34,7 +31,6 @@ const more = WHATS_NEW_IDS.slice(2).map(card);
     {live.t}
   </h2>
   <p class="mt-5 mx-auto max-w-2xl text-center text-fg-2 md:text-lg leading-relaxed text-pretty">{live.d}</p>
-  <p class="mt-4 w-fit mx-auto text-xs text-fg-3 px-2.5 py-1 rounded-full border border-hairline bg-panel">Mac only for now</p>
 
   {/* La ripresa del desktop dal vivo sul MacBook sta nell'hero: qui la seconda, su due schermi. */}
   <div class="mt-12 md:mt-14 max-w-2xl mx-auto">
@@ -60,7 +56,6 @@ const more = WHATS_NEW_IDS.slice(2).map(card);
       <div class="mt-6 flex flex-wrap items-center gap-3">
         <a href="#download" class="btn-primary font-semibold px-5 py-2.5 rounded-control">Try free for 5 days</a>
       </div>
-      {winMacOnly && <p class="mt-5 text-xs text-fg-3 leading-relaxed">{winMacOnly}</p>}
     </div>
     <div class="md:col-span-6 lg:col-span-5 lg:col-start-8">
       <div class="panel p-2">
