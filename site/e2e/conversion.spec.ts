@@ -75,11 +75,35 @@ test.describe("on a phone (375 px, iPhone)", () => {
 test.describe("on a desktop (1280 px, Mac)", () => {
   test.use({ viewport: { width: 1280, height: 800 }, userAgent: MAC_UA });
 
-  test("the hero keeps Try free, without the phone line", async ({ page }) => {
+  // Conversione 21/10: il pulsante "Try free" mandava 9.105 px piu' in basso, dove i pulsanti
+  // compaiono dopo un caricamento. Ora il pulsante dell'hero scarica la build di questo computer.
+  test("the hero's main button downloads the Mac build, without the phone line", async ({ page }) => {
+    await page.route("**/api.github.com/**", (r) => r.fulfill({
+      status: 200, contentType: "application/json",
+      body: JSON.stringify({ tag_name: "v1.1.1", html_url: "https://github.com/WhoIsMars/linerfm-releases/releases/tag/v1.1.1", assets: [
+        { name: "LinerFM_1.1.1_aarch64.dmg", size: 34700000, browser_download_url: "https://example.test/LinerFM_1.1.1_aarch64.dmg" },
+        { name: "LinerFM_1.1.1_x64.dmg", size: 38000000, browser_download_url: "https://example.test/LinerFM_1.1.1_x64.dmg" },
+        { name: "LinerFM_1.1.1_x64-setup.exe", size: 31400000, browser_download_url: "https://example.test/LinerFM_1.1.1_x64-setup.exe" },
+      ] }),
+    }));
     await page.goto("/");
     const hero = page.locator("#top");
-    await expect(hero.getByRole("link", { name: "Try free for 5 days" })).toBeVisible();
+    const main = hero.getByRole("link", { name: /Download for Mac/ });
+    await expect(main).toBeVisible();
+    await expect(main).toHaveAttribute("href", /aarch64\.dmg$/);
+    await expect(main).toContainText("5 days free");
+    await expect(hero.getByRole("link", { name: "Intel Mac" })).toHaveAttribute("href", /x64\.dmg$/);
+    await expect(hero.getByRole("link", { name: "Windows" })).toHaveAttribute("href", /setup\.exe$/);
+    await expect(hero.getByRole("link", { name: "Buy · 10€" })).toBeVisible();
+    await expect(hero.getByRole("link", { name: "Try free for 5 days" })).toBeHidden();
     await expect(hero.getByText(PHONE_LINE)).toBeHidden();
+  });
+
+  test("while GitHub is unreachable the hero still offers a download", async ({ page }) => {
+    await page.goto("/");
+    const hero = page.locator("#top");
+    await expect(hero.getByRole("link", { name: /Download/ })).toBeVisible();
+    await expect(hero.getByRole("link", { name: /Download/ })).toHaveAttribute("href", /github\.com/);
   });
 
   test("#download keeps the installers' place and both first launch guides", async ({ page }) => {

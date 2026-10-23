@@ -5,6 +5,7 @@
 // pagina. Una sola azione piena, la prova; l'acquisto è una riga di testo sotto.
 import { CHECKOUT_URL } from "../config/links";
 import AmbientVideo from "./AmbientVideo.astro";
+import DownloadButton from "./DownloadButton.tsx";
 
 const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
 ---
@@ -22,7 +23,11 @@ const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
       LinerFM runs on Mac and Windows. Open this page on your computer to install it.
     </p>
     <div class="mt-9 flex flex-col items-center gap-3">
-      <a href="#download" class="btn-primary font-semibold text-base px-7 py-3.5 rounded-full">Try free for 5 days</a>
+      {/* Computer: il pulsante scarica subito la build giusta (conversione 21/10: "Try free" portava
+          9.105 px piu' in basso, e 46 persone su 50 non cliccavano nulla). Telefono: resta l'ancora,
+          l'app non si installa li'. */}
+      <div class="desktop-only"><DownloadButton compact client:load /></div>
+      <a href="#download" class="phone-only btn-primary font-semibold text-base px-7 py-3.5 rounded-full">Try free for 5 days</a>
       <p class="text-sm text-fg-3">
         Then 10€ once, no subscription.
         <a href={CHECKOUT_URL} class="lemonsqueezy-button text-fg-2 underline underline-offset-4 hover:text-fg">Buy · 10€</a>

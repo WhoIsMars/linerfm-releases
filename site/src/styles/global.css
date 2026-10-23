@@ -295,6 +295,10 @@ footer a[href]::after {
 .phone-only { display: none; }
 @media (max-width: 767px) { .phone-only { display: block; } }
 :root.ua-mobile .phone-only { display: block; }
+/* Il contrario: il pulsante che scarica l'installer, inutile su un telefono. */
+.desktop-only { display: block; }
+@media (max-width: 767px) { .desktop-only { display: none; } }
+:root.ua-mobile .desktop-only { display: none; }
 
 /* ── Titoli da vetrina (22/10, confronto con iBaila) ─────────────────────────────
    Stesso font di sistema dell'app, ma a scala di copertina: pesante, stretto, righe

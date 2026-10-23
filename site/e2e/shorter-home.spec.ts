@@ -75,10 +75,12 @@ test("a comparison names its sources and the day they were read", async ({ page 
 test.describe("after the iBaila comparison (1280 px)", () => {
   test.use({ viewport: { width: 1280, height: 800 } });
 
-  test("the hero has one filled button, the trial; Buy is a text link", async ({ page }) => {
+  test("the hero has one filled button, the download of the trial; Buy is a text link", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("#top .btn-primary")).toHaveCount(1);
-    await expect(page.locator("#top .btn-primary")).toHaveText("Try free for 5 days");
+    // Due nel DOM (computer e telefono), uno solo visibile: dal 23/10 sul computer scarica subito.
+    const filled = page.locator("#top .btn-primary").filter({ visible: true });
+    await expect(filled).toHaveCount(1);
+    await expect(filled).toContainText(/Download/);
     await expect(page.locator("#top .btn-ghost")).toHaveCount(0);
   });
 
@@ -110,7 +112,7 @@ test.describe("after the iBaila comparison (1280 px)", () => {
     const banner = page.locator("#tt-consent");
     await expect(banner).toBeVisible();
     const b = (await banner.boundingBox())!;
-    const btn = (await page.locator("#top .btn-primary").boundingBox())!;
+    const btn = (await page.locator("#top .btn-primary").filter({ visible: true }).boundingBox())!;
     const overlaps = b.x < btn.x + btn.width && btn.x < b.x + b.width && b.y < btn.y + btn.height && btn.y < b.y + b.height;
     expect(overlaps).toBe(false);
     expect(b.width).toBeLessThanOrEqual(400);
