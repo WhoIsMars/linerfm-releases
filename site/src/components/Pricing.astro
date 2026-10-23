@@ -2,15 +2,15 @@
 import { CHECKOUT_URL } from "../config/links";
 // Le tre promesse che prima stavano in una sezione a sé (Promise, tolta il 22/10)
 // sono entrate qui: con cosa funziona e dove restano i dati stanno accanto al prezzo.
-// Dal 22/10 (confronto con iBaila): titolo grande, icona dell'app, prezzo a scala di
+// 23/10: quattro righe come iBaila, la prova per prima ("5 days free, no card"); le fonti
+// supportate stanno gia' in "Works with" e non si ripetono qui. Dal 22/10 (confronto con iBaila): titolo grande, icona dell'app, prezzo a scala di
 // copertina, una riga di fiducia sotto il pulsante. Lemon Squeezy è il Merchant of Record
 // (privacy.astro), quindi le tasse le gestisce lui.
 const perks = [
-  "One-time purchase, no subscription",
-  "Works with Spotify, Apple Music and YouTube Music",
-  "Minor updates included forever",
-  "One active device at a time, move your license anytime",
-  "Runs locally, no account and no telemetry",
+  "5 days free, no card. Every feature from the first day.",
+  "10€ once, no subscription. Minor updates included forever.",
+  "One computer at a time, Mac or Windows. Move your license anytime.",
+  "Runs on your computer: no account, no telemetry.",
 ];
 const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
 ---
@@ -40,6 +40,6 @@ const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
     </ul>
     <a href={CHECKOUT_URL} class="lemonsqueezy-button btn-primary mt-8 block text-center font-semibold px-6 py-3.5 rounded-full">Buy LinerFM · 10€</a>
     <p class="mt-4 text-center text-xs text-fg-3">Secure checkout by Lemon Squeezy, taxes handled for you.</p>
-    <p class="mt-1 text-center text-xs text-fg-3">5-day free trial first, no card needed. After the trial a license is required: there is no limited free tier.</p>
+    <p class="mt-1 text-center text-xs text-fg-3">After the trial a license is required: there is no limited free tier.</p>
   </div>
 </section>

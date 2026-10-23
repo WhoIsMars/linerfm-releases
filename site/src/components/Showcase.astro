@@ -58,10 +58,16 @@ const rows = [
 const chapterNo: Record<string, number> = { "On your screen": 1, Control: 2, Playlists: 3, Windows: 4 };
 ---
 <section id="features-tour" class="max-w-6xl mx-auto px-5 pt-28 md:pt-36 pb-8" aria-labelledby="tour-title">
-  <p class="eyebrow">The tour</p>
+  <p class="eyebrow">How it feels</p>
   <h2 id="tour-title" class="display-2 mt-4 max-w-[16ch]">
     Music on every surface. <span class="display-dim">Mac and Windows.</span>
   </h2>
+  {/* 23/10 (confronto con iBaila): prima la sensazione, poi le funzioni. Ogni parte viene da
+      features.json: colori dalla copertina (dynamic-color), testi sincronizzati (karaoke). */}
+  <p id="tour-lead" class="mt-6 max-w-[58ch] text-fg-2 text-base md:text-lg leading-relaxed text-pretty">
+    Every song brings its own colors. The artwork sets the palette, the lyrics land line by line, and when the next
+    song starts, every surface changes with it.
+  </p>
 
   <div class="mt-16 md:mt-24 space-y-20 md:space-y-28">
     {rows.map((r, i) => (

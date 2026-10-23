@@ -1,11 +1,26 @@
 ---
 import { DISCORD_URL } from "../config/links";
 // Prima le obiezioni che fermano un download (sicurezza, avvisi, prova, rimborsi), poi il resto.
+// 23/10 (confronto con iBaila): le paure che fermano un download (microfono, permessi, consumo) hanno
+// una risposta ciascuna, subito dopo gli avvisi di sicurezza. Ogni frase e' verificata nel repo dell'app:
+//  - niente microfono: src-tauri/Info.plist non ha NSMicrophoneUsageDescription, entitlements.plist ha solo
+//    disable-library-validation e automation.apple-events, nessun getUserMedia/AVCaptureDevice in src-tauri e sidecar;
+//  - l'unico ascolto e' il suono di Spotify/Music (audio_tap.rs:1-5 e :21, PLAYER_BUNDLES), due numeri in memoria,
+//    solo con luce ai bordi accesa (style.ts:82 edge:false) e "Reacts to music" (DesktopWindow.tsx:63-66),
+//    macOS 14.2+ (audio_tap.rs:6-9), permesso "Audio" (Info.plist:7-8);
+//  - Automation: Info.plist:9-10, entitlements.plist:22; Accessibilita': solo col Volume HUD (settings.py:25 false,
+//    volume_tap.rs:12-13 e :340);
+//  - consumo: nessun numero misurato, quindi nessun numero. Verificato solo che con Low Power Mode (Mac) o
+//    Energy saver (Windows) lo sfondo mostra la copertina ferma (Settings.tsx:651) e che l'ascolto si ferma
+//    in pausa (DesktopWindow.tsx:64-70, audio_tap.rs tap_action).
 // L'id va nell'evento faq_open (BaseLayout): dice quale domanda apre chi non scarica. Max 20 caratteri.
 const faqs = [
   { id: "safe", q: "Is this safe and legal?", a: "LinerFM runs entirely on your computer and uses your own keys and your own sessions. It is not affiliated with Spotify, Apple or YouTube, and stores nothing on any server." },
   { id: "warning-mac", q: "Why does macOS show a security warning?", a: "The app isn't notarized by Apple yet (it's a solo project). It's signed ad-hoc; see the install steps above. Notarization is planned." },
   { id: "warning-windows", q: "Why does Windows show a SmartScreen warning?", a: "The installer isn't code signed yet (it's a solo project). Click \"More info\", then \"Run anyway\". Updates after that install on their own." },
+  { id: "microphone", q: "Does it use my microphone or record anything?", a: "No. LinerFM never asks for the microphone. The only sound it can listen to is the output of Spotify (or Music, on a Mac), and only while the glow around your screen edge is on with Reacts to music switched on. It turns that sound into two numbers, bass and mids, kept in memory. Nothing is recorded, saved or sent." },
+  { id: "permissions", q: "Which permissions does it ask for?", a: "On a Mac you may see three. Automation, so it can read the current track and control Spotify or Music. Audio, only if you turn on Reacts to music for the screen-edge glow (macOS 14.2 or later): it lets LinerFM listen to the player and nothing else. Accessibility, only if you turn on the Volume HUD, which is off by default, so it can replace the macOS volume overlay." },
+  { id: "power", q: "Will it slow my computer down or use my battery?", a: "I have no battery numbers to quote, so here is what the app does instead. With Low Power Mode on a Mac, or Energy saver on Windows, the live desktop shows the still cover instead of video. The listening for the glow stops when you pause. The live desktop is one switch in Settings, Desktop background, and the rest of LinerFM keeps working without it." },
   { id: "free", q: "Is there a free version?", a: "There's a full-featured 5-day free trial, no card needed. After it ends, a license is required to keep using LinerFM. There's no limited free tier, and reinstalling doesn't reset the trial." },
   { id: "refunds", q: "Refunds?", a: "There's a free trial, so purchases are final, except for genuine edge cases (double purchase, app won't start on your computer), handled case by case." },
   { id: "computers", q: "Which computers are supported?", a: "Macs with macOS 11 or later, in two native builds (Apple Silicon and Intel), and since 1.0.0 Windows 10 and 11 (64-bit). Since 1.1.0 Windows also has the screensaver, the volume HUD, the live desktop and a top bar in place of the notch; only the track next to the menu bar icon stays on the Mac." },
@@ -19,7 +34,7 @@ const faqs = [
   <div class="md:sticky md:top-24 self-start">
     <p class="eyebrow">FAQ</p>
     <h2 class="display-2 mt-4">Questions, <span class="display-dim">answered.</span></h2>
-    <p class="mt-5 text-sm text-fg-3 leading-relaxed max-w-[34ch]">Something else? Ask on <a href={DISCORD_URL} class="underline underline-offset-2 hover:text-fg">Discord</a>.</p>
+    <p class="mt-5 text-sm text-fg-3 leading-relaxed max-w-[34ch]">Something else on your mind? Ask on <a href={DISCORD_URL} class="underline underline-offset-2 hover:text-fg">Discord</a>. LinerFM is a solo project, so a real person answers.</p>
   </div>
   <div class="space-y-3">
     {faqs.map((f) => (
