@@ -134,3 +134,37 @@ test("a Buy link carries the channel remembered for the tab", async ({ page }) =
   const href = await page.locator("#top a.lemonsqueezy-button").first().getAttribute("href");
   expect(new URL(href!).searchParams.get("checkout[custom][src]")).toBe("reddit-macapps");
 });
+
+// 23/10: "nel sito mancano i social, specialmente discord" (owner). Discord nella barra, i cinque
+// profili sotto l'hero e nel footer: chi arriva da un reel deve trovare la community senza cercarla.
+test.describe("social links", () => {
+  const SOCIAL = {
+    Discord: "https://discord.gg/vhU22mKHAr",
+    TikTok: "https://www.tiktok.com/@liner_fm",
+    Instagram: "https://www.instagram.com/linerfm/",
+    YouTube: "https://www.youtube.com/@liner_fm",
+    X: "https://x.com/Liner_FM",
+  };
+
+  test("the nav links to Discord on a desktop", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/");
+    await expect(page.locator("header nav").getByRole("link", { name: "Discord" })).toHaveAttribute("href", SOCIAL.Discord);
+  });
+
+  test("the hero and the footer list the five profiles", async ({ page }) => {
+    await page.goto("/");
+    for (const [name, href] of Object.entries(SOCIAL)) {
+      await expect(page.locator("#top").getByRole("link", { name, exact: true })).toHaveAttribute("href", href);
+      await expect(page.locator("footer").getByRole("link", { name, exact: true })).toHaveAttribute("href", href);
+    }
+  });
+
+  test("the social row fits a phone", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto("/");
+    await expect(page.locator("#top").getByRole("link", { name: "Discord", exact: true })).toBeVisible();
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(overflow).toBeLessThanOrEqual(0);
+  });
+});

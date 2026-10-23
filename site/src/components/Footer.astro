@@ -1,5 +1,5 @@
 ---
-import { DISCORD_URL, X_URL, INSTAGRAM_URL, REPO_URL } from "../config/links";
+import { SOCIAL_LINKS, REPO_URL } from "../config/links";
 const year = new Date().getFullYear();
 const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
 ---
@@ -9,9 +9,7 @@ const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
     <div class="mt-6 flex flex-wrap gap-x-6 gap-y-2">
       <a href={`${base}privacy`} class="hover:text-fg">Privacy</a>
       <a href={`${base}eula`} class="hover:text-fg">License (EULA)</a>
-      <a href={DISCORD_URL} class="hover:text-fg">Discord</a>
-      <a href={X_URL} class="hover:text-fg">X</a>
-      <a href={INSTAGRAM_URL} class="hover:text-fg">Instagram</a>
+      {SOCIAL_LINKS.map((s) => <a href={s.href} class="hover:text-fg" rel="me">{s.name}</a>)}
       <a href={REPO_URL} class="hover:text-fg">GitHub</a>
       <a href={`${base}changelog`} class="hover:text-fg">What's new</a>
       <a href={`${base}windows`} class="hover:text-fg">LinerFM for Windows</a>

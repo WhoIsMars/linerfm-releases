@@ -1,9 +1,9 @@
 ---
-import { CHECKOUT_URL } from "../config/links";
+import { CHECKOUT_URL, DISCORD_URL } from "../config/links";
 const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
 ---
 <!-- Barra in vetro staccata dai bordi, come una toolbar: sfocatura, un filo, nessun colore
-     proprio. Una sola azione piena (la prova); Buy resta, come testo. Discord e X stanno nel footer. -->
+     proprio. Una sola azione piena (la prova); Buy resta, come testo. Discord sta anche qui, a destra (23/10: "nel sito mancano i social, specialmente discord"). -->
 <header class="sticky top-3 z-40 px-3">
   <nav class="max-w-4xl mx-auto flex items-center justify-between gap-4 pl-5 pr-2 h-12 rounded-full backdrop-blur-xl bg-ink-900/72 border border-hairline shadow-[0_8px_32px_rgba(0,0,0,.45)]" aria-label="Main">
     <a href={base} class="font-semibold tracking-tight" aria-label="LinerFM home">Liner<span class="text-green-500">FM</span></a>
@@ -15,6 +15,7 @@ const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
       <a href={`${base}changelog`} class="hover:text-fg">What's new</a>
     </div>
     <div class="flex items-center gap-3">
+      <a href={DISCORD_URL} class="hidden md:inline text-sm text-fg-2 hover:text-fg">Discord</a>
       <a href={CHECKOUT_URL} class="lemonsqueezy-button hidden sm:inline text-sm font-semibold text-fg-2 hover:text-fg">Buy · 10€</a>
       <a href={`${base}#download`} class="btn-primary text-sm font-semibold px-4 py-2 rounded-full">Try free</a>
     </div>
