@@ -93,7 +93,16 @@ test.describe("after the iBaila comparison (1280 px)", () => {
   test("the security warning is step 2 of the setup, before the download buttons", async ({ page }) => {
     await page.goto("/");
     const steps = page.locator("#download ol > li h3");
-    await expect(steps).toHaveText(["Download", "Open it once", "Connect your music", "Press play"]);
+    await expect(steps).toHaveText(["Download", "Open it once", "Press play", "Connect, if you want"]);
+  });
+
+  test("setup says playback needs no keys, and puts accounts after it as optional", async ({ page }) => {
+    // 23/10: widget e desktop seguono Spotify senza Client ID (dev app su profilo vuoto).
+    // Il vecchio passo 3 diceva "paste every key": chi non è sviluppatore si ferma prima di scaricare.
+    await page.goto("/");
+    const third = page.locator("#download ol > li").nth(2);
+    await expect(third).toContainText("No key, no account");
+    await expect(page.locator("#download ol").first()).not.toContainText("every key and connection while you paste them");
   });
 
   test("the cookie banner sits in a corner and leaves the hero button free", async ({ page }) => {

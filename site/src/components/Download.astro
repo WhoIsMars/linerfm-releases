@@ -14,8 +14,10 @@ const steps = [
 const setup = [
   { t: "Download", d: "The .dmg for your Mac's chip, or the installer for Windows 10 and 11." },
   { t: "Open it once", d: "It isn't signed by Apple or Microsoft yet. On a Mac, click Open Anyway in Privacy & Security; on Windows, More info, then Run anyway." },
-  { t: "Connect your music", d: "Pick Spotify, Apple Music or YouTube Music. The guided setup checks every key and connection while you paste them." },
-  { t: "Press play", d: "The wallpaper, the widget and the lyrics follow the song." },
+  // 23/10: widget e desktop seguono Spotify senza Client ID (dev app su profilo vuoto, visto
+  // dall'owner). Gli account vengono dopo e sono facoltativi: prima diceva "paste every key".
+  { t: "Press play", d: "Play a song in Spotify. The wallpaper, the widget and the lyrics follow it. No key, no account." },
+  { t: "Connect, if you want", d: "Link Spotify, Apple Music or YouTube Music for playlists, search and the AI tools. The guided setup checks each key while you paste it." },
 ];
 ---
 <section id="download" class="max-w-6xl mx-auto px-5 pt-28 md:pt-36 pb-20 text-center scroll-mt-16">
