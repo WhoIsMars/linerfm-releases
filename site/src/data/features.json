@@ -379,6 +379,16 @@
         "mac",
         "windows"
       ]
+    },
+    {
+      "id": "lyrics-from-spotify",
+      "t": "Lyrics from Spotify",
+      "d": "Synced lyrics come from Spotify first, the same lines the Spotify app shows, then from LRCLIB. Songs from YouTube Music, Apple Music and SoundCloud are looked up on Spotify too, and lyrics found once stay on your computer, so they show up at once the next time.",
+      "since": "1.2.2",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     }
   ],
   "surfaces": [
