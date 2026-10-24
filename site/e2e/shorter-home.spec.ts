@@ -12,26 +12,21 @@ test.beforeEach(async ({ page }) => {
 test.describe("on a desktop (1280 px)", () => {
   test.use({ viewport: { width: 1280, height: 800 } });
 
-  test("the price comes before 65% of the page, in at most 8 sections", async ({ page }) => {
+  // 24/10/2026, home a schermi: 9 sezioni da uno schermo ciascuna (hero, piattaforme, 4 feature, prezzo,
+  // domande, download) al posto di 8 sezioni lunghe; il prezzo resta prima del 65% (misurato: 59%).
+  test("the price comes before 65% of the page, in at most 9 sections", async ({ page }) => {
     await page.goto("/");
     const r = await page.evaluate(() => ({
       sections: document.querySelectorAll("main > section").length,
       height: document.documentElement.scrollHeight,
       pricing: document.querySelector("#pricing")!.getBoundingClientRect().top + scrollY,
     }));
-    expect(r.sections).toBeLessThanOrEqual(8);
+    expect(r.sections).toBeLessThanOrEqual(9);
     expect(r.pricing / r.height).toBeLessThan(0.65);
   });
 
-  test("8 features in view, the others behind See all", async ({ page }) => {
-    await page.goto("/");
-    const features = page.locator("#features");
-    await expect(features.locator("h3:visible")).toHaveCount(8);
-    const button = features.getByText(/See all \d+ features/);
-    const total = Number((await button.textContent())!.match(/\d+/)![0]);
-    await button.click();
-    await expect(features.locator("h3:visible")).toHaveCount(total);
-  });
+  // "8 features in view, the others behind See all" tolto il 24/10/2026: la griglia di 38 card non c'e' piu',
+  // le feature senza ripresa stanno nella riga "And also" dell'ultima schermata.
 });
 
 // L'id della domanda va nell'evento faq_open: il worker accetta [a-z0-9_-] fino a 20 caratteri.

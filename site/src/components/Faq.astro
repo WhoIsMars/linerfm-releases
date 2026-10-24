@@ -13,38 +13,34 @@ import { DISCORD_URL } from "../config/links";
 //  - consumo: nessun numero misurato, quindi nessun numero. Verificato solo che con Low Power Mode (Mac) o
 //    Energy saver (Windows) lo sfondo mostra la copertina ferma (Settings.tsx:651) e che l'ascolto si ferma
 //    in pausa (DesktopWindow.tsx:64-70, audio_tap.rs tap_action).
+// 24/10/2026: la home a schermi tiene le sei domande che fermano un download; il resto (prova, rimborsi,
+// computer, sorgenti, dati) sta gia' in pagina o nelle pagine di appoggio.
 // L'id va nell'evento faq_open (BaseLayout): dice quale domanda apre chi non scarica. Max 20 caratteri.
 const faqs = [
   { id: "safe", q: "Is this safe and legal?", a: "LinerFM runs entirely on your computer and uses your own keys and your own sessions. It is not affiliated with Spotify, Apple or YouTube, and stores nothing on any server." },
-  { id: "warning-mac", q: "Why does macOS show a security warning?", a: "The app isn't notarized by Apple yet (it's a solo project). It's signed ad-hoc; see the install steps above. Notarization is planned." },
+  { id: "warning-mac", q: "Why does macOS show a security warning?", a: "The app isn't notarized by Apple yet (it's a solo project). It's signed ad-hoc; the install steps are right below. Notarization is planned." },
   { id: "warning-windows", q: "Why does Windows show a SmartScreen warning?", a: "The installer isn't code signed yet (it's a solo project). Click \"More info\", then \"Run anyway\". Updates after that install on their own." },
   { id: "microphone", q: "Does it use my microphone or record anything?", a: "No. LinerFM never asks for the microphone. The only sound it can listen to is the output of Spotify (or Music, on a Mac), and only while the glow around your screen edge is on with Reacts to music switched on. It turns that sound into two numbers, bass and mids, kept in memory. Nothing is recorded, saved or sent." },
   { id: "permissions", q: "Which permissions does it ask for?", a: "On a Mac you may see three. Automation, so it can read the current track and control Spotify or Music. Audio, only if you turn on Reacts to music for the screen-edge glow (macOS 14.2 or later): it lets LinerFM listen to the player and nothing else. Accessibility, only if you turn on the Volume HUD, which is off by default, so it can replace the macOS volume overlay." },
   { id: "power", q: "Will it slow my computer down or use my battery?", a: "I have no battery numbers to quote, so here is what the app does instead. With Low Power Mode on a Mac, or Energy saver on Windows, the live desktop shows the still cover instead of video. The listening for the glow stops when you pause. The live desktop is one switch in Settings, Desktop background, and the rest of LinerFM keeps working without it." },
-  { id: "free", q: "Is there a free version?", a: "There's a full-featured 5-day free trial, no card needed. After it ends, a license is required to keep using LinerFM. There's no limited free tier, and reinstalling doesn't reset the trial." },
-  { id: "refunds", q: "Refunds?", a: "There's a free trial, so purchases are final, except for genuine edge cases (double purchase, app won't start on your computer), handled case by case." },
-  { id: "computers", q: "Which computers are supported?", a: "Macs with macOS 11 or later, in two native builds (Apple Silicon and Intel), and since 1.0.0 Windows 10 and 11 (64-bit). Since 1.1.0 Windows also has the screensaver, the volume HUD, the live desktop and a top bar in place of the notch; only the track next to the menu bar icon stays on the Mac." },
-  { id: "spotify", q: "Do I need Spotify at all?", a: "No. Since 0.9.0 YouTube Music is a full source: search, your playlists, your likes and the AI tools all work there. Apple Music is followed on the widget, the notch and the tray. Pick the source you already use." },
-  { id: "youtube-music", q: "How do I connect YouTube Music?", a: "You sign in to YouTube Music in Chrome, and LinerFM uses that session. Nothing to paste, no key to create. If you sign out of Chrome, LinerFM loses access too." },
-  { id: "premium", q: "Do I need Spotify Premium?", a: "Only if you use Spotify as your source and want the full live-apply experience with your own key. You can also use the data-import and copy-to-clipboard modes without it." },
-  { id: "data", q: "Where does my data go?", a: "Nowhere. No account, no telemetry. Your listening data and keys stay on your computer." },
 ];
 ---
-<section id="faq" class="max-w-6xl mx-auto px-5 pt-28 md:pt-36 pb-20 grid md:grid-cols-[1fr_1.6fr] gap-10 md:gap-16 scroll-mt-16">
-  <div class="md:sticky md:top-24 self-start">
-    <p class="eyebrow">FAQ</p>
-    <h2 class="display-2 mt-4">Questions, <span class="display-dim">answered.</span></h2>
-    <p class="mt-5 text-sm text-fg-3 leading-relaxed max-w-[34ch]">Something else on your mind? Ask on <a href={DISCORD_URL} class="underline underline-offset-2 hover:text-fg">Discord</a>. LinerFM is a solo project, so a real person answers.</p>
-  </div>
-  <div class="space-y-3">
-    {faqs.map((f) => (
-      <details class="group panel-quiet px-5 py-4" data-faq={f.id}>
-        <summary class="flex items-center justify-between gap-4 cursor-pointer list-none font-medium">
-          {f.q}
-          <span class="text-fg-3 group-open:rotate-45 transition-transform text-xl leading-none" aria-hidden="true">+</span>
-        </summary>
-        <p class="mt-3 text-sm text-fg-3 leading-relaxed">{f.a}</p>
-      </details>
-    ))}
+<section id="faq" class="screen" aria-labelledby="faq-title">
+  <div class="max-w-6xl w-full mx-auto px-4 sm:px-6 grid md:grid-cols-[1fr_1.6fr] gap-10 md:gap-16">
+    <div class="md:sticky md:top-28 self-start">
+      <h2 id="faq-title" class="t-screen" data-reveal style="--i:0">Questions, answered.</h2>
+      <p class="mt-5 text-sm text-fg-3 leading-relaxed max-w-[34ch]" data-reveal style="--i:1">Something else on your mind? Ask on <a href={DISCORD_URL} class="underline underline-offset-2 hover:text-fg">Discord</a>. LinerFM is a solo project, so a real person answers.</p>
+    </div>
+    <div class="space-y-3" data-reveal style="--i:2">
+      {faqs.map((f) => (
+        <details class="group panel-quiet px-5 py-4" data-faq={f.id}>
+          <summary class="flex items-center justify-between gap-4 cursor-pointer list-none font-medium">
+            {f.q}
+            <span class="text-fg-3 group-open:rotate-45 transition-transform text-xl leading-none" aria-hidden="true">+</span>
+          </summary>
+          <p class="mt-3 text-sm text-fg-3 leading-relaxed">{f.a}</p>
+        </details>
+      ))}
+    </div>
   </div>
 </section>

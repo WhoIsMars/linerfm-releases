@@ -72,32 +72,5 @@ test.describe("pricing is four clear rows, the trial first", () => {
   });
 });
 
-test.describe("the tour opens with the feeling, before the features", () => {
-  test("eyebrow and one lead line above the first feature, built from what the app does", async ({ page }) => {
-    await page.goto("/");
-    const s = page.locator("#features-tour");
-    await expect(s.locator(".eyebrow").first()).toHaveText("How it feels");
-    const lead = s.locator("#tour-lead");
-    await expect(lead).toBeVisible();
-    await expect(lead).toContainText("artwork");
-    await expect(lead).toContainText("line by line");
-    // the lead comes before the first chapter in the page
-    const order = await page.evaluate(() => {
-      const lead = document.querySelector("#tour-lead")!;
-      const firstRow = document.querySelector("#features-tour article")!;
-      return !!(lead.compareDocumentPosition(firstRow) & Node.DOCUMENT_POSITION_FOLLOWING);
-    });
-    expect(order).toBe(true);
-  });
-
-  test("the home still has at most 8 sections and the price before 65% of the page", async ({ page }) => {
-    await page.goto("/");
-    const r = await page.evaluate(() => ({
-      sections: document.querySelectorAll("main > section").length,
-      ratio: (document.querySelector("#pricing")!.getBoundingClientRect().top + scrollY) / document.documentElement.scrollHeight,
-    }));
-    console.log(`pricing at ${(r.ratio * 100).toFixed(1)}% of the page, ${r.sections} sections`);
-    expect(r.sections).toBeLessThanOrEqual(8);
-    expect(r.ratio).toBeLessThan(0.65);
-  });
-});
+// 24/10/2026: "the tour opens with the feeling" tolto con la home a schermi (niente piu' #features-tour);
+// la struttura nuova e' coperta da e2e/redesign.spec.ts.

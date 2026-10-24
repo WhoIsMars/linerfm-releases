@@ -9,15 +9,16 @@
 export type MediaSize = { width: number; height: number };
 
 const SIZES: Record<string, MediaSize> = {
-  "video/explainer.mp4": { width: 1920, height: 1080 },
+  // Riprese vere del telefono dell'owner (24/10/2026), ritagliate in verticale per la home.
+  "media/hero.mp4": { width: 720, height: 1000 },
+  "media/colors.mp4": { width: 720, height: 1000 },
+  "media/light.mp4": { width: 720, height: 1000 },
+  "media/search.mp4": { width: 720, height: 1000 },
+  "media/widget.jpg": { width: 380, height: 540 },
   "video/clip-notch.mp4": { width: 1200, height: 900 },
-  "video/clip-widget.mp4": { width: 1200, height: 900 },
   "video/clip-screensaver.mp4": { width: 1200, height: 900 },
   "video/clip-search.mp4": { width: 1200, height: 900 },
-  "video/clip-ai.mp4": { width: 1200, height: 900 },
-  "video/clip-cleanup.mp4": { width: 1200, height: 900 },
   "video/clip-live-desktop.mp4": { width: 960, height: 960 },
-  "video/clip-live-canvas.mp4": { width: 720, height: 900 },
   "video/clip-windows.mp4": { width: 1020, height: 1138 },
   "screenshots/gatekeeper-1.png": { width: 1320, height: 800 },
   "screenshots/gatekeeper-2.png": { width: 586, height: 572 },

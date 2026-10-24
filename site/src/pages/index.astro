@@ -1,27 +1,61 @@
 ---
+// La home a schermi (24/10/2026, sul modello di aestheticmac.com/ibaila, richiesta dell'owner):
+// una sezione per schermo, una frase e una ripresa vera ciascuna, lo scorrimento che si ferma
+// sull'inizio delle sezioni, le comparse al passaggio. Le schermate delle feature vengono da
+// src/data/home.ts: quelle senza ripresa vera sono pronte ma non vanno in pagina.
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Nav from "../components/Nav.astro";
 import Hero from "../components/Hero.astro";
-import Showcase from "../components/Showcase.astro";
 import WorksWith from "../components/WorksWith.astro";
-import Features from "../components/Features.astro";
+import FeatureScreen from "../components/FeatureScreen.astro";
 import Pricing from "../components/Pricing.astro";
-import Download from "../components/Download.astro";
 import Faq from "../components/Faq.astro";
-import FinalCta from "../components/FinalCta.astro";
+import Download from "../components/Download.astro";
 import Footer from "../components/Footer.astro";
+import { FEATURE_SCREENS, ALSO, listJoin } from "../data/home";
+
+const shown = FEATURE_SCREENS.filter((s) => s.media);
 ---
 <BaseLayout>
   <Nav />
   <main id="main-content">
     <Hero />
-    <Showcase />
     <WorksWith />
-    <Features />
+    {shown.map((screen, i) => (
+      <FeatureScreen screen={screen} flip={i % 2 === 1}>
+        {i === shown.length - 1 && (
+          <p class="mt-8 text-sm text-fg-3 leading-relaxed max-w-[44ch]" data-reveal style="--i:2">
+            <span class="text-fg-2 font-medium">And also:</span> {listJoin(ALSO)}.
+          </p>
+        )}
+      </FeatureScreen>
+    ))}
     <Pricing />
-    <Download />
     <Faq />
-    <FinalCta />
+    <Download />
   </main>
   <Footer />
 </BaseLayout>
+
+<script>
+  // Comparse al passaggio: lo stato nascosto lo accende questo script (.js-reveal su <html>), quindi
+  // senza JavaScript la pagina resta tutta visibile. Con "Riduci movimento" non si nasconde niente.
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const items = document.querySelectorAll<HTMLElement>("[data-reveal]");
+  if (!reduce && "IntersectionObserver" in window && items.length) {
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        e.target.classList.add("is-in");
+        io.unobserve(e.target);
+      }
+    }, { rootMargin: "0px 0px -10% 0px", threshold: 0.15 });
+    // Quello che e' gia' sullo schermo all'apertura non aspetta: niente salti sotto gli occhi.
+    const fold = window.innerHeight;
+    items.forEach((el) => {
+      if (el.getBoundingClientRect().top < fold * 0.9) el.classList.add("is-in");
+      else io.observe(el);
+    });
+    document.documentElement.classList.add("js-reveal");
+  }
+</script>
