@@ -1,5 +1,8 @@
 ---
 import { CHECKOUT_URL, DISCORD_URL } from "../config/links";
+import { FEATURE_SCREENS } from "../data/home";
+// La prima schermata pubblicata: cambia da sola quando una ripresa entra o esce da home.ts.
+const firstFeature = FEATURE_SCREENS.find((s) => s.media)?.id ?? "works-with";
 const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
 ---
 <!-- Barra in vetro staccata dai bordi, come una toolbar: sfocatura, un filo, nessun colore
@@ -9,7 +12,7 @@ const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
     <a href={base} class="font-semibold tracking-tight" aria-label="LinerFM home">Liner<span class="text-green-500">FM</span></a>
     <div class="hidden md:flex items-center gap-6 text-sm text-fg-2">
       <a href={`${base}#works-with`} class="hover:text-fg">Works with</a>
-      <a href={`${base}#colors`} class="hover:text-fg">Features</a>
+      <a href={`${base}#${firstFeature}`} class="hover:text-fg">Features</a>
       <a href={`${base}#pricing`} class="hover:text-fg">Pricing</a>
       <a href={`${base}#faq`} class="hover:text-fg">FAQ</a>
       <a href={`${base}changelog`} class="hover:text-fg">What's new</a>
