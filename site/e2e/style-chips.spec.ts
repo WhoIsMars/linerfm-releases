@@ -33,6 +33,8 @@ for (const [id, t, label] of [
   ["screensaver", 2.4, "Onyx"],
   ["screensaver", 4.0, "Glass"],
   ["screensaver", 5.6, "Vinyl"],
+  ["ai-playlists", 2.0, "Create playlist"],
+  ["ai-playlists", 7.0, "Add tracks"],
 ] as const) {
   test(`${id} at ${t}s lights ${label}`, async ({ page }) => {
     await page.goto("/");
@@ -56,4 +58,13 @@ test("the screensaver shows all five styles as buttons", async ({ page }) => {
   await page.goto("/");
   const ss = page.locator("#screensaver");
   for (const name of ["Artwork", "Onyx", "Glass", "Vinyl", "Midnight"]) await expect(ss.getByRole("button", { name })).toHaveCount(1);
+});
+
+test("AI tools the video does not show stay plain text", async ({ page }) => {
+  await page.goto("/");
+  const ai = page.locator("#ai-playlists");
+  for (const name of ["Find playlist", "Optimize"]) {
+    await expect(ai.getByRole("button", { name })).toHaveCount(0);
+    await expect(ai.locator(".chip", { hasText: name })).toHaveCount(1);
+  }
 });

@@ -19,7 +19,7 @@ const SIZES: Record<string, MediaSize> = {
   "media/widget.mp4": { width: 944, height: 720 },
   "media/notch.mp4": { width: 1072, height: 360 },
   "media/screensaver.mp4": { width: 1280, height: 800 },
-  "media/ai.mp4": { width: 1280, height: 884 },
+  "media/ai.mp4": { width: 1140, height: 840 },
   "video/clip-notch.mp4": { width: 1200, height: 900 },
   "video/clip-screensaver.mp4": { width: 1200, height: 900 },
   "video/clip-search.mp4": { width: 1200, height: 900 },
