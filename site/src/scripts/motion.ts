@@ -77,6 +77,17 @@ if (!reduce && "IntersectionObserver" in window) {
   });
 }
 
+// ── Le luci girano solo quando si vedono ─────────────────────────────────────
+// Ogni anello ridipinge un conic-gradient sfocato a ogni fotogramma: fuori dallo schermo si ferma
+// (come lo shader di iBaila, che si spegne con un IntersectionObserver).
+if ("IntersectionObserver" in window) {
+  root.classList.add("js-anim");
+  const vis = new IntersectionObserver((entries) => {
+    for (const e of entries) e.target.classList.toggle("is-vis", e.isIntersecting);
+  }, { rootMargin: "120px 0px" });
+  document.querySelectorAll("[data-edge-light], .final-ring, .hero-backdrop").forEach((el) => vis.observe(el));
+}
+
 // ── Hero che si allontana scorrendo (iBaila: y 0 -> -90 px su 500 px, opacita' 1 -> 0 su 420) ──
 const copy = document.querySelector<HTMLElement>("[data-hero-copy]");
 if (copy && !reduce && window.matchMedia("(min-width: 1024px)").matches) {

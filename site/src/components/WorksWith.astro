@@ -1,22 +1,22 @@
 ---
 // Con cosa funziona. Seconda passata (24/10/2026, sul modello di iBaila): una card per sorgente col
-// logo vero del marchio (SVG inline da `simple-icons`, versione fissata in package.json), nel colore
+// logo vero del marchio (SVG inline da `simple-icons`, versione fissata in package.json, via src/lib/brand-icons.ts), nel colore
 // del marchio, con il suo alone in alto a sinistra che si accende al passaggio del mouse; sotto, Mac
 // e Windows nella stessa riga. simple-icons non ha piu' il logo di Windows (rimosso su richiesta di
 // Microsoft): al suo posto quattro riquadri disegnati qui, come fa iBaila.
 // Le frasi vengono da FAQ e card di features.json: Apple Music e' seguita su Mac; YouTube Music e
 // SoundCloud suonano in Chrome. Sotto, la prova gratuita detta una seconda volta.
-import { siSpotify, siApplemusic, siYoutubemusic, siSoundcloud, siApple } from "simple-icons";
+import { BRAND } from "../lib/brand-icons";
 
 const sources = [
-  { name: "Spotify", where: "The app", icon: siSpotify },
-  { name: "Apple Music", where: "The Music app, on a Mac", icon: siApplemusic },
-  { name: "YouTube Music", where: "In Chrome", icon: siYoutubemusic },
-  { name: "SoundCloud", where: "In Chrome", icon: siSoundcloud },
+  { name: "Spotify", where: "The app", icon: BRAND.spotify },
+  { name: "Apple Music", where: "The Music app, on a Mac", icon: BRAND.applemusic },
+  { name: "YouTube Music", where: "In Chrome", icon: BRAND.youtubemusic },
+  { name: "SoundCloud", where: "In Chrome", icon: BRAND.soundcloud },
 ];
 const WINDOWS = "M3 5.2 10.4 4.2v7.1H3V5.2Zm8.3-1.1L21 2.8v8.5h-9.7V4.1ZM3 12.7h7.4v7.1L3 18.8v-6.1Zm8.3 0H21v8.5l-9.7-1.3v-7.2Z";
 const systems = [
-  { name: "Mac", where: "macOS 11 or later, Apple Silicon and Intel", path: siApple.path },
+  { name: "Mac", where: "macOS 11 or later, Apple Silicon and Intel", path: BRAND.apple.path },
   { name: "Windows", where: "Windows 10 and 11, 64-bit", path: WINDOWS },
 ];
 ---

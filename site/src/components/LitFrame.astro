@@ -4,8 +4,9 @@
 //  - .lf__halo: l'alone dietro, i due colori sfocati a 64 px, che respira piano (8 s);
 //  - .lf__bezel: il vetro scuro dello schermo, raggi e ombra come la cornice del laptop di iBaila;
 //  - .lf__inner: la luce dentro lo schermo, una fascia sfocata sul bordo interno, come la feature;
-//  - .lf__rim: l'anello di luce sul bordo, un conic-gradient nei due colori che gira (10 s),
-//    con una copia sfocata (.lf__bloom) per il bagliore.
+//  - .lf__rim: l'anello di luce sul bordo: dietro la cornice, 2,5 px piu' largo, un conic-gradient
+//    nei due colori che gira (10 s) con una rotazione (transform), cosi' lo muove il compositore
+//    senza ridipingere; .lf__bloom e' la sua copia sfocata per il bagliore.
 // I colori arrivano da `glow` (src/data/home.ts), presi dalla ripresa: mai il verde.
 // La luce si accende quando la cornice entra nello schermo (.is-in, motion.ts): con "Riduci
 // movimento" e' accesa da subito e ferma.
@@ -22,9 +23,9 @@ const style = `--c1:${glow[0]};--c2:${glow[1]}${ratio ? `;--ratio:${ratio}` : ""
 ---
 <div class:list={["lf", `lf--${kind}`, cls]} style={style} data-edge-light data-reveal="media">
   <div class="lf__halo" aria-hidden="true"></div>
+  <div class="lf__bloom" aria-hidden="true"></div>
+  <div class="lf__rim" aria-hidden="true"></div>
   <div class="lf__bezel">
     <div class="lf__screen"><slot /><div class="lf__inner" aria-hidden="true"></div></div>
-    <div class="lf__rim" aria-hidden="true"></div>
-    <div class="lf__bloom" aria-hidden="true"></div>
   </div>
 </div>

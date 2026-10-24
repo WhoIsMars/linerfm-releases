@@ -460,20 +460,35 @@ html.lenis { scroll-behavior: auto; }
   aspect-ratio: auto;
 }
 .lf__screen .ambient-video { height: 100%; }
-/* L'anello: il bordo della cornice (2px) dipinto da un conic-gradient che gira.
-   La maschera lascia solo il filo esterno. */
+/* L'anello: dietro la cornice, 2,5px piu' largo; dentro, un quadrato col conic-gradient che ruota
+   (transform: lo muove il compositore, niente pittura a ogni fotogramma). La cornice opaca copre il
+   centro, resta acceso solo il filo. .lf__bloom e' la stessa cosa piu' larga e sfocata. */
 .lf__rim, .lf__bloom {
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 2.5px;
-  background: conic-gradient(from var(--lf-a), var(--c1), var(--c2) 25%, color-mix(in srgb, var(--c1) 30%, transparent) 45%, var(--c2) 70%, var(--c1));
-  -webkit-mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  animation: lf-spin 10s linear infinite;
+  inset: -2.5px;
+  z-index: 0;
+  border-radius: 32.5px;
+  overflow: hidden;
   pointer-events: none;
 }
-.lf__bloom { padding: 7px; filter: blur(14px); opacity: .9; }
+.lf--screen .lf__rim { border-radius: 24.5px; }
+.lf__bloom { inset: -7px; border-radius: 37px; filter: blur(16px); opacity: .9; }
+.lf--screen .lf__bloom { border-radius: 29px; }
+.lf__rim::before, .lf__bloom::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: conic-gradient(var(--c1), var(--c2) 25%, color-mix(in srgb, var(--c1) 30%, transparent) 45%, var(--c2) 70%, var(--c1));
+  animation: spin 10s linear infinite;
+  will-change: transform;
+}
+.lf__bezel { z-index: 1; }
+@keyframes lf-spin { to { --lf-a: 360deg; } }
+@keyframes lf-breathe { 0%, 100% { opacity: .42; transform: scale(.98); } 50% { opacity: .62; transform: scale(1.02); } }
 /* La luce dentro lo schermo, come quella del prodotto: una fascia di 16px sul bordo
    interno, sfocata, che si somma all'immagine (screen). */
 .lf__inner {
@@ -488,11 +503,11 @@ html.lenis { scroll-behavior: auto; }
   filter: blur(9px);
   mix-blend-mode: screen;
   opacity: .75;
-  animation: lf-spin 10s linear infinite;
   pointer-events: none;
 }
-@keyframes lf-spin { to { --lf-a: 360deg; } }
-@keyframes lf-breathe { 0%, 100% { opacity: .42; transform: scale(.98); } 50% { opacity: .62; transform: scale(1.02); } }
+/* Fuori dallo schermo le luci si fermano (motion.ts mette .is-vis a chi si vede). */
+.js-anim .lf:not(.is-vis) *, .js-anim .lf:not(.is-vis) *::before, .js-anim .final-ring:not(.is-vis) *,
+.js-anim .hero-backdrop:not(.is-vis) *, .js-anim .price-card:not(.is-vis) *::before { animation-play-state: paused !important; }
 /* Accensione: senza .js-reveal (niente JS o "Riduci movimento") la luce e' gia' accesa. */
 .js-reveal .lf .lf__rim, .js-reveal .lf .lf__bloom, .js-reveal .lf .lf__halo, .js-reveal .lf .lf__inner {
   opacity: 0;
@@ -503,7 +518,7 @@ html.lenis { scroll-behavior: auto; }
 .js-reveal .lf.is-in .lf__halo { opacity: .55; }
 .js-reveal .lf.is-in .lf__inner { opacity: .75; }
 @media (prefers-reduced-motion: reduce) {
-  .lf__rim, .lf__bloom, .lf__halo, .lf__inner { animation: none; }
+  .lf__rim::before, .lf__bloom::before, .lf__halo { animation: none; }
 }
 @media (prefers-reduced-transparency: reduce) { .lf__halo, .lf__bloom { display: none; } }
 
@@ -628,9 +643,10 @@ main, footer { position: relative; z-index: 2; }
   background: conic-gradient(from var(--lf-a), #c8ffdd, #6bf5a3, #1ed760, #0f9d4a, #1ed760, #6bf5a3, #c8ffdd);
   filter: blur(12px);
   opacity: .55;
-  animation: lf-spin 6s linear infinite;
   transition: opacity .5s var(--ease-glide), filter .5s var(--ease-glide), inset .5s var(--ease-glide);
 }
+/* L'aura gira solo sotto il mouse: ferma, a riposo, non costa un fotogramma. */
+.btn-primary:hover::before { animation: lf-spin 3s linear infinite; }
 .btn-primary:hover { background-color: #22cc5f; }
 .btn-primary:hover::before { opacity: 1; filter: blur(18px); inset: -5px; }
 .btn-primary:active { transform: scale(.965); }
@@ -793,7 +809,7 @@ main, footer { position: relative; z-index: 2; }
   left: 50%;
   top: 50%;
   z-index: -1;
-  width: min(820px, 125vw);
+  width: min(1040px, 135vw);
   aspect-ratio: 1;
   translate: -50% -50%;
   pointer-events: none;
@@ -824,3 +840,6 @@ main, footer { position: relative; z-index: 2; }
   .hero-dl > astro-island > div { align-items: flex-start; }
 }
 .lf .ambient-video__toggle { z-index: 3; }
+/* Senza Lenis (telefono, "Riduci movimento") un link #sezione non deve finire sotto la barra. */
+main section[id] { scroll-margin-top: 4.5rem; }
+@media (max-width: 639px) { .final-ring { opacity: .6; } }
