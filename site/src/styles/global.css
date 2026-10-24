@@ -48,10 +48,6 @@ html {
      stile chiaro sopra un fondo quasi nero senza questa riga. */
   color-scheme: dark;
   scroll-behavior: smooth;
-  /* Home a schermi (24/10/2026, sul modello di iBaila): lo scorrimento si ferma
-     sull'inizio di una sezione quando ci passa vicino, senza mai trattenere chi
-     scorre (proximity, non mandatory). Le pagine senza .screen non ne risentono. */
-  scroll-snap-type: y proximity;
   scrollbar-color: rgba(255, 255, 255, .22) transparent;
   background-color: var(--color-ink-950);
   color: var(--color-fg);
@@ -297,155 +293,534 @@ footer a[href]::after {
 @media (max-width: 767px) { .desktop-only { display: none; } }
 :root.ua-mobile .desktop-only { display: none; }
 
-/* ── Titoli da vetrina (22/10, confronto con iBaila) ─────────────────────────────
-   Stesso font di sistema dell'app, ma a scala di copertina: pesante, stretto, righe
-   corte. Il secondo tono è grigio (.display-dim), mai un gradiente né un colore: il
-   verde resta delle azioni. L'etichetta sopra (.eyebrow) dice di cosa parla la sezione. */
-.display {
-  font-size: clamp(2.6rem, 7.2vw, 5.6rem);
-  line-height: 0.98;
-  font-weight: 700;
-  letter-spacing: -0.045em;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Seconda passata sul modello di aestheticmac.com/ibaila (24/10/2026).
+   Valori presi dal loro CSS e dal loro bundle: .study/NOTE.md nella PR.
+   Regola che resta: il verde e' delle azioni (pulsanti, stati veri). La luce
+   attorno ai media, gli aloni e i titoli accesi prendono i colori della
+   ripresa della sezione (--c1, --c2), mai il verde.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --ease-glide: cubic-bezier(.16, 1, .3, 1);
+  --ease-soft: cubic-bezier(.22, 1, .36, 1);
+  --c1: #9cc8ff;
+  --c2: #c8b4ff;
+  /* Le copertine della pagina in un anello: ogni canzone porta il suo colore. */
+  --covers-ring: conic-gradient(from 0deg, #5ad1ff, #a18cff, #ff6fa8, #ff8a3d, #ffd54a, #5ad1ff);
+}
+html { background-color: #030304; }
+html.lenis, html.lenis body { height: auto; }
+html.lenis { scroll-behavior: auto; }
+.lenis.lenis-stopped { overflow: clip; }
+.lenis.lenis-smooth iframe { pointer-events: none; }
+::selection { background: color-mix(in srgb, var(--c1) 40%, transparent); color: #fff; }
+
+/* ── Ritmo: sezioni a passo regolare (112/160 px), contenitore 1240 px ─────── */
+.section { position: relative; padding-block: 6rem; }
+@media (min-width: 640px) { .section { padding-block: 8.5rem; } }
+.feature { position: relative; padding-block: 6rem; }
+@media (min-width: 640px) { .feature { padding-block: 7.5rem; } }
+
+/* ── Tipografia ───────────────────────────────────────────────────────────
+   Font di sistema (SF Pro su Mac, lo stesso dell'app) al peso 800 e con la
+   stretta di iBaila (-.045em, interlinea .94): la scelta fa il 90% del loro
+   effetto senza scaricare un font. */
+.t-display {
+  font-size: clamp(2.9rem, 6.6vw, 6.25rem);
+  line-height: .94;
+  font-weight: 800;
+  letter-spacing: -.05em;
   text-wrap: balance;
 }
-.display-2 {
-  font-size: clamp(2.2rem, 5.2vw, 4.2rem);
-  line-height: 1;
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  text-wrap: balance;
-}
-.display-dim { color: var(--color-fg-3); }
-.eyebrow {
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-fg-3);
-}
-
-/* ── Schermo acceso (22/10) ──────────────────────────────────────────────────────
-   Dietro ogni ripresa, la sua stessa immagine sfocata: la luce che esce dallo schermo
-   ha i colori della copertina che sta suonando, come il desktop dal vivo e la sua luce
-   sul bordo. Nessun colore scelto a mano, e mai il verde. L'immagine arriva da
-   --art (il poster del video). */
-.lit { position: relative; isolation: isolate; }
-.lit::before {
-  content: "";
-  position: absolute;
-  inset: -4% -3%;
-  z-index: -1;
-  border-radius: 48px;
-  background: var(--art) center / cover no-repeat;
-  filter: blur(56px) saturate(1.3);
-  opacity: 0.5;
-  pointer-events: none;
-}
-.lit-soft::before { opacity: 0.32; filter: blur(48px) saturate(1.2); }
-@media (prefers-reduced-transparency: reduce) { .lit::before { display: none; } }
-
-/* ── Home a schermi (24/10/2026) ─────────────────────────────────────────────────
-   Una sezione per schermo: alta almeno quanto la finestra, contenuto al centro,
-   l'inizio della sezione e' il punto dove lo scorrimento si ferma. Il padding in alto
-   lascia libero lo spazio sotto la barra di navigazione, che galleggia sopra. */
-.screen {
-  min-height: 100vh;
-  min-height: 100svh;
-  scroll-snap-align: start;
-  display: grid;
-  align-content: center;
-  padding-block: 5.5rem 3.5rem;
-}
-/* Le sezioni piu' lunghe di uno schermo (domande, download) partono dall'alto. */
-.screen-long { align-content: start; padding-top: 7rem; }
-
-/* Scala dei titoli: tre gradini, la stessa stretta dei titoli di sistema. */
-.t-hero {
-  font-size: clamp(2.5rem, 5.6vw, 5rem);
-  line-height: 1;
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  text-wrap: balance;
-}
-.t-screen {
-  font-size: clamp(2rem, 4vw, 3.5rem);
-  line-height: 1.04;
-  font-weight: 700;
-  letter-spacing: -0.035em;
+.t-section {
+  font-size: clamp(2.5rem, 5.6vw, 5.25rem);
+  line-height: .96;
+  font-weight: 800;
+  letter-spacing: -.048em;
   text-wrap: balance;
 }
 .t-lead {
-  font-size: clamp(1.05rem, 1.35vw, 1.25rem);
+  font-size: clamp(1.0625rem, 1.35vw, 1.25rem);
   line-height: 1.55;
-  color: var(--color-fg-2);
+  letter-spacing: -.005em;
+  color: rgba(245, 245, 247, .66);
   text-wrap: pretty;
 }
-
-/* La ripresa: il riquadro dello schermo del telefono, verticale, con la luce della
-   copertina dietro (.lit). Alta al massimo quanto lascia la finestra, cosi' frase e
-   video stanno sempre insieme nello stesso schermo. */
-.take {
-  position: relative;
-  width: min(100%, calc((100svh - 11rem) * 0.72));
-  margin-inline: auto;
+.eyebrow {
+  display: inline-flex;
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--c1) 60%, #fff), var(--c1) 45%, var(--c2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
-.take video,
-.take img {
+/* La parte accesa del titolo: un gradiente nei due colori della luce, con un
+   poco di bagliore. */
+.text-halo {
+  background: linear-gradient(95deg, color-mix(in srgb, var(--c1) 55%, #fff) 0%, var(--c1) 38%, var(--c2) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 28px color-mix(in srgb, var(--c1) 35%, transparent));
+}
+/* Le parole avvolte dallo split ereditano il gradiente: ognuna lo ridisegna su di se'. */
+.text-halo .w {
+  background: inherit;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.text-halo:has(.w) { filter: none; }
+.text-halo:has(.w) .w { filter: drop-shadow(0 0 24px color-mix(in srgb, var(--c1) 30%, transparent)); }
+
+/* ── Comparse ─────────────────────────────────────────────────────────────
+   Parole: maschera per parola, la parola sale dal 105% ruotata di 4 gradi.
+   Il resto: blur 10px, 26px piu' in basso, opacita' 0. Tutto spento con
+   "Riduci movimento" (motion.ts non mette .js-reveal). */
+.w-mask {
+  display: inline-block;
+  overflow: hidden;
+  padding-bottom: .14em;
+  margin-bottom: -.14em;
+  vertical-align: bottom;
+}
+.w { display: inline-block; transform-origin: 0% 100%; }
+.js-reveal [data-words] .w {
+  opacity: 0;
+  transform: translateY(105%) rotate(4deg);
+  transition: transform 1s var(--ease-glide), opacity .8s var(--ease-glide);
+  transition-delay: calc(var(--w, 0) * 55ms);
+}
+.js-reveal [data-words].is-in .w { opacity: 1; transform: none; }
+
+.js-reveal [data-reveal] {
+  opacity: 0;
+  filter: blur(10px);
+  transform: translateY(26px);
+  transition: opacity 1s var(--ease-glide), filter 1s var(--ease-glide), transform 1s var(--ease-glide);
+  transition-delay: calc(var(--i, 0) * 90ms);
+}
+.js-reveal [data-reveal="media"] {
+  transform: translateY(50px) scale(.96);
+  transition-duration: 1.2s;
+}
+.js-reveal [data-reveal].is-in { opacity: 1; filter: none; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .js-reveal [data-reveal], .js-reveal [data-words] .w { opacity: 1; filter: none; transform: none; transition: none; }
+}
+
+/* ── Cornice accesa: la luce ai bordi attorno a ogni media ─────────────────
+   Come la luce del prodotto: un anello nei colori della copertina che gira
+   piano sul bordo dello schermo, un bagliore stretto e un alone largo dietro
+   che respira. Si accende entrando (la luce cresce da 0). */
+@property --lf-a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+.lf { position: relative; isolation: isolate; }
+.lf__halo {
+  position: absolute;
+  inset: 4% -2% -2%;
+  z-index: -1;
+  border-radius: 48px;
+  background:
+    radial-gradient(60% 60% at 25% 30%, var(--c1), transparent 70%),
+    radial-gradient(60% 60% at 80% 75%, var(--c2), transparent 70%);
+  filter: blur(64px);
+  opacity: .55;
+  animation: lf-breathe 8s ease-in-out infinite;
+  pointer-events: none;
+}
+.lf__bezel {
+  position: relative;
+  padding: 10px;
+  border-radius: 30px;
+  background: linear-gradient(#1b1b20, #0c0c0f 40%, #09090b);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .07), inset 0 1px 0 rgba(255, 255, 255, .12), 0 50px 120px -30px rgba(0, 0, 0, .9);
+}
+.lf--screen .lf__bezel { padding: 8px; border-radius: 22px; }
+.lf__screen {
+  position: relative;
+  overflow: hidden;
+  border-radius: 21px;
+  background: #05060d;
+  aspect-ratio: var(--ratio, auto);
+}
+.lf--screen .lf__screen { border-radius: 14px; }
+.lf__screen video, .lf__screen img {
   display: block;
   width: 100%;
-  height: auto;
-  aspect-ratio: 18 / 25;
+  height: 100%;
   object-fit: cover;
-  border-radius: 22px;
-  background: var(--color-ink-900);
-  border: 1px solid var(--color-hairline);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .08);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  aspect-ratio: auto;
 }
-.take .ambient-video__toggle { right: .8rem; bottom: .8rem; }
+.lf__screen .ambient-video { height: 100%; }
+/* L'anello: il bordo della cornice (2px) dipinto da un conic-gradient che gira.
+   La maschera lascia solo il filo esterno. */
+.lf__rim, .lf__bloom {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2.5px;
+  background: conic-gradient(from var(--lf-a), var(--c1), var(--c2) 25%, color-mix(in srgb, var(--c1) 30%, transparent) 45%, var(--c2) 70%, var(--c1));
+  -webkit-mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: lf-spin 10s linear infinite;
+  pointer-events: none;
+}
+.lf__bloom { padding: 7px; filter: blur(14px); opacity: .9; }
+/* La luce dentro lo schermo, come quella del prodotto: una fascia di 16px sul bordo
+   interno, sfocata, che si somma all'immagine (screen). */
+.lf__inner {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  padding: 16px;
+  background: conic-gradient(from var(--lf-a), var(--c1), var(--c2) 25%, color-mix(in srgb, var(--c1) 25%, transparent) 45%, var(--c2) 70%, var(--c1));
+  -webkit-mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  filter: blur(9px);
+  mix-blend-mode: screen;
+  opacity: .75;
+  animation: lf-spin 10s linear infinite;
+  pointer-events: none;
+}
+@keyframes lf-spin { to { --lf-a: 360deg; } }
+@keyframes lf-breathe { 0%, 100% { opacity: .42; transform: scale(.98); } 50% { opacity: .62; transform: scale(1.02); } }
+/* Accensione: senza .js-reveal (niente JS o "Riduci movimento") la luce e' gia' accesa. */
+.js-reveal .lf .lf__rim, .js-reveal .lf .lf__bloom, .js-reveal .lf .lf__halo, .js-reveal .lf .lf__inner {
+  opacity: 0;
+  transition: opacity 1.6s var(--ease-soft) .25s;
+}
+.js-reveal .lf.is-in .lf__rim { opacity: 1; }
+.js-reveal .lf.is-in .lf__bloom { opacity: .9; }
+.js-reveal .lf.is-in .lf__halo { opacity: .55; }
+.js-reveal .lf.is-in .lf__inner { opacity: .75; }
+@media (prefers-reduced-motion: reduce) {
+  .lf__rim, .lf__bloom, .lf__halo, .lf__inner { animation: none; }
+}
+@media (prefers-reduced-transparency: reduce) { .lf__halo, .lf__bloom { display: none; } }
+
+/* La ripresa verticale: alta al massimo quanto lascia la finestra. */
+.take {
+  position: relative;
+  width: min(100%, calc((100svh - 9rem) * 0.72));
+  margin-inline: auto;
+}
+@media (max-width: 1023px) { .take { width: min(100%, calc(62svh * 0.72)); } }
+.take .ambient-video__toggle, .lf .ambient-video__toggle { right: .8rem; bottom: .8rem; }
 .take-caption {
-  margin-top: .9rem;
+  margin-top: 1.1rem;
   font-size: .8125rem;
   color: var(--color-fg-3);
   text-align: center;
   text-wrap: balance;
 }
-/* Sotto i 1024px frase e ripresa stanno una sopra l'altra: la ripresa si ferma al 58% dell'altezza,
-   cosi' su un telefono (375x812) titolo, riga e video entrano nello stesso schermo. */
-@media (max-width: 1023px) {
-  .take { width: min(100%, calc(58svh * 0.72)); }
+
+/* ── Chip degli stili e delle funzioni ─────────────────────────────────── */
+.chips { display: flex; flex-wrap: wrap; gap: .5rem; padding: 0; margin-bottom: 0; list-style: none; }
+.chip {
+  padding: .5rem .95rem;
+  border-radius: 999px;
+  font-size: .875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, .82);
+  background: rgba(255, 255, 255, .045);
+  border: 1px solid rgba(255, 255, 255, .1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06);
+  transition: border-color .4s var(--ease-glide), background-color .4s var(--ease-glide), box-shadow .4s var(--ease-glide);
+}
+.chip:hover {
+  border-color: color-mix(in srgb, var(--c1) 55%, transparent);
+  background: color-mix(in srgb, var(--c1) 10%, transparent);
+  box-shadow: 0 0 22px -6px var(--c1), inset 0 1px 0 rgba(255, 255, 255, .08);
 }
 
-/* ── Comparse al passaggio ─────────────────────────────────────────────────────
-   Lo stato nascosto esiste solo se lo script ha messo .js-reveal su <html>: senza
-   JavaScript, e con "Riduci movimento", tutto e' visibile da subito. Il testo sale
-   di 16px, il video arriva un poco piu' lento e cresce dal 96%: una sola coreografia,
-   la stessa curva che rallenta alla fine (expo out). */
-.js-reveal [data-reveal] {
+/* ── Hero ──────────────────────────────────────────────────────────────── */
+.hero { position: relative; overflow: hidden; padding-block: 8rem 6rem; }
+@media (min-width: 1024px) { .hero { padding-block: 9.5rem 8rem; min-height: 100svh; display: grid; align-content: center; } }
+.hero-backdrop { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+/* I solchi di un vinile (il loro: repeating-radial-gradient 1px ogni 24px) che respirano. */
+.hero-grooves {
+  position: absolute;
+  top: 46%;
+  left: 62%;
+  width: 1900px;
+  height: 1900px;
+  margin: -950px 0 0 -950px;
+  border-radius: 50%;
+  background: repeating-radial-gradient(circle, rgba(255, 255, 255, .05) 0 1px, transparent 1.5px 24px);
+  -webkit-mask-image: radial-gradient(closest-side, transparent 9%, #000 22%, rgba(0, 0, 0, .55) 48%, transparent 72%);
+  mask-image: radial-gradient(closest-side, transparent 9%, #000 22%, rgba(0, 0, 0, .55) 48%, transparent 72%);
+  animation: hero-breathe 9s ease-in-out infinite;
+}
+.hero-glow { position: absolute; border-radius: 50%; will-change: transform; }
+.hero-glow--a {
+  width: 760px; height: 560px; top: 40px; left: calc(62% - 760px);
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--c1) 26%, transparent), color-mix(in srgb, var(--c1) 8%, transparent) 55%, transparent);
+  animation: hero-drift-a 19s ease-in-out infinite alternate;
+}
+.hero-glow--b {
+  width: 700px; height: 520px; top: 220px; left: 58%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--c2) 20%, transparent), color-mix(in srgb, var(--c2) 6%, transparent) 55%, transparent);
+  animation: hero-drift-b 23s ease-in-out infinite alternate;
+}
+@keyframes hero-breathe { 50% { transform: scale(1.025); } }
+@keyframes hero-drift-a { to { transform: translate(180px, 70px) scale(1.08); } }
+@keyframes hero-drift-b { to { transform: translate(-200px, -60px) scale(.94); } }
+@media (prefers-reduced-motion: reduce) { .hero-grooves, .hero-glow { animation: none; } }
+.lf--hero .lf__halo { inset: -6% -10%; filter: blur(80px); }
+
+/* La torcia: un alone che segue il mouse (iBaila: 800px, lerp .12, solo puntatori fini). */
+#torch {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  width: 800px;
+  height: 800px;
+  border-radius: 50%;
+  pointer-events: none;
   opacity: 0;
-  transform: translateY(16px);
-  transition: opacity .6s cubic-bezier(.16, 1, .3, 1), transform .6s cubic-bezier(.16, 1, .3, 1);
-  transition-delay: calc(var(--i, 0) * 80ms);
+  transition: opacity .7s ease;
+  background: radial-gradient(closest-side, rgba(190, 215, 255, .055), rgba(160, 140, 255, .025) 45%, transparent 75%);
 }
-.js-reveal [data-reveal="media"] {
-  transform: translateY(16px) scale(.96);
-  transition-duration: .9s;
+main, footer { position: relative; z-index: 2; }
+
+/* ── Barra di navigazione in vetro ─────────────────────────────────────── */
+.glass {
+  background: rgba(14, 14, 18, .6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  backdrop-filter: blur(24px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, .09);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), 0 30px 80px -40px rgba(0, 0, 0, .8);
 }
-.js-reveal [data-reveal].is-in { opacity: 1; transform: none; }
-@media (prefers-reduced-motion: reduce) {
-  .js-reveal [data-reveal] { opacity: 1; transform: none; transition: none; }
+.nav-links a {
+  padding: .5rem .85rem;
+  border-radius: 999px;
+  transition: background-color .3s var(--ease-glide), color .3s var(--ease-glide);
+}
+.nav-links a:hover { background: rgba(255, 255, 255, .06); color: var(--color-fg); }
+
+/* ── Pulsante d'azione: verde, con un'aura che gira e cresce al passaggio ──
+   (btn-buy di iBaila: conic che gira 6s, blur 12 -> 18, inset -2 -> -5,
+   pressione a .965). L'aura e' verde perche' e' un'azione. */
+.btn-primary {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--color-green-500);
+  color: #03190d;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), inset 0 -2px 0 rgba(0, 0, 0, .12);
+  transition: background-color .35s var(--ease-glide), transform .35s var(--ease-glide);
+}
+.btn-primary::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border-radius: inherit;
+  background: conic-gradient(from var(--lf-a), #c8ffdd, #6bf5a3, #1ed760, #0f9d4a, #1ed760, #6bf5a3, #c8ffdd);
+  filter: blur(12px);
+  opacity: .55;
+  animation: lf-spin 6s linear infinite;
+  transition: opacity .5s var(--ease-glide), filter .5s var(--ease-glide), inset .5s var(--ease-glide);
+}
+.btn-primary:hover { background-color: #22cc5f; }
+.btn-primary:hover::before { opacity: 1; filter: blur(18px); inset: -5px; }
+.btn-primary:active { transform: scale(.965); }
+.btn-ghost { transition: background-color .3s var(--ease-glide), transform .3s var(--ease-glide), border-color .3s var(--ease-glide); }
+.btn-ghost:hover { border-color: rgba(255, 255, 255, .6); }
+.btn-ghost:active { transform: scale(.965); }
+@media (prefers-reduced-motion: reduce) { .btn-primary::before { animation: none; } }
+
+/* ── Card dei marchi (service-card + lit-card di iBaila) ─────────────────── */
+.brand-card {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  padding: 1.6rem 1.5rem 1.5rem;
+  border-radius: 26px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .02));
+  border: 1px solid rgba(255, 255, 255, .08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06);
+  transition: border-color .5s var(--ease-glide), transform .5s var(--ease-glide);
+}
+.brand-card--row { display: flex; align-items: center; gap: 1.25rem; padding: 1.4rem 1.5rem; }
+.brand-card__glow {
+  position: absolute;
+  left: -2.5rem;
+  top: -3rem;
+  width: 12rem;
+  height: 12rem;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--brand), transparent);
+  opacity: .28;
+  filter: blur(24px);
+  transition: opacity .5s var(--ease-glide);
+}
+.brand-card::after {
+  /* il bordo che si accende sotto il mouse */
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(320px circle at var(--mx, 50%) var(--my, -30%), color-mix(in srgb, var(--brand) 85%, #fff), color-mix(in srgb, var(--brand) 40%, transparent) 35%, transparent 65%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity: 0;
+  transition: opacity .5s var(--ease-glide);
+  pointer-events: none;
+}
+.brand-card:hover::after { opacity: 1; }
+.brand-card:hover .brand-card__glow { opacity: .5; }
+.brand-card__logo {
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  flex: none;
+  border-radius: 1rem;
+  color: var(--brand);
+  background: rgba(255, 255, 255, .04);
+  border: 1px solid rgba(255, 255, 255, .1);
+  transition: filter .5s var(--ease-glide), box-shadow .5s var(--ease-glide);
+}
+.brand-card:hover .brand-card__logo {
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--brand) 70%, transparent));
+  box-shadow: 0 0 30px -8px var(--brand);
 }
 
-/* ── Piattaforme ───────────────────────────────────────────────────────────────── */
-.platform {
-  display: flex;
-  align-items: center;
-  gap: .9rem;
-  padding: 1rem 1.25rem;
+/* ── Prezzo: bordo che gira e alone (price-card di iBaila) ─────────────────── */
+.price-card { position: relative; isolation: isolate; border-radius: 34px; padding: 1.5px; }
+.price-card__glow {
+  position: absolute;
+  inset: -18px;
+  z-index: -1;
+  border-radius: 48px;
+  background: var(--covers-ring);
+  filter: blur(40px);
+  opacity: .26;
 }
-.platform svg { flex: none; width: 22px; height: 22px; color: var(--color-fg-2); }
+.price-card__spin {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+}
+.price-card__spin::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: var(--covers-ring);
+  animation: spin 9s linear infinite;
+}
+.price-card__inner { position: relative; border-radius: 32.5px; background: linear-gradient(#0f0f14, #09090c); }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .price-card__spin::before { animation: none; } }
+
+/* ── Domande ─────────────────────────────────────────────────────────────── */
+.faq-item {
+  padding: 1.15rem 1.5rem;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .025);
+  border: 1px solid rgba(255, 255, 255, .08);
+  transition: background-color .5s var(--ease-glide), border-color .5s var(--ease-glide);
+}
+.faq-item[open] { background: rgba(255, 255, 255, .05); border-color: rgba(255, 255, 255, .15); }
+.faq-item:hover { border-color: rgba(255, 255, 255, .15); }
+.faq-item__plus {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  font-size: 1.15rem;
+  line-height: 1;
+  color: var(--color-fg-2);
+  background: rgba(255, 255, 255, .07);
+  transition: transform .5s var(--ease-glide), background-color .5s var(--ease-glide), color .5s var(--ease-glide);
+}
+.faq-item[open] .faq-item__plus { transform: rotate(45deg); background: #fff; color: #050505; }
+
+/* ── Passi: la linea che si riempie (setup di iBaila) ───────────────────── */
+.steps { position: relative; list-style: none; padding: 0; }
+.step { position: relative; padding-top: 1.6rem; border-top: 1px solid rgba(255, 255, 255, .1); }
+.step::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -1px;
+  height: 1px;
+  width: 100%;
+  background: var(--color-green-500);
+  box-shadow: 0 0 12px 1px rgba(29, 185, 84, .6);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 1.4s var(--ease-glide);
+  transition-delay: calc(var(--i, 0) * 180ms + .2s);
+}
+.step.is-in::before, html:not(.js-reveal) .step::before { transform: none; }
+.step__n {
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 700;
+  color: #050505;
+  background: #fff;
+}
+
+/* ── Chiusura: l'anello di luce attorno al download ("Dim the lights") ─────── */
+.section--final { overflow: hidden; }
+.final-head { position: relative; isolation: isolate; padding-block: 4rem; }
+.final-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: -1;
+  width: min(820px, 125vw);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  pointer-events: none;
+}
+.final-ring__bloom, .final-ring__line {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--covers-ring);
+  animation: spin 14s linear infinite;
+}
+.final-ring__bloom {
+  -webkit-mask: radial-gradient(closest-side, transparent 64%, #000 66%, #000 68%, transparent 76%);
+  mask: radial-gradient(closest-side, transparent 64%, #000 66%, #000 68%, transparent 76%);
+  filter: blur(18px);
+  opacity: .55;
+}
+.final-ring__line {
+  -webkit-mask: radial-gradient(closest-side, transparent 65.6%, #000 66%, #000 66.4%, transparent 67%);
+  mask: radial-gradient(closest-side, transparent 65.6%, #000 66%, #000 66.4%, transparent 67%);
+  opacity: .85;
+}
+@media (prefers-reduced-motion: reduce) { .final-ring__bloom, .final-ring__line { animation: none; } }
 
 /* Nell'hero a due colonne il pulsante e le righe sotto stanno allineati a sinistra col titolo. */
 @media (min-width: 1024px) {
   .hero-dl > div,
   .hero-dl > astro-island > div { align-items: flex-start; }
 }
+.lf .ambient-video__toggle { z-index: 3; }

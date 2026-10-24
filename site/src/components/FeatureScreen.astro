@@ -1,7 +1,10 @@
 ---
-// Una schermata della home: una frase, una riga, una ripresa vera. Senza media non disegna
-// niente: la schermata resta pronta in src/data/home.ts finche' la ripresa non esiste.
+// Una sezione della home: etichetta, titolo grande con la seconda parte accesa nel colore della
+// luce, una riga, i chip con gli stili e le funzioni vere, il media nella cornice accesa.
+// Le riprese del telefono (verticali) stanno accanto al testo; le catture della UI (orizzontali)
+// sotto, larghe, come lo schermo del laptop di iBaila. Senza media non disegna niente.
 import AmbientVideo from "./AmbientVideo.astro";
+import LitFrame from "./LitFrame.astro";
 import { mediaSize } from "../lib/media-dimensions";
 import type { FeatureScreenData } from "../data/home";
 
@@ -10,22 +13,35 @@ const { screen, flip = false } = Astro.props;
 const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
 const m = screen.media;
 const poster = m?.video ? m.video.replace(/\.mp4$/, ".jpg") : m?.image;
-const img = m?.image ? mediaSize(m.image) : undefined;
+const size = m ? mediaSize(m.video ?? m.image ?? "") : undefined;
+const kind = m?.kind ?? "phone";
+const wide = kind === "screen";
+const glowStyle = screen.glow ? `--c1:${screen.glow[0]};--c2:${screen.glow[1]}` : undefined;
 ---
 {m && (
-  <section id={screen.id} class="screen" data-feature={screen.id} aria-labelledby={`${screen.id}-title`}>
-    <div class="max-w-6xl w-full mx-auto px-4 sm:px-6 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-      <div class:list={["max-w-[34rem]", flip && "lg:order-2"]}>
-        <h2 id={`${screen.id}-title`} class="t-screen" data-reveal style="--i:0">{screen.title}</h2>
-        <p class="t-lead mt-5" data-reveal style="--i:1">{screen.line}</p>
+  <section id={screen.id} class:list={["feature", wide && "feature--wide"]} data-feature={screen.id} aria-labelledby={`${screen.id}-title`} style={glowStyle}>
+    <div class:list={["max-w-[1240px] w-full mx-auto px-5 sm:px-6", wide ? "" : "grid lg:grid-cols-2 gap-12 lg:gap-20 items-center"]}>
+      <div class:list={[wide ? "max-w-[46rem] mx-auto text-center" : "max-w-[36rem]", !wide && flip && "lg:order-2"]}>
+        {screen.eyebrow && <p class="eyebrow" data-reveal>{screen.eyebrow}</p>}
+        <h2 id={`${screen.id}-title`} class="t-section mt-5" data-words>
+          {screen.title}{screen.halo && <>{" "}<span class="text-halo">{screen.halo}</span></>}
+        </h2>
+        <p class:list={["t-lead mt-6", wide && "mx-auto max-w-[40rem]"]} data-reveal style="--i:1">{screen.line}</p>
+        {screen.chips && (
+          <ul class:list={["chips mt-8", wide && "justify-center"]} aria-label="Styles and tools">
+            {screen.chips.map((c, i) => <li class="chip" data-reveal style={`--i:${i + 2}`}>{c}</li>)}
+          </ul>
+        )}
         <slot />
       </div>
-      <figure class:list={["take lit lit-soft m-0", flip && "lg:order-1"]} style={`--art:url(${base}${poster})`} data-reveal="media" data-take>
-        {m.video ? (
-          <AmbientVideo src={m.video} poster={poster} lazy description={m.alt} />
-        ) : (
-          <img src={`${base}${m.image}`} alt={m.alt} width={img?.width} height={img?.height} loading="lazy" decoding="async" />
-        )}
+      <figure class:list={["m-0", wide ? "mt-14 sm:mt-20 mx-auto max-w-[1080px]" : "take", !wide && flip && "lg:order-1"]} data-take>
+        <LitFrame glow={screen.glow} kind={kind} ratio={size ? `${size.width} / ${size.height}` : undefined}>
+          {m.video ? (
+            <AmbientVideo src={m.video} poster={poster} lazy description={m.alt} />
+          ) : (
+            <img src={`${base}${m.image}`} alt={m.alt} width={size?.width} height={size?.height} loading="lazy" decoding="async" />
+          )}
+        </LitFrame>
         <figcaption class="take-caption">{m.caption}</figcaption>
       </figure>
     </div>

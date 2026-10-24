@@ -7,10 +7,10 @@ const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
 ---
 <!-- Barra in vetro staccata dai bordi, come una toolbar: sfocatura, un filo, nessun colore
      proprio. Una sola azione piena (la prova); Buy resta, come testo. Discord sta anche qui, a destra (23/10: "nel sito mancano i social, specialmente discord"). -->
-<header class="sticky top-3 z-40 px-3">
-  <nav class="max-w-4xl mx-auto flex items-center justify-between gap-4 pl-5 pr-2 h-12 rounded-full backdrop-blur-xl bg-ink-900/72 border border-hairline shadow-[0_8px_32px_rgba(0,0,0,.45)]" aria-label="Main">
-    <a href={base} class="font-semibold tracking-tight" aria-label="LinerFM home">Liner<span class="text-green-500">FM</span></a>
-    <div class="hidden md:flex items-center gap-6 text-sm text-fg-2">
+<header class="site-nav sticky top-3 z-40 px-3" data-nav>
+  <nav class="glass max-w-[880px] mx-auto flex items-center justify-between gap-3 pl-5 pr-1.5 h-[52px] rounded-full" aria-label="Main">
+    <a href={base} class="flex items-center gap-2 font-bold text-[1.0625rem] tracking-[-0.03em]" aria-label="LinerFM home"><img src={`${base}favicon-32.png`} alt="" width="20" height="20" class="w-5 h-5" /><span>Liner<span class="text-green-500">FM</span></span></a>
+    <div class="hidden md:flex items-center text-sm text-fg-2 nav-links">
       <a href={`${base}#works-with`} class="hover:text-fg">Works with</a>
       <a href={`${base}#${firstFeature}`} class="hover:text-fg">Features</a>
       <a href={`${base}#pricing`} class="hover:text-fg">Pricing</a>
@@ -20,7 +20,7 @@ const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
     <div class="flex items-center gap-3">
       <a href={DISCORD_URL} class="hidden md:inline text-sm text-fg-2 hover:text-fg">Discord</a>
       <a href={CHECKOUT_URL} class="lemonsqueezy-button hidden sm:inline text-sm font-semibold text-fg-2 hover:text-fg">Buy · 10€</a>
-      <a href={`${base}#download`} class="btn-primary text-sm font-semibold px-4 py-2 rounded-full">Try free</a>
+      <a href={`${base}#download`} class="btn-primary text-sm font-semibold px-4 py-2.5 rounded-full">Try free</a>
     </div>
   </nav>
 </header>

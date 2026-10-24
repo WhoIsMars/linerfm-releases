@@ -1,8 +1,8 @@
 ---
-// La home a schermi (24/10/2026, sul modello di aestheticmac.com/ibaila, richiesta dell'owner):
-// una sezione per schermo, una frase e una ripresa vera ciascuna, lo scorrimento che si ferma
-// sull'inizio delle sezioni, le comparse al passaggio. Le schermate delle feature vengono da
-// src/data/home.ts: quelle senza ripresa vera sono pronte ma non vanno in pagina.
+// La home (24/10/2026, sul modello di aestheticmac.com/ibaila, richiesta dell'owner). Seconda passata:
+// sezioni a ritmo regolare invece dello scatto a schermo intero, scorrimento morbido (Lenis), titoli
+// parola per parola, ogni media nella cornice con la luce ai bordi. Le sezioni delle feature vengono da
+// src/data/home.ts; il movimento sta in src/scripts/motion.ts.
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Nav from "../components/Nav.astro";
 import Hero from "../components/Hero.astro";
@@ -15,16 +15,19 @@ import Footer from "../components/Footer.astro";
 import { FEATURE_SCREENS, ALSO, listJoin } from "../data/home";
 
 const shown = FEATURE_SCREENS.filter((s) => s.media);
+// Le riprese verticali si alternano a destra e a sinistra fra loro; le catture larghe stanno sotto il testo.
+const phones = shown.filter((s) => s.media?.kind !== "screen").map((s) => s.id);
 ---
 <BaseLayout>
+  <div id="torch" aria-hidden="true"></div>
   <Nav />
   <main id="main-content">
     <Hero />
     <WorksWith />
     {shown.map((screen, i) => (
-      <FeatureScreen screen={screen} flip={i % 2 === 1}>
+      <FeatureScreen screen={screen} flip={phones.indexOf(screen.id) % 2 === 1}>
         {i === shown.length - 1 && (
-          <p class="mt-8 text-sm text-fg-3 leading-relaxed max-w-[44ch]" data-reveal style="--i:2">
+          <p class="mt-8 text-sm text-fg-3 leading-relaxed max-w-[44ch]" data-reveal style="--i:7">
             <span class="text-fg-2 font-medium">And also:</span> {listJoin(ALSO)}.
           </p>
         )}
@@ -38,24 +41,5 @@ const shown = FEATURE_SCREENS.filter((s) => s.media);
 </BaseLayout>
 
 <script>
-  // Comparse al passaggio: lo stato nascosto lo accende questo script (.js-reveal su <html>), quindi
-  // senza JavaScript la pagina resta tutta visibile. Con "Riduci movimento" non si nasconde niente.
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const items = document.querySelectorAll<HTMLElement>("[data-reveal]");
-  if (!reduce && "IntersectionObserver" in window && items.length) {
-    const io = new IntersectionObserver((entries) => {
-      for (const e of entries) {
-        if (!e.isIntersecting) continue;
-        e.target.classList.add("is-in");
-        io.unobserve(e.target);
-      }
-    }, { rootMargin: "0px 0px -10% 0px", threshold: 0.15 });
-    // Quello che e' gia' sullo schermo all'apertura non aspetta: niente salti sotto gli occhi.
-    const fold = window.innerHeight;
-    items.forEach((el) => {
-      if (el.getBoundingClientRect().top < fold * 0.9) el.classList.add("is-in");
-      else io.observe(el);
-    });
-    document.documentElement.classList.add("js-reveal");
-  }
+  import "../scripts/motion";
 </script>
