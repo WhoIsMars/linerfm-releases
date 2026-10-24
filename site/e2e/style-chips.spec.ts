@@ -30,7 +30,9 @@ for (const [id, t, label] of [
   ["widget", 6.2, "Terminal"],
   ["notch", 4.6, "Vinyl"],
   ["notch", 7.0, "Midnight"],
-  ["screensaver", 5.0, "Vinyl"],
+  ["screensaver", 2.4, "Onyx"],
+  ["screensaver", 4.0, "Glass"],
+  ["screensaver", 5.6, "Vinyl"],
 ] as const) {
   test(`${id} at ${t}s lights ${label}`, async ({ page }) => {
     await page.goto("/");
@@ -50,9 +52,8 @@ test("clicking a style chip moves the video to that style", async ({ page }) => 
   await expect(current(page, "notch")).toHaveText("Glass");
 });
 
-test("styles the video never shows stay plain text, not dead buttons", async ({ page }) => {
+test("the screensaver shows all five styles as buttons", async ({ page }) => {
   await page.goto("/");
   const ss = page.locator("#screensaver");
-  await expect(ss.getByRole("button", { name: "Onyx" })).toHaveCount(0);
-  await expect(ss.locator(".chip", { hasText: "Onyx" })).toHaveCount(1);
+  for (const name of ["Artwork", "Onyx", "Glass", "Vinyl", "Midnight"]) await expect(ss.getByRole("button", { name })).toHaveCount(1);
 });
