@@ -25,20 +25,21 @@ const faqs = [
   { id: "power", q: "Will it slow my computer down or use my battery?", a: "I have no battery numbers to quote, so here is what the app does instead. With Low Power Mode on a Mac, or Energy saver on Windows, the live desktop shows the still cover instead of video. The listening for the glow stops when you pause. The live desktop is one switch in Settings, Desktop background, and the rest of LinerFM keeps working without it." },
 ];
 ---
-<section id="faq" class="screen" aria-labelledby="faq-title">
-  <div class="max-w-6xl w-full mx-auto px-4 sm:px-6 grid md:grid-cols-[1fr_1.6fr] gap-10 md:gap-16">
+<section id="faq" class="section" aria-labelledby="faq-title">
+  <div class="max-w-[1240px] w-full mx-auto px-5 sm:px-6 grid md:grid-cols-[1fr_1.5fr] gap-12 md:gap-20">
     <div class="md:sticky md:top-28 self-start">
-      <h2 id="faq-title" class="t-screen" data-reveal style="--i:0">Questions, answered.</h2>
+      <p class="eyebrow" data-reveal>FAQ</p>
+      <h2 id="faq-title" class="t-section mt-5" data-words>Questions, <span class="text-halo">answered.</span></h2>
       <p class="mt-5 text-sm text-fg-3 leading-relaxed max-w-[34ch]" data-reveal style="--i:1">Something else on your mind? Ask on <a href={DISCORD_URL} class="underline underline-offset-2 hover:text-fg">Discord</a>. LinerFM is a solo project, so a real person answers.</p>
     </div>
-    <div class="space-y-3" data-reveal style="--i:2">
-      {faqs.map((f) => (
-        <details class="group panel-quiet px-5 py-4" data-faq={f.id}>
-          <summary class="flex items-center justify-between gap-4 cursor-pointer list-none font-medium">
+    <div class="space-y-3">
+      {faqs.map((f, i) => (
+        <details class="group faq-item" data-faq={f.id} data-reveal style={`--i:${i}`}>
+          <summary class="flex items-center justify-between gap-6 cursor-pointer list-none font-medium text-[1.0625rem] tracking-[-0.01em]">
             {f.q}
-            <span class="text-fg-3 group-open:rotate-45 transition-transform text-xl leading-none" aria-hidden="true">+</span>
+            <span class="faq-item__plus" aria-hidden="true">+</span>
           </summary>
-          <p class="mt-3 text-sm text-fg-3 leading-relaxed">{f.a}</p>
+          <p class="mt-3 text-[0.9375rem] text-fg-3 leading-relaxed max-w-[60ch]">{f.a}</p>
         </details>
       ))}
     </div>

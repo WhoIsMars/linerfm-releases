@@ -14,10 +14,11 @@ const perks = [
 ];
 const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
 ---
-<section id="pricing" class="screen" aria-labelledby="pricing-title">
-  <div class="max-w-6xl w-full mx-auto px-4 sm:px-6 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+<section id="pricing" class="section" aria-labelledby="pricing-title">
+  <div class="max-w-[1240px] w-full mx-auto px-5 sm:px-6 grid lg:grid-cols-2 gap-14 lg:gap-20 items-center">
     <div class="text-center lg:text-left">
-      <h2 id="pricing-title" class="t-hero mx-auto lg:mx-0 max-w-[11ch]" data-reveal style="--i:0">No account. Pay once.</h2>
+      <p class="eyebrow" data-reveal>Pricing</p>
+      <h2 id="pricing-title" class="t-section mt-5 mx-auto lg:mx-0 max-w-[11ch]" data-words>No account. <span class="text-halo">Pay once.</span></h2>
       <p class="t-lead mt-6 mx-auto lg:mx-0 max-w-[38ch]" data-reveal style="--i:1">
         No sign-up, no subscription, nothing sent to a server. You pay 10€ once and LinerFM is yours, on Mac or Windows.
       </p>
@@ -26,7 +27,12 @@ const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
       </p>
     </div>
 
-    <div class="w-full max-w-md mx-auto lit lit-soft panel p-8 md:p-10" style={`--art:url(${base}media/colors.jpg);--i:1`} data-reveal="media">
+    {/* Il bordo che gira e l'alone dietro (price-card di iBaila): i colori delle copertine della
+        pagina, perche' ogni canzone porta il suo. Il verde resta sul pulsante. */}
+    <div class="price-card w-full max-w-md mx-auto" data-reveal="media" data-edge-light>
+      <span class="price-card__glow" aria-hidden="true"></span>
+      <span class="price-card__spin" aria-hidden="true"></span>
+      <div class="price-card__inner p-8 md:p-10">
       <div class="flex items-center gap-3">
         <img src={`${base}icon-512.png`} alt="" width="44" height="44" class="w-11 h-11" loading="lazy" />
         <div>
@@ -35,7 +41,7 @@ const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
         </div>
       </div>
       <div class="mt-7 flex items-baseline gap-2">
-        <span class="text-6xl font-bold tracking-[-0.04em] tabular-nums">10€</span>
+        <span class="text-7xl font-extrabold tracking-[-0.05em] tabular-nums">10€</span>
         <span class="text-fg-3 leading-tight">once.<br />No subscription.</span>
       </div>
       <ul class="mt-7 space-y-3">
@@ -49,6 +55,7 @@ const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
       <a href={CHECKOUT_URL} class="lemonsqueezy-button btn-primary mt-8 block text-center font-semibold px-6 py-3.5 rounded-full">Buy LinerFM · 10€</a>
       <p class="mt-4 text-center text-xs text-fg-2">Secure checkout by Lemon Squeezy, taxes handled for you.</p>
       <p class="mt-1 text-center text-xs text-fg-2">After the trial a license is required: there is no limited free tier.</p>
+      </div>
     </div>
   </div>
 </section>

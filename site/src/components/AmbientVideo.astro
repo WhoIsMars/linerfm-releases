@@ -32,7 +32,8 @@ const url = (path: string) => `${base}${path.replace(/^\//, "")}`;
   {/* Con <source> il browser sceglie il formato; un src sul <video> le farebbe ignorare. */}
   <video
     src={webm ? undefined : url(src)}
-    poster={poster ? url(poster) : undefined}
+    poster={poster && !lazy ? url(poster) : undefined}
+    data-poster={poster && lazy ? url(poster) : undefined}
     width={size?.width}
     height={size?.height}
     autoplay={!lazy}
@@ -95,8 +96,16 @@ const url = (path: string) => `${base}${path.replace(/^\//, "")}`;
       else video.pause();
     });
 
-    // I video "lazy" non scaricano niente finché non sono quasi sullo schermo,
-    // e si fermano quando escono: tre video in cima non rallentano l'apertura.
+    // I video "lazy" non scaricano niente finché non sono quasi sullo schermo, nemmeno il poster
+    // (otto poster all'apertura pesavano 400 KB), e si fermano quando escono.
+    const lazyPoster = video.dataset.poster;
+    if (lazyPoster) {
+      new IntersectionObserver((entries, io) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        video.poster = lazyPoster;
+        io.disconnect();
+      }, { rootMargin: "900px 0px" }).observe(video);
+    }
     if (video.hasAttribute("data-lazy") && !video.autoplay) {
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       new IntersectionObserver(

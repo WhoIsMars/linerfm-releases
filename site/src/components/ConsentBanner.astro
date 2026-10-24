@@ -13,10 +13,10 @@ const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
   role="region"
   aria-label="Cookie consent"
   hidden
-  class="fixed inset-x-0 bottom-0 z-50 px-2 pb-2 sm:inset-x-auto sm:right-4 sm:bottom-4 sm:p-0 sm:max-w-sm"
+  class="fixed inset-x-0 bottom-0 z-50 px-2 pb-2 sm:inset-x-auto sm:right-4 sm:bottom-4 sm:p-0 sm:max-w-[20rem]"
 >
-  <div class="mx-auto max-w-2xl rounded-2xl border border-white/12 bg-ink-800/95 backdrop-blur p-3 sm:p-4 shadow-2xl">
-    <p class="text-xs sm:text-sm text-white/80">
+  <div class="glass mx-auto max-w-2xl rounded-[20px] p-3 sm:p-4">
+    <p class="text-xs leading-relaxed text-white/80">
       <span class="sm:hidden">
         Can we use the TikTok pixel? It sets a cookie to measure our ads and, if you buy,
         shares a hashed email and the total with TikTok. The app stays 100% local.
@@ -28,9 +28,9 @@ const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
       </span>
       <a href={`${base}privacy/`} class="underline underline-offset-2 text-white">Details</a>
     </p>
-    <div class="mt-2 sm:mt-4 flex gap-3">
-      <button type="button" data-consent="denied" class="btn-ghost flex-1 rounded-xl px-4 py-2 sm:py-2.5 text-sm font-semibold">Decline</button>
-      <button type="button" data-consent="granted" class="btn-ghost flex-1 rounded-xl px-4 py-2 sm:py-2.5 text-sm font-semibold">Accept</button>
+    <div class="mt-2 sm:mt-3 flex gap-2">
+      <button type="button" data-consent="denied" class="btn-ghost flex-1 rounded-xl px-4 py-2 text-sm font-semibold">Decline</button>
+      <button type="button" data-consent="granted" class="btn-ghost flex-1 rounded-xl px-4 py-2 text-sm font-semibold">Accept</button>
     </div>
   </div>
 </div>

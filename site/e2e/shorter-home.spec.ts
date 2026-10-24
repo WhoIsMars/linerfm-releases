@@ -14,15 +14,17 @@ test.describe("on a desktop (1280 px)", () => {
 
   // 24/10/2026, home a schermi: 9 sezioni da uno schermo ciascuna (hero, piattaforme, 4 feature, prezzo,
   // domande, download) al posto di 8 sezioni lunghe; il prezzo resta prima del 65% (misurato: 59%).
-  test("the price comes before 65% of the page, in at most 9 sections", async ({ page }) => {
+  // Cambiato apposta lo stesso giorno (16:35): l'owner vuole widget, notch, screensaver e AI ciascuna con la
+  // sua sezione, quindi 12 sezioni e il prezzo al 73% (misurato a 1280 px); il limite sale al 75%.
+  test("the price comes before 75% of the page, in at most 12 sections", async ({ page }) => {
     await page.goto("/");
     const r = await page.evaluate(() => ({
       sections: document.querySelectorAll("main > section").length,
       height: document.documentElement.scrollHeight,
       pricing: document.querySelector("#pricing")!.getBoundingClientRect().top + scrollY,
     }));
-    expect(r.sections).toBeLessThanOrEqual(9);
-    expect(r.pricing / r.height).toBeLessThan(0.65);
+    expect(r.sections).toBeLessThanOrEqual(12);
+    expect(r.pricing / r.height).toBeLessThan(0.75);
   });
 
   // "8 features in view, the others behind See all" tolto il 24/10/2026: la griglia di 38 card non c'e' piu',

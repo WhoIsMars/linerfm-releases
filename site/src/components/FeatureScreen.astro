@@ -1,7 +1,10 @@
 ---
-// Una schermata della home: una frase, una riga, una ripresa vera. Senza media non disegna
-// niente: la schermata resta pronta in src/data/home.ts finche' la ripresa non esiste.
+// Una sezione della home: etichetta, titolo grande con la seconda parte accesa nel colore della
+// luce, una riga, i chip con gli stili e le funzioni vere, il media nella cornice accesa.
+// Le riprese del telefono (verticali) stanno accanto al testo; le catture della UI (orizzontali)
+// sotto, larghe, come lo schermo del laptop di iBaila. Senza media non disegna niente.
 import AmbientVideo from "./AmbientVideo.astro";
+import LitFrame from "./LitFrame.astro";
 import { mediaSize } from "../lib/media-dimensions";
 import type { FeatureScreenData } from "../data/home";
 
@@ -10,24 +13,128 @@ const { screen, flip = false } = Astro.props;
 const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
 const m = screen.media;
 const poster = m?.video ? m.video.replace(/\.mp4$/, ".jpg") : m?.image;
-const img = m?.image ? mediaSize(m.image) : undefined;
+const size = m ? mediaSize(m.video ?? m.image ?? "") : undefined;
+const kind = m?.kind ?? "phone";
+const wide = kind === "screen";
+const glowStyle = screen.glow ? `--c1:${screen.glow[0]};--c2:${screen.glow[1]}` : undefined;
 ---
 {m && (
-  <section id={screen.id} class="screen" data-feature={screen.id} aria-labelledby={`${screen.id}-title`}>
-    <div class="max-w-6xl w-full mx-auto px-4 sm:px-6 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-      <div class:list={["max-w-[34rem]", flip && "lg:order-2"]}>
-        <h2 id={`${screen.id}-title`} class="t-screen" data-reveal style="--i:0">{screen.title}</h2>
-        <p class="t-lead mt-5" data-reveal style="--i:1">{screen.line}</p>
+  <section id={screen.id} class:list={["feature", wide && "feature--wide"]} data-feature={screen.id} aria-labelledby={`${screen.id}-title`} style={glowStyle}>
+    <div class:list={["max-w-[1240px] w-full mx-auto px-5 sm:px-6", wide ? "" : "grid lg:grid-cols-2 gap-12 lg:gap-20 items-center"]}>
+      <div class:list={[wide ? "max-w-[46rem] mx-auto text-center" : "max-w-[36rem]", !wide && flip && "lg:order-2"]}>
+        {screen.eyebrow && <p class="eyebrow" data-reveal>{screen.eyebrow}</p>}
+        <h2 id={`${screen.id}-title`} class="t-section mt-5" data-words>
+          {screen.title}{screen.halo && <>{" "}<span class="text-halo">{screen.halo}</span></>}
+        </h2>
+        <p class:list={["t-lead mt-6", wide && "mx-auto max-w-[40rem]"]} data-reveal style="--i:1">{screen.line}</p>
+        {screen.chips && (
+          <ul class:list={["chips mt-8", wide && "justify-center"]} aria-label="Styles and tools" data-cues={screen.cues && JSON.stringify(screen.cues.map((c) => [c.label, c.at]))}>
+            {screen.chips.map((c, i) => <li class="chip" data-reveal style={`--i:${i + 2}`}>{c}</li>)}
+          </ul>
+        )}
         <slot />
       </div>
-      <figure class:list={["take lit lit-soft m-0", flip && "lg:order-1"]} style={`--art:url(${base}${poster})`} data-reveal="media" data-take>
-        {m.video ? (
-          <AmbientVideo src={m.video} poster={poster} lazy description={m.alt} />
-        ) : (
-          <img src={`${base}${m.image}`} alt={m.alt} width={img?.width} height={img?.height} loading="lazy" decoding="async" />
-        )}
+      <figure class:list={["m-0", wide ? "mt-14 sm:mt-20 mx-auto max-w-[1080px]" : "take", !wide && flip && "lg:order-1"]} data-take>
+        <LitFrame glow={screen.glow} kind={kind} ratio={size ? `${size.width} / ${size.height}` : undefined}>
+          {m.video ? (
+            <AmbientVideo src={m.video} poster={poster} lazy description={m.alt} />
+          ) : (
+            <img src={`${base}${m.image}`} alt={m.alt} width={size?.width} height={size?.height} loading="lazy" decoding="async" />
+          )}
+        </LitFrame>
         <figcaption class="take-caption">{m.caption}</figcaption>
       </figure>
     </div>
   </section>
 )}
+
+<script>
+  // Chip che seguono il video: lo stile in onda si accende, con una barra che si riempie per il
+  // tempo che resta in video; un clic porta il video su quello stile. Senza JS i chip restano testo,
+  // così l'HTML non paga i bottoni.
+  import { activeCue, type Cue } from "../lib/style-cues";
+
+  document.querySelectorAll<HTMLElement>("ul[data-cues]").forEach((list) => {
+    const video = list.closest("section")?.querySelector("video");
+    if (!video) return;
+    const cues: Cue[] = (JSON.parse(list.dataset.cues ?? "[]") as [string, number][]).map(([label, at]) => ({ label, at }));
+    const buttons = new Map<string, HTMLButtonElement>();
+    list.querySelectorAll<HTMLLIElement>("li.chip").forEach((li) => {
+      const label = li.textContent?.trim() ?? "";
+      const first = cues.find((c) => c.label === label);
+      if (!first) return;
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = label;
+      b.dataset.cue = String(first.at);
+      b.setAttribute("aria-current", "false");
+      b.addEventListener("click", () => {
+        const go = () => { video.currentTime = first.at + 0.05; paint(); };
+        if (video.readyState >= 1) go();
+        else { video.preload = "auto"; video.addEventListener("loadedmetadata", go, { once: true }); video.load(); }
+      });
+      li.textContent = "";
+      li.classList.add("chip--cue");
+      li.append(b);
+      buttons.set(label, b);
+    });
+    const sorted = [...cues].sort((a, b) => a.at - b.at);
+    const paint = () => {
+      const t = video.currentTime;
+      const on = activeCue(cues, t);
+      const start = [...sorted].reverse().find((c) => c.at <= t);
+      const end = sorted.find((c) => c.at > t)?.at ?? (video.duration || t);
+      const p = start && end > start.at ? Math.min(1, (t - start.at) / (end - start.at)) : 0;
+      buttons.forEach((b, label) => {
+        const lit = label === on;
+        b.setAttribute("aria-current", String(lit));
+        if (lit) b.style.setProperty("--p", p.toFixed(3));
+      });
+    };
+    let raf = 0;
+    const loop = () => { paint(); raf = video.paused ? 0 : requestAnimationFrame(loop); };
+    video.addEventListener("play", () => { if (!raf) raf = requestAnimationFrame(loop); });
+    // "seeking" oltre a "seeked": se un seek interrompe il caricamento, Chromium può saltare "seeked"
+    video.addEventListener("seeking", paint);
+    video.addEventListener("seeked", paint);
+    video.addEventListener("timeupdate", () => { if (!raf) paint(); });
+    paint();
+  });
+</script>
+
+<style is:global>
+  .chip--cue { padding: 0; }
+  .chip--cue button {
+    position: relative;
+    padding: .5rem .95rem;
+    border-radius: inherit;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    overflow: hidden;
+    transition: color .4s var(--ease-glide);
+  }
+  .chip--cue:has(button[aria-current="true"]) {
+    color: #fff;
+    border-color: color-mix(in srgb, var(--c1) 70%, transparent);
+    background: color-mix(in srgb, var(--c1) 16%, transparent);
+    box-shadow: 0 0 26px -6px var(--c1), inset 0 1px 0 rgba(255, 255, 255, .12);
+  }
+  /* la barra del tempo che lo stile resta in video, nel colore della luce della sezione */
+  .chip--cue button::after {
+    content: "";
+    position: absolute;
+    left: 18%;
+    right: 18%;
+    bottom: 3px;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--c1), var(--c2));
+    transform: scaleX(0);
+    transform-origin: left;
+    opacity: 0;
+  }
+  .chip--cue button[aria-current="true"]::after { transform: scaleX(var(--p, 0)); opacity: .9; }
+  .chip--cue button:focus-visible { outline: 2px solid var(--c1); outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) { .chip--cue button::after { display: none; } }
+</style>
