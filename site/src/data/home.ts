@@ -1,15 +1,24 @@
-// Le schermate della home (24/10/2026, sul modello di iBaila): una frase e una ripresa ciascuna.
+// Le schermate della home: una frase e un media ciascuna.
 //
 // Regole:
 //  - ogni frase viene da una card di features.json (`cards`, gli id stanno in `from`), riscritta in
-//    una riga; i nomi di look e temi sono quelli dell'app (widget: src/host/widget-menu.test.tsx:186,
-//    notch: sidecar/linerfm/ui/src/notch/themes.ts, AI: src/widget.jsx:1959-1962 nel repo dell'app);
-//  - il media e' una ripresa VERA del telefono dell'owner (public/media, da
-//    .planning/social-v2/work/takes/ph8698|ph8700|ph8701 nel repo dell'app), mai un render della UI;
-//  - `media: null` = la ripresa non esiste ancora: la schermata e' pronta ma non va in pagina
-//    (FeatureScreen non disegna niente). `wanted` dice cosa registrare.
+//    una riga; i nomi di look, temi e voci di menu sono quelli dell'app (repo linerfm):
+//    look del widget src/widget.jsx:1998, menu src/widget.jsx:1042 (Play on), 1946 (Source),
+//    1977 (Search), 1987-1990 (Create playlist, Find playlist, Optimize, Add tracks),
+//    2007-2008 (Dynamic color, Canvas video); temi di notch e screensaver
+//    sidecar/linerfm/ui/src/notch/themes.ts:82-234; ⇧⌘S src/widget.jsx:2020;
+//  - due tipi di media, entrambi veri: le riprese del telefono dell'owner (`kind: "phone"`,
+//    verticali, da .planning/social-v2/work/takes/ph8698|ph8700|ph8701) e, dal 24/10/2026 su
+//    richiesta dell'owner, le catture della UI VERA del prodotto (`kind: "screen"`): widget,
+//    notch, screensaver e finestra AI resi in Chromium dal codice dell'app con
+//    .planning/site-v2/site-takes.cjs, con brani e copertine vere. Mai mockup disegnati;
+//  - `glow`: i due colori della luce attorno al media, presi dalla ripresa (la luce che si vede
+//    nel video, o la copertina che suona). Mai il verde: il verde e' delle azioni;
+//  - `media: null` = il media non esiste ancora: la schermata e' pronta ma non va in pagina.
 
 export interface Take {
+  /** "phone": ripresa verticale del telefono; "screen": cattura orizzontale della UI vera. */
+  kind?: "phone" | "screen";
   /** Video: percorso dell'mp4 in public/; il poster e' lo stesso nome in .jpg. */
   video?: string;
   /** Immagine ferma, quando c'e' solo un fotogramma buono. */
@@ -20,7 +29,15 @@ export interface Take {
 
 export interface FeatureScreenData {
   id: string;
+  /** Etichetta piccola sopra il titolo. */
+  eyebrow?: string;
   title: string;
+  /** Parte finale del titolo, accesa nel colore della luce. */
+  halo?: string;
+  /** Stili e funzioni veri, con i nomi dell'app. */
+  chips?: string[];
+  /** I due colori della luce ai bordi del media. */
+  glow?: [string, string];
   line: string;
   /** Id delle card di features.json da cui vengono le frasi. */
   from: string[];
@@ -29,86 +46,129 @@ export interface FeatureScreenData {
   wanted?: string;
 }
 
+const SCREEN_CAPTION = "Captured from the app itself, playing real songs.";
+
 export const FEATURE_SCREENS: FeatureScreenData[] = [
   {
     id: "colors",
-    title: "Every song repaints your desktop.",
+    eyebrow: "Live desktop",
+    title: "Every song",
+    halo: "repaints your desktop.",
     line: "Skip a track and the wallpaper, the colors and the albums under the clock change with it.",
     from: ["live-desktop", "dynamic-color"],
+    // la luce ciano attorno al portatile nella ripresa, il rosa della copertina di Lucid Dreams
+    glow: ["#5ad1ff", "#ff6fa8"],
     media: {
+      kind: "phone",
       video: "media/colors.mp4",
       alt: "A MacBook and a monitor: FUXX by XXXTENTACION plays on a grey wallpaper, the track changes to Lucid Dreams by Juice WRLD and both desktops take its artwork, with a cyan light around the laptop screen.",
       caption: "Real footage, filmed on the owner's desk.",
     },
   },
   {
+    id: "widget",
+    eyebrow: "Widget",
+    title: "One widget,",
+    halo: "five looks.",
+    line: "It plays the song's video on your desktop. Its menu switches the Source, picks where it plays, opens Search and the AI playlist tools.",
+    chips: ["Glass", "Cinematic", "Minimal", "Compact", "Terminal"],
+    from: ["widget", "terminal-theme", "ai-playlists"],
+    glow: ["#69c1ea", "#ff6b8b"],
+    media: {
+      kind: "screen",
+      video: "media/widget.mp4",
+      alt: "The LinerFM widget playing Lucid Dreams by Juice WRLD, switching through its five looks: Glass, Cinematic, Minimal, Compact and Terminal.",
+      caption: SCREEN_CAPTION,
+    },
+  },
+  {
     id: "edge-light",
-    title: "A light around your screen.",
+    eyebrow: "Edge light",
+    title: "A light around",
+    halo: "your screen.",
     line: "In the cover's colors or one you pick, thin or wide, soft or strong. It can follow the beat.",
     from: ["edge-light-custom", "live-desktop"],
+    // la luce gialla della ripresa
+    glow: ["#ffd54a", "#ff8a5c"],
     media: {
+      kind: "phone",
       video: "media/light.mp4",
       alt: "Fair Trade by Drake plays and a yellow light runs around the edge of the MacBook screen, under a wallpaper made from the album artwork.",
       caption: "Real footage. The color and width are yours to set, per display.",
     },
   },
   {
-    id: "widget",
-    title: "A widget that plays the song's video.",
-    line: "Five looks: Glass, Cinematic, Minimal, Compact and Terminal. Its menu switches the source and opens search and the AI playlist tools.",
-    // menu: src/widget.jsx MenuTile (Search, Create playlist, Find playlist, Optimize, Add tracks) e il gruppo Source
-    from: ["widget", "terminal-theme", "ai-playlists"],
+    id: "notch",
+    eyebrow: "Notch",
+    title: "Your notch",
+    halo: "becomes a player.",
+    line: "Hover it for the track, the controls and a seek bar you can drag, with the lyrics line by line right under it.",
+    chips: ["Artwork", "Onyx", "Glass", "Vinyl", "Midnight"],
+    from: ["notch-hover", "karaoke", "vinyl-midnight-themes"],
+    glow: ["#39b0ea", "#a18cff"],
     media: {
-      image: "media/widget.jpg",
-      alt: "The LinerFM widget in its Glass look on a desktop, playing the Spotify Canvas of Hate Me by Ellie Goulding, with the progress bar and the controls under it.",
-      caption: "A still from real footage: the Glass look, playing a Canvas.",
+      kind: "screen",
+      video: "media/notch.mp4",
+      alt: "The notch player open on Lucid Dreams by Juice WRLD, changing theme from Artwork to Onyx, Glass, Vinyl and Midnight, then moving on to SICKO MODE by Travis Scott.",
+      caption: SCREEN_CAPTION,
     },
-    wanted: "Una ripresa di 5 s del widget che cambia look dal menu (Glass, Cinematic, Minimal, Compact, Terminal): oggi c'e' solo il fotogramma fermo.",
+  },
+  {
+    id: "screensaver",
+    eyebrow: "Screensaver",
+    title: "Step away.",
+    halo: "The song stays.",
+    line: "Full screen artwork and lyrics on every display when you leave the computer, or right away with ⇧⌘S on a Mac. It changes with every song.",
+    chips: ["Artwork", "Onyx", "Glass", "Vinyl", "Midnight"],
+    from: ["screensaver", "vinyl-midnight-themes"],
+    glow: ["#ff8a3d", "#ff4f6d"],
+    media: {
+      kind: "screen",
+      video: "media/screensaver.mp4",
+      alt: "The music screensaver playing Blinding Lights by The Weeknd, then Lucid Dreams by Juice WRLD in the Vinyl theme, then SICKO MODE by Travis Scott in Midnight, each cover filling the screen.",
+      caption: SCREEN_CAPTION,
+    },
+  },
+  {
+    id: "ai-playlists",
+    eyebrow: "AI playlists",
+    title: "Playlists",
+    halo: "from a sentence.",
+    line: "Describe a mood and the AI picks real tracks. Find a playlist by describing it, add tracks from text, and optimize one with the numbers of every song.",
+    chips: ["Create playlist", "Find playlist", "Add tracks", "Optimize"],
+    from: ["ai-playlists", "discover", "curator", "track-stats", "skip-based-removals"],
+    glow: ["#ff8a5c", "#b38cff"],
+    media: {
+      kind: "screen",
+      video: "media/ai.mp4",
+      alt: "Create with AI: the prompt Late night drive, melodic rap and dark synth pop is typed, Generate is pressed and eleven real tracks appear, from Lucid Dreams and Blinding Lights to SICKO MODE and Starboy.",
+      caption: "Captured from the app itself. The AI runs on your own free Groq key.",
+    },
   },
   {
     id: "search",
-    title: "Type a song from any app.",
+    eyebrow: "Search",
+    title: "Type a song",
+    halo: "from any app.",
     line: "One shortcut, a few letters, Enter: it plays. Spotify never comes to the front.",
     from: ["search", "search-filters"],
+    glow: ["#9cc8ff", "#c8b4ff"],
     media: {
+      kind: "phone",
       video: "media/search.mp4",
       alt: "On a MacBook the search box opens over the desktop, juice is typed and the results list Juice WRLD.",
       // scorciatoie: src-tauri/src/lib.rs:7359 nel repo dell'app
       caption: "Real footage. ⌘⇧K on a Mac, Ctrl+Alt+K on Windows.",
     },
   },
-  // ── Pronte, senza ripresa vera: non vanno in pagina finche' l'owner non registra ──
-  {
-    id: "notch",
-    title: "Your notch becomes a player.",
-    line: "Hover it for the track and a seek bar, with the lyrics line by line right under it. Five themes: Artwork, Onyx, Glass, Vinyl and Midnight.",
-    from: ["notch-hover", "karaoke", "vinyl-midnight-themes"],
-    media: null,
-    wanted: "QuickTime, 6 s: il mouse va sulla notch, si apre il player, sotto scorre il karaoke; poi cambio tema da Settings.",
-  },
+  // ── Pronte, senza media: non vanno in pagina ──
   {
     id: "lyrics",
     title: "The lyrics, on your desktop.",
     line: "Synced lyrics follow whatever you play: Spotify, Apple Music, a YouTube video in your browser or a SoundCloud track.",
     from: ["lyrics-every-source", "karaoke"],
     media: null,
-    wanted: "QuickTime, 6 s: i testi sincronizzati sul desktop e sotto la notch su una canzone famosa.",
-  },
-  {
-    id: "screensaver",
-    title: "Step away, the song stays.",
-    line: "Full screen artwork and lyrics when you leave the computer, on every display, following the song.",
-    from: ["screensaver", "vinyl-midnight-themes"],
-    media: null,
-    wanted: "QuickTime, 6 s: lo screensaver che parte con copertina e testi, e cambia con la canzone successiva.",
-  },
-  {
-    id: "ai-playlists",
-    title: "Playlists from a sentence.",
-    line: "Create a playlist, find one by describing it, add tracks from text, and see which songs you keep skipping.",
-    from: ["ai-playlists", "discover", "curator", "track-stats", "skip-based-removals"],
-    media: null,
-    wanted: "QuickTime, 8 s: Create playlist with AI dal menu del widget, una frase, la lista che si riempie, Save.",
+    wanted: "QuickTime, 6 s: i testi sincronizzati sul desktop e sotto la notch su una canzone famosa (dal telefono: i testi veri non si rendono dalla UI per i diritti).",
   },
   {
     id: "source",
@@ -123,9 +183,6 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
 /** Una riga, senza media: le cose vere che non hanno (ancora) una schermata. Nomi dalle card. */
 export const ALSO = [
   "synced lyrics under the notch",
-  "a notch player in five themes",
-  "a music screensaver",
-  "AI playlists",
   "your listening stats",
   "Last.fm scrobbling",
   "Discord presence",

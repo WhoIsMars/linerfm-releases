@@ -14,7 +14,11 @@ const SIZES: Record<string, MediaSize> = {
   "media/colors.mp4": { width: 720, height: 1000 },
   "media/light.mp4": { width: 720, height: 1000 },
   "media/search.mp4": { width: 720, height: 1000 },
-  "media/widget.jpg": { width: 380, height: 540 },
+  // Catture della UI vera (24/10/2026, .planning/site-v2/site-takes.cjs nel repo dell'app).
+  "media/widget.mp4": { width: 1280, height: 800 },
+  "media/notch.mp4": { width: 1216, height: 416 },
+  "media/screensaver.mp4": { width: 1280, height: 800 },
+  "media/ai.mp4": { width: 1280, height: 884 },
   "video/clip-notch.mp4": { width: 1200, height: 900 },
   "video/clip-screensaver.mp4": { width: 1200, height: 900 },
   "video/clip-search.mp4": { width: 1200, height: 900 },
