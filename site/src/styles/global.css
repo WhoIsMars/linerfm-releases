@@ -362,15 +362,17 @@ html.lenis { scroll-behavior: auto; }
 /* La parte accesa del titolo: un gradiente nei due colori della luce, con un
    poco di bagliore. */
 .text-halo {
-  background: linear-gradient(95deg, color-mix(in srgb, var(--c1) 55%, #fff) 0%, var(--c1) 38%, var(--c2) 100%);
+  --halo-fill: linear-gradient(95deg, color-mix(in srgb, var(--c1) 55%, #fff) 0%, var(--c1) 38%, var(--c2) 100%);
+  background: var(--halo-fill);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   filter: drop-shadow(0 0 28px color-mix(in srgb, var(--c1) 35%, transparent));
 }
-/* Le parole avvolte dallo split ereditano il gradiente: ognuna lo ridisegna su di se'. */
+/* Le parole avvolte dallo split ridisegnano il gradiente su di se'. Non "inherit": il genitore
+   diretto e' .w-mask, senza sfondo, e Safari lasciava le parole trasparenti (24/10, iPhone). */
 .text-halo .w {
-  background: inherit;
+  background: var(--halo-fill);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
