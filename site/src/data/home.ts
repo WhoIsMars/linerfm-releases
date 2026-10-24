@@ -16,6 +16,8 @@
 //    nel video, o la copertina che suona). Mai il verde: il verde e' delle azioni;
 //  - `media: null` = il media non esiste ancora: la schermata e' pronta ma non va in pagina.
 
+import type { Cue } from "../lib/style-cues";
+
 export interface Take {
   /** "phone": ripresa verticale del telefono; "screen": cattura orizzontale della UI vera. */
   kind?: "phone" | "screen";
@@ -36,6 +38,9 @@ export interface FeatureScreenData {
   halo?: string;
   /** Stili e funzioni veri, con i nomi dell'app. */
   chips?: string[];
+  /** Quando lo stile di un chip entra nel video (secondi, misurati sui fotogrammi): il chip si
+   *  accende mentre lo stile è in onda e un clic porta il video lì. I chip senza cue restano testo. */
+  cues?: Cue[];
   /** I due colori della luce ai bordi del media. */
   glow?: [string, string];
   line: string;
@@ -72,6 +77,9 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
     halo: "five looks.",
     line: "It plays the song's video on your desktop. Its menu switches the Source, picks where it plays, opens Search and the AI playlist tools.",
     chips: ["Glass", "Cinematic", "Minimal", "Compact", "Terminal"],
+    // widget.mp4: dissolvenze tra i cinque PNG di site-takes.cjs, metà dissolvenza da scene score
+    cues: [{ label: "Glass", at: 0 }, { label: "Cinematic", at: 1.57 }, { label: "Minimal", at: 2.95 },
+      { label: "Compact", at: 4.28 }, { label: "Terminal", at: 5.58 }, { label: "Glass", at: 6.97 }],
     from: ["widget", "terminal-theme", "ai-playlists"],
     glow: ["#69c1ea", "#ff6b8b"],
     media: {
@@ -104,6 +112,9 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
     halo: "becomes a player.",
     line: "Hover it for the track, the controls and a seek bar you can drag, with the lyrics line by line right under it.",
     chips: ["Artwork", "Onyx", "Glass", "Vinyl", "Midnight"],
+    // notch.mp4: setTheme di site-takes.cjs, verificati fotogramma per fotogramma
+    cues: [{ label: "Artwork", at: 0 }, { label: "Onyx", at: 1.6 }, { label: "Glass", at: 3.0 },
+      { label: "Vinyl", at: 4.4 }, { label: "Midnight", at: 6.43 }],
     from: ["notch-hover", "karaoke", "vinyl-midnight-themes"],
     glow: ["#39b0ea", "#a18cff"],
     media: {
@@ -120,6 +131,8 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
     halo: "The song stays.",
     line: "Full screen artwork and lyrics on every display when you leave the computer, or right away with ⇧⌘S on a Mac. It changes with every song.",
     chips: ["Artwork", "Onyx", "Glass", "Vinyl", "Midnight"],
+    // screensaver.mp4 mostra solo Artwork, Vinyl e Midnight: Onyx e Glass restano testo
+    cues: [{ label: "Artwork", at: 0 }, { label: "Vinyl", at: 3.93 }, { label: "Midnight", at: 6.63 }],
     from: ["screensaver", "vinyl-midnight-themes"],
     glow: ["#ff8a3d", "#ff4f6d"],
     media: {
