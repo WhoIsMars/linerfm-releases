@@ -272,6 +272,13 @@ footer a[href]::after {
 .ambient-video__toggle:hover,
 .ambient-video__toggle:focus-visible { opacity: 1; background: rgba(5, 5, 5, .9); }
 .ambient-video__toggle svg { width: 16px; height: 16px; }
+/* Da telefono il cerchio da 44 px copriva il video (l'ora nella notch, 24/10): si vede da 30 px,
+   ma l'area di tocco resta 44 px grazie al ::after. */
+@media (max-width: 639px) {
+  .ambient-video__toggle { width: 30px; height: 30px; right: .45rem; bottom: .45rem; opacity: .6; }
+  .ambient-video__toggle::after { content: ""; position: absolute; inset: -7px; border-radius: inherit; }
+  .ambient-video__toggle svg { width: 12px; height: 12px; }
+}
 /* :not([hidden]) perché un display dichiarato qui batterebbe l'attributo hidden. */
 .ambient-video__toggle [data-icon]:not([hidden]) { display: grid; }
 
