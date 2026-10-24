@@ -107,7 +107,8 @@ test.describe("at 1440x900", () => {
     }
     // la luce si accende entrando: il primo media in alto e' gia' acceso, quelli in fondo no
     await expect.poll(() => page.locator("#top .lf__rim").evaluate((e) => Number(getComputedStyle(e).opacity))).toBe(1);
-    expect(await page.locator("#search .lf__rim").evaluate((e) => Number(getComputedStyle(e).opacity))).toBe(0);
+    // spenta = sotto il 2%: al caricamento l'anello può essere ancora in coda alla transizione (0.00001 visto)
+    await expect.poll(() => page.locator("#search .lf__rim").evaluate((e) => Number(getComputedStyle(e).opacity))).toBeLessThan(0.02);
   });
 
   test("the platforms row shows the real logos from simple-icons, in brand colors", async ({ page }) => {
