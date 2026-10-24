@@ -18,7 +18,8 @@ test("the title is the one promise, shown by the live desktop footage", async ({
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(PROMISE);
   const hero = page.locator("#top");
-  await expect(hero.locator("video source[src$='clip-live-desktop.mp4']")).toHaveCount(1);
+  // 24/10/2026: la ripresa vera del telefono dell'owner al posto della clip resa dalla UI
+  await expect(hero.locator("video[src$='media/hero.mp4']")).toHaveCount(1);
   // dalla 1.1.0 il desktop dal vivo c'e' anche su Windows: il sito lo dice dove lo mostra
   await expect(hero.getByText("The live wallpaper runs on Windows too", { exact: false })).toBeVisible();
 });
@@ -35,7 +36,7 @@ for (const path of ["/", "/windows"]) {
 
 test("the live desktop footage is shown once, in the hero", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator("video source[src$='clip-live-desktop.mp4']")).toHaveCount(1);
+  await expect(page.locator("video[src$='media/hero.mp4']")).toHaveCount(1);
 });
 
 test.describe("on a phone (375 px, iPhone)", () => {

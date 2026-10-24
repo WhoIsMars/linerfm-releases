@@ -1,58 +1,47 @@
 ---
-// Una sola immagine, la stessa delle bio e del primo fotogramma dei video: il desktop che
-// diventa la canzone. Dal 22/10 (confronto con iBaila) il titolo è grande e centrato e la
-// ripresa vera prende tutta la colonna sotto di lui: il prodotto è la cosa più grande della
-// pagina. Una sola azione piena, la prova; l'acquisto è una riga di testo sotto.
+// Il primo schermo (24/10/2026, sul modello di iBaila): la promessa, una riga, il pulsante che
+// scarica la build di questo computer, la riga "No account. 5 days free. 10€ once." e i profili;
+// accanto, la ripresa vera del desktop che diventa la canzone (telefono dell'owner, ph8700).
+// La prova gratuita e' il vantaggio che iBaila non ha: si dice qui e una volta a meta' pagina.
 import { CHECKOUT_URL, SOCIAL_LINKS } from "../config/links";
 import AmbientVideo from "./AmbientVideo.astro";
 import DownloadButton from "./DownloadButton.tsx";
 
 const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
 ---
-<section id="top" class="relative">
-  <div class="max-w-6xl mx-auto px-5 pt-16 md:pt-24 text-center">
-    <h1 class="display mx-auto max-w-[14ch]">
-      Your desktop plays the song you're on.
-    </h1>
-    <p class="mt-6 mx-auto max-w-[58ch] text-fg-2 text-base md:text-lg leading-relaxed text-pretty">
-      Your wallpaper becomes the song: the artwork, the Spotify Canvas or the YouTube video plays under
-      your icons. Plus live lyrics and a widget that matches every album, on your Mac or PC.
-    </p>
-    {/* Solo su telefono (.phone-only in global.css): l'app non si installa lì, i pulsanti restano. */}
-    <p class="phone-only mt-4 mx-auto max-w-sm text-fg-2 text-sm leading-snug text-pretty">
-      LinerFM runs on Mac and Windows. Open this page on your computer to install it.
-    </p>
-    <div class="mt-9 flex flex-col items-center gap-3">
-      {/* Computer: il pulsante scarica subito la build giusta (conversione 21/10: "Try free" portava
-          9.105 px piu' in basso, e 46 persone su 50 non cliccavano nulla). Telefono: resta l'ancora,
-          l'app non si installa li'. */}
-      <div class="desktop-only"><DownloadButton compact client:load /></div>
-      <a href="#download" class="phone-only btn-primary font-semibold text-base px-7 py-3.5 rounded-full">Try free for 5 days</a>
-      <p class="text-sm text-fg-3">
-        Then 10€ once, no subscription.
-        <a href={CHECKOUT_URL} class="lemonsqueezy-button text-fg-2 underline underline-offset-4 hover:text-fg">Buy · 10€</a>
+<section id="top" class="screen" aria-labelledby="hero-title">
+  <div class="max-w-6xl w-full mx-auto px-4 sm:px-6 grid lg:grid-cols-[1.1fr_1fr] gap-12 lg:gap-16 items-center">
+    <div class="text-center lg:text-left">
+      <h1 id="hero-title" class="t-hero mx-auto lg:mx-0 max-w-[13ch]">Your desktop plays the song you're on.</h1>
+      <p class="t-lead mt-6 mx-auto lg:mx-0 max-w-[40ch]">
+        The artwork, the Spotify Canvas or the YouTube video becomes your wallpaper, with a light around the screen.
+      </p>
+      {/* Solo su telefono: l'app non si installa li', il pulsante porta ai download. */}
+      <p class="phone-only mt-4 mx-auto max-w-sm text-fg-2 text-sm leading-snug text-pretty">
+        LinerFM runs on Mac and Windows. Open this page on your computer to install it.
+      </p>
+      <div class="mt-8 flex flex-col items-center lg:items-start gap-3">
+        <div class="desktop-only hero-dl"><DownloadButton compact client:load /></div>
+        <a href="#download" class="phone-only btn-primary font-semibold text-base px-7 py-3.5 rounded-full">Try free for 5 days</a>
+        <p class="text-[0.9375rem] font-medium text-fg">No account. 5 days free. 10€ once.</p>
+        <p class="text-sm text-fg-3">
+          Sure already? <a href={CHECKOUT_URL} class="lemonsqueezy-button text-fg-2 underline underline-offset-4 hover:text-fg">Buy · 10€</a>
+        </p>
+      </div>
+      <p class="mt-8 text-xs text-fg-3">Spotify, Apple Music, YouTube Music and SoundCloud · Mac and Windows</p>
+      {/* I profili: chi arriva da un reel cerca la community e il resto dei video (23/10). */}
+      <p class="mt-2 text-xs text-fg-3 flex flex-wrap justify-center lg:justify-start gap-x-4 gap-y-1">
+        {SOCIAL_LINKS.map((s) => <a href={s.href} class="underline underline-offset-4 hover:text-fg" rel="me">{s.name}</a>)}
       </p>
     </div>
-    <p class="mt-6 text-xs text-fg-3 tracking-wide">Spotify, Apple Music and YouTube Music · Mac &amp; Windows · No account · No card for the trial</p>
-    {/* I profili, subito sotto: chi arriva da un reel cerca la community e il resto dei video (23/10). */}
-    <p class="mt-3 text-xs text-fg-3 tracking-wide flex flex-wrap justify-center gap-x-4 gap-y-1">
-      {SOCIAL_LINKS.map((s) => <a href={s.href} class="underline underline-offset-4 hover:text-fg" rel="me">{s.name}</a>)}
-    </p>
-  </div>
 
-  <div class="max-w-6xl mx-auto px-3 md:px-5 mt-14 md:mt-16">
-    <div class="lit panel p-1.5 md:p-2.5" style={`--art:url(${base}video/clip-live-desktop.jpg)`}>
+    <figure class="take lit m-0" style={`--art:url(${base}media/hero.jpg)`}>
       <AmbientVideo
-        src="video/clip-live-desktop.mp4"
-        webm="video/clip-live-desktop.webm"
-        poster="video/clip-live-desktop.jpg"
-        description="A MacBook desktop playing Juice WRLD: the wallpaper takes the colors of the artwork, a Cover Flow of recent albums slides under the clock, the player bar sits at the bottom and the up next list opens on the left."
-        videoClass="rounded-[10px] bg-ink-900"
+        src="media/hero.mp4"
+        poster="media/hero.jpg"
+        description="Filmed with a phone: a MacBook and a monitor playing HIGHEST IN THE ROOM by Travis Scott. The Spotify Canvas plays as the wallpaper of both screens, the albums slide under the clock, and a blue light runs around the laptop screen."
       />
-    </div>
-    <p class="mt-4 text-xs text-fg-3 text-center text-pretty">
-      Real footage on a Mac. The live wallpaper runs on Windows too.
-      <a href={`${base}video/explainer.mp4`} class="underline underline-offset-2 hover:text-fg">Watch the 48-second tour</a>
-    </p>
+      <figcaption class="take-caption">Real footage on a Mac. The live wallpaper runs on Windows too.</figcaption>
+    </figure>
   </div>
 </section>

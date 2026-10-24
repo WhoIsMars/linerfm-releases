@@ -1,0 +1,33 @@
+---
+// Una schermata della home: una frase, una riga, una ripresa vera. Senza media non disegna
+// niente: la schermata resta pronta in src/data/home.ts finche' la ripresa non esiste.
+import AmbientVideo from "./AmbientVideo.astro";
+import { mediaSize } from "../lib/media-dimensions";
+import type { FeatureScreenData } from "../data/home";
+
+interface Props { screen: FeatureScreenData; flip?: boolean }
+const { screen, flip = false } = Astro.props;
+const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
+const m = screen.media;
+const poster = m?.video ? m.video.replace(/\.mp4$/, ".jpg") : m?.image;
+const img = m?.image ? mediaSize(m.image) : undefined;
+---
+{m && (
+  <section id={screen.id} class="screen" data-feature={screen.id} aria-labelledby={`${screen.id}-title`}>
+    <div class="max-w-6xl w-full mx-auto px-4 sm:px-6 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+      <div class:list={["max-w-[34rem]", flip && "lg:order-2"]}>
+        <h2 id={`${screen.id}-title`} class="t-screen" data-reveal style="--i:0">{screen.title}</h2>
+        <p class="t-lead mt-5" data-reveal style="--i:1">{screen.line}</p>
+        <slot />
+      </div>
+      <figure class:list={["take lit lit-soft m-0", flip && "lg:order-1"]} style={`--art:url(${base}${poster})`} data-reveal="media" data-take>
+        {m.video ? (
+          <AmbientVideo src={m.video} poster={poster} lazy description={m.alt} />
+        ) : (
+          <img src={`${base}${m.image}`} alt={m.alt} width={img?.width} height={img?.height} loading="lazy" decoding="async" />
+        )}
+        <figcaption class="take-caption">{m.caption}</figcaption>
+      </figure>
+    </div>
+  </section>
+)}

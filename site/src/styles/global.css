@@ -48,6 +48,11 @@ html {
      stile chiaro sopra un fondo quasi nero senza questa riga. */
   color-scheme: dark;
   scroll-behavior: smooth;
+  /* Home a schermi (24/10/2026, sul modello di iBaila): lo scorrimento si ferma
+     sull'inizio di una sezione quando ci passa vicino, senza mai trattenere chi
+     scorre (proximity, non mandatory). Le pagine senza .screen non ne risentono. */
+  scroll-snap-type: y proximity;
+  scrollbar-color: rgba(255, 255, 255, .22) transparent;
   background-color: var(--color-ink-950);
   color: var(--color-fg);
 }
@@ -70,6 +75,10 @@ body {
     transition-duration: .01ms !important;
   }
 }
+
+a, button, summary { touch-action: manipulation; }
+
+::selection { background: rgba(255, 255, 255, .22); color: #fff; }
 
 /* Focus da tastiera: l'anello di default del browser non arriva al 3:1 sul
    fondo ink-950. Il verde menta ci arriva con margine (15,2:1). */
@@ -243,18 +252,6 @@ footer a[href]::after {
   box-shadow: 0 0 8px rgba(29, 185, 84, .8);
 }
 
-/* Le voci si accendono al passaggio (script in pages/index.astro). L'attenuazione
-   la accende lo script: senza JavaScript la pagina resta leggibile per intero. */
-.js-reveal .reveal {
-  opacity: .32;
-  transform: translateY(12px);
-  transition: opacity .5s cubic-bezier(.22, 1, .36, 1), transform .5s cubic-bezier(.22, 1, .36, 1);
-}
-.js-reveal .reveal.is-on { opacity: 1; transform: none; }
-@media (prefers-reduced-motion: reduce) {
-  .js-reveal .reveal { opacity: 1; transform: none; }
-}
-
 /* ── Video ambient ────────────────────────────────────────────────────────
    Ogni video che parte da solo e cicla deve poter essere fermato: il comando
    sta sopra al video, in basso a destra, ed è sempre raggiungibile. */
@@ -346,3 +343,109 @@ footer a[href]::after {
 }
 .lit-soft::before { opacity: 0.32; filter: blur(48px) saturate(1.2); }
 @media (prefers-reduced-transparency: reduce) { .lit::before { display: none; } }
+
+/* ── Home a schermi (24/10/2026) ─────────────────────────────────────────────────
+   Una sezione per schermo: alta almeno quanto la finestra, contenuto al centro,
+   l'inizio della sezione e' il punto dove lo scorrimento si ferma. Il padding in alto
+   lascia libero lo spazio sotto la barra di navigazione, che galleggia sopra. */
+.screen {
+  min-height: 100vh;
+  min-height: 100svh;
+  scroll-snap-align: start;
+  display: grid;
+  align-content: center;
+  padding-block: 5.5rem 3.5rem;
+}
+/* Le sezioni piu' lunghe di uno schermo (domande, download) partono dall'alto. */
+.screen-long { align-content: start; padding-top: 7rem; }
+
+/* Scala dei titoli: tre gradini, la stessa stretta dei titoli di sistema. */
+.t-hero {
+  font-size: clamp(2.5rem, 5.6vw, 5rem);
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+.t-screen {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: 1.04;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+.t-lead {
+  font-size: clamp(1.05rem, 1.35vw, 1.25rem);
+  line-height: 1.55;
+  color: var(--color-fg-2);
+  text-wrap: pretty;
+}
+
+/* La ripresa: il riquadro dello schermo del telefono, verticale, con la luce della
+   copertina dietro (.lit). Alta al massimo quanto lascia la finestra, cosi' frase e
+   video stanno sempre insieme nello stesso schermo. */
+.take {
+  position: relative;
+  width: min(100%, calc((100svh - 11rem) * 0.72));
+  margin-inline: auto;
+}
+.take video,
+.take img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 18 / 25;
+  object-fit: cover;
+  border-radius: 22px;
+  background: var(--color-ink-900);
+  border: 1px solid var(--color-hairline);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .08);
+}
+.take .ambient-video__toggle { right: .8rem; bottom: .8rem; }
+.take-caption {
+  margin-top: .9rem;
+  font-size: .8125rem;
+  color: var(--color-fg-3);
+  text-align: center;
+  text-wrap: balance;
+}
+/* Sotto i 1024px frase e ripresa stanno una sopra l'altra: la ripresa si ferma al 58% dell'altezza,
+   cosi' su un telefono (375x812) titolo, riga e video entrano nello stesso schermo. */
+@media (max-width: 1023px) {
+  .take { width: min(100%, calc(58svh * 0.72)); }
+}
+
+/* ── Comparse al passaggio ─────────────────────────────────────────────────────
+   Lo stato nascosto esiste solo se lo script ha messo .js-reveal su <html>: senza
+   JavaScript, e con "Riduci movimento", tutto e' visibile da subito. Il testo sale
+   di 16px, il video arriva un poco piu' lento e cresce dal 96%: una sola coreografia,
+   la stessa curva che rallenta alla fine (expo out). */
+.js-reveal [data-reveal] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity .6s cubic-bezier(.16, 1, .3, 1), transform .6s cubic-bezier(.16, 1, .3, 1);
+  transition-delay: calc(var(--i, 0) * 80ms);
+}
+.js-reveal [data-reveal="media"] {
+  transform: translateY(16px) scale(.96);
+  transition-duration: .9s;
+}
+.js-reveal [data-reveal].is-in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .js-reveal [data-reveal] { opacity: 1; transform: none; transition: none; }
+}
+
+/* ── Piattaforme ───────────────────────────────────────────────────────────────── */
+.platform {
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+  padding: 1rem 1.25rem;
+}
+.platform svg { flex: none; width: 22px; height: 22px; color: var(--color-fg-2); }
+
+/* Nell'hero a due colonne il pulsante e le righe sotto stanno allineati a sinistra col titolo. */
+@media (min-width: 1024px) {
+  .hero-dl > div,
+  .hero-dl > astro-island > div { align-items: flex-start; }
+}

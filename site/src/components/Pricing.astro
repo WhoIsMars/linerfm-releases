@@ -1,11 +1,10 @@
 ---
-import { CHECKOUT_URL } from "../config/links";
-// Le tre promesse che prima stavano in una sezione a sé (Promise, tolta il 22/10)
-// sono entrate qui: con cosa funziona e dove restano i dati stanno accanto al prezzo.
-// 23/10: quattro righe come iBaila, la prova per prima ("5 days free, no card"); le fonti
-// supportate stanno gia' in "Works with" e non si ripetono qui. Dal 22/10 (confronto con iBaila): titolo grande, icona dell'app, prezzo a scala di
-// copertina, una riga di fiducia sotto il pulsante. Lemon Squeezy è il Merchant of Record
-// (privacy.astro), quindi le tasse le gestisce lui.
+import { CHECKOUT_URL, DISCORD_URL } from "../config/links";
+// "No account. Pay once." (24/10/2026, owner: iBaila lo dice e noi no). A sinistra le due promesse
+// in grande, a destra la scheda del prezzo con le quattro righe di sempre, la prova per prima.
+// Ogni riga e' gia' detta altrove sul sito e verificata: card `local` di features.json (no account,
+// no telemetry), FAQ "free" (nessun livello gratuito dopo la prova), EULA (un computer alla volta).
+// Lemon Squeezy e' il Merchant of Record (privacy.astro), quindi le tasse le gestisce lui.
 const perks = [
   "5 days free, no card. Every feature from the first day.",
   "10€ once, no subscription. Minor updates included forever.",
@@ -14,32 +13,41 @@ const perks = [
 ];
 const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
 ---
-<section id="pricing" class="max-w-6xl mx-auto px-5 pt-28 md:pt-36 pb-8 scroll-mt-16">
-  <div class="text-center">
-    <p class="eyebrow">Pricing</p>
-    <h2 class="display-2 mt-4 mx-auto max-w-[16ch]">10€, once. <span class="display-dim">Every feature, both systems.</span></h2>
-  </div>
-  <div class="mt-14 mx-auto max-w-md lit lit-soft panel p-8 md:p-10" style={`--art:url(${base}video/clip-live-desktop.jpg)`}>
-    <div class="flex items-center gap-3">
-      <img src={`${base}icon-512.png`} alt="" width="44" height="44" class="w-11 h-11" loading="lazy" />
-      <div>
-        <p class="font-semibold">LinerFM</p>
-        <p class="text-xs text-fg-3">for Mac and Windows</p>
+<section id="pricing" class="screen" aria-labelledby="pricing-title">
+  <div class="max-w-6xl w-full mx-auto px-4 sm:px-6 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+    <div class="text-center lg:text-left">
+      <h2 id="pricing-title" class="t-hero mx-auto lg:mx-0 max-w-[11ch]" data-reveal style="--i:0">No account. Pay once.</h2>
+      <p class="t-lead mt-6 mx-auto lg:mx-0 max-w-[38ch]" data-reveal style="--i:1">
+        No sign-up, no subscription, nothing sent to a server. You pay 10€ once and LinerFM is yours, on Mac or Windows.
+      </p>
+      <p class="mt-6 text-sm text-fg-3 max-w-[40ch] mx-auto lg:mx-0" data-reveal style="--i:2">
+        Made by one person. Questions go to <a href={DISCORD_URL} class="underline underline-offset-4 hover:text-fg">Discord</a>, and I answer them.
+      </p>
+    </div>
+
+    <div class="w-full max-w-md mx-auto lit lit-soft panel p-8 md:p-10" style={`--art:url(${base}media/colors.jpg);--i:1`} data-reveal="media">
+      <div class="flex items-center gap-3">
+        <img src={`${base}icon-512.png`} alt="" width="44" height="44" class="w-11 h-11" loading="lazy" />
+        <div>
+          <p class="font-semibold">LinerFM</p>
+          <p class="text-xs text-fg-3">for Mac and Windows</p>
+        </div>
       </div>
+      <div class="mt-7 flex items-baseline gap-2">
+        <span class="text-6xl font-bold tracking-[-0.04em] tabular-nums">10€</span>
+        <span class="text-fg-3 leading-tight">once.<br />No subscription.</span>
+      </div>
+      <ul class="mt-7 space-y-3">
+        {perks.map((p) => (
+          <li class="flex items-start gap-3 text-sm text-fg-2">
+            <svg viewBox="0 0 16 16" width="16" height="16" class="mt-0.5 flex-none text-fg-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" /></svg>
+            <span>{p}</span>
+          </li>
+        ))}
+      </ul>
+      <a href={CHECKOUT_URL} class="lemonsqueezy-button btn-primary mt-8 block text-center font-semibold px-6 py-3.5 rounded-full">Buy LinerFM · 10€</a>
+      <p class="mt-4 text-center text-xs text-fg-3">Secure checkout by Lemon Squeezy, taxes handled for you.</p>
+      <p class="mt-1 text-center text-xs text-fg-3">After the trial a license is required: there is no limited free tier.</p>
     </div>
-    <div class="mt-7 flex items-baseline gap-2">
-      <span class="text-6xl font-bold tracking-[-0.045em] tabular-nums">10€</span>
-      <span class="text-fg-3 leading-tight">once.<br />No subscription.</span>
-    </div>
-    <ul class="mt-7 space-y-3">
-      {perks.map((p) => (
-        <li class="flex items-start gap-3 text-sm text-fg-2">
-          <span class="mt-0.5 text-fg-3" aria-hidden="true">✓</span><span>{p}</span>
-        </li>
-      ))}
-    </ul>
-    <a href={CHECKOUT_URL} class="lemonsqueezy-button btn-primary mt-8 block text-center font-semibold px-6 py-3.5 rounded-full">Buy LinerFM · 10€</a>
-    <p class="mt-4 text-center text-xs text-fg-3">Secure checkout by Lemon Squeezy, taxes handled for you.</p>
-    <p class="mt-1 text-center text-xs text-fg-3">After the trial a license is required: there is no limited free tier.</p>
   </div>
 </section>
