@@ -50,6 +50,8 @@ const og = new URL(`${base}${ogImage.replace(/^\//, "")}`, Astro.site ?? "http:/
     <meta name="twitter:image" content={og} />
     <script type="application/ld+json" set:html={appLd} />
     <script src="https://assets.lemonsqueezy.com/lemon.js" defer is:inline></script>
+    {/* Metricool: visite del sito accanto ai social, stesso pannello (owner, 24/10/2026). */}
+    <script is:inline>function loadScript(a){var b=document.getElementsByTagName("head")[0],c=document.createElement("script");c.type="text/javascript",c.src="https://tracker.metricool.com/resources/be.js",c.onreadystatechange=a,c.onload=a,b.appendChild(c)}loadScript(function(){beTracker.t({hash:"a870b2b3705cba7bc947b520ecc38ca9"})});</script>
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to main content</a>

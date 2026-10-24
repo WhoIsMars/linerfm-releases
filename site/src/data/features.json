@@ -1,6 +1,6 @@
 {
   "_generated": "da docs/product-surface.json nel repo linerfm — non modificare a mano, gira scripts/sync-product-surface.mjs",
-  "updated": "2026-10-22",
+  "updated": "2026-10-24",
   "cards": [
     {
       "id": "widget",
@@ -312,6 +312,16 @@
       ]
     },
     {
+      "id": "edge-light-custom",
+      "t": "Your own edge light",
+      "d": "Choose the color of the light around your screen edges, or keep the cover's colors. Make the line thin or wide, the glow soft or strong, separately for each display.",
+      "since": "1.2.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
       "id": "windows",
       "t": "Now on Windows",
       "d": "LinerFM runs on Windows 10 and 11: the widget, search, a top bar in place of the notch, synced lyrics, the screensaver, the volume HUD, the live desktop and the side panel, AI playlists, your stats and Last.fm. Windows Hello can lock it at launch, and updates install on their own, like on the Mac.",
@@ -355,6 +365,16 @@
       "t": "SoundCloud on the widget",
       "d": "Play SoundCloud in Chrome, from a track, a playlist or a Mix, and LinerFM follows it with sharp artwork and play, pause and skip.",
       "since": "1.0.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "lyrics-every-source",
+      "t": "Lyrics for every source",
+      "d": "Synced lyrics now follow whatever you play, not only Spotify and Apple Music. A YouTube video in your browser or a SoundCloud track gets its lyrics on the desktop and under the notch, in time with the song.",
+      "since": "1.2.0",
       "platforms": [
         "mac",
         "windows"
