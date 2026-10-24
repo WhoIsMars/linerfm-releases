@@ -489,18 +489,20 @@ html.lenis { scroll-behavior: auto; }
 .lf__bezel { z-index: 1; }
 @keyframes lf-spin { to { --lf-a: 360deg; } }
 @keyframes lf-breathe { 0%, 100% { opacity: .42; transform: scale(.98); } 50% { opacity: .62; transform: scale(1.02); } }
-/* La luce dentro lo schermo, come quella del prodotto: una fascia di 16px sul bordo
-   interno, sfocata, che si somma all'immagine (screen). */
+/* La luce dentro lo schermo, come quella del prodotto: una fascia morbida sul bordo
+   interno nei due colori, che si somma all'immagine (screen). */
 .lf__inner {
   position: absolute;
   inset: 0;
   z-index: 2;
   border-radius: inherit;
-  padding: 16px;
-  background: conic-gradient(from var(--lf-a), var(--c1), var(--c2) 25%, color-mix(in srgb, var(--c1) 25%, transparent) 45%, var(--c2) 70%, var(--c1));
-  -webkit-mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  filter: blur(9px);
+  /* ombre interne, non maschera + blur: in WebKit la maschera sfocata usciva come una fascia dura */
+  box-shadow:
+    inset 16px 0 26px -12px var(--c1),
+    inset -16px 0 26px -12px var(--c2),
+    inset 0 16px 26px -12px var(--c2),
+    inset 0 -16px 26px -12px var(--c1),
+    inset 0 0 3px 0 color-mix(in srgb, var(--c1) 70%, #fff);
   mix-blend-mode: screen;
   opacity: .75;
   pointer-events: none;
