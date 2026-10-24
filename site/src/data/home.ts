@@ -131,14 +131,17 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
     halo: "The song stays.",
     line: "Full screen artwork and lyrics on every display when you leave the computer, or right away with ⇧⌘S on a Mac. It changes with every song.",
     chips: ["Artwork", "Onyx", "Glass", "Vinyl", "Midnight"],
-    // screensaver.mp4 mostra solo Artwork, Vinyl e Midnight: Onyx e Glass restano testo
-    cues: [{ label: "Artwork", at: 0 }, { label: "Vinyl", at: 3.93 }, { label: "Midnight", at: 6.63 }],
+    // screensaver.mp4 (24/10, sera): controlli visibili, i cinque stili cliccati sul selettore vero
+    // ai tempi qui sotto, poi SICKO MODE a 7,1 s. Senza controlli gli stili differivano quasi solo
+    // nella forma della copertina e l'owner non li vedeva.
+    cues: [{ label: "Artwork", at: 0 }, { label: "Onyx", at: 1.6 }, { label: "Glass", at: 3.2 },
+      { label: "Vinyl", at: 4.8 }, { label: "Midnight", at: 6.4 }],
     from: ["screensaver", "vinyl-midnight-themes"],
     glow: ["#ff8a3d", "#ff4f6d"],
     media: {
       kind: "screen",
       video: "media/screensaver.mp4",
-      alt: "The music screensaver playing Blinding Lights by The Weeknd, then Lucid Dreams by Juice WRLD in the Vinyl theme, then SICKO MODE by Travis Scott in Midnight, each cover filling the screen.",
+      alt: "The music screensaver playing Blinding Lights by The Weeknd while its style changes from Artwork to Onyx, Glass, Vinyl and Midnight, then SICKO MODE by Travis Scott.",
       caption: SCREEN_CAPTION,
     },
   },
@@ -149,27 +152,31 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
     halo: "from a sentence.",
     line: "Describe a mood and the AI picks real tracks. Find a playlist by describing it, add tracks from text, and optimize one with the numbers of every song.",
     chips: ["Create playlist", "Find playlist", "Add tracks", "Optimize"],
+    // ai.mp4 (24/10, sera): Create con una frase, poi Add tracks con tre titoli incollati nella
+    // playlist appena creata. Find e Optimize non sono in video: restano testo.
+    cues: [{ label: "Create playlist", at: 0 }, { label: "Add tracks", at: 5.45 }],
     from: ["ai-playlists", "discover", "curator", "track-stats", "skip-based-removals"],
     glow: ["#ff8a5c", "#b38cff"],
     media: {
       kind: "screen",
       video: "media/ai.mp4",
-      alt: "Create with AI: the prompt Late night drive, melodic rap and dark synth pop is typed, Generate is pressed and eleven real tracks appear, from Lucid Dreams and Blinding Lights to SICKO MODE and Starboy.",
+      alt: "Create with AI: Late night drive, melodic rap and dark synth pop is typed and eleven real tracks appear, from Lucid Dreams to SICKO MODE. Then Add tracks: Starboy, goosebumps and HUMBLE. are pasted, found on Spotify and added to the new playlist.",
       caption: "Captured from the app itself. The AI runs on your own free Groq key.",
     },
   },
   {
     id: "search",
     eyebrow: "Search",
-    title: "Type a song",
-    halo: "from any app.",
-    line: "One shortcut, a few letters, Enter: it plays. Spotify never comes to the front.",
+    // titolo con le parole dell'owner (24/10)
+    title: "Type a song, album, artist",
+    halo: "or playlist name.",
+    line: "One shortcut from any app, a few letters, Enter: it plays. Spotify never comes to the front.",
     from: ["search", "search-filters"],
     glow: ["#9cc8ff", "#c8b4ff"],
     media: {
       kind: "phone",
       video: "media/search.mp4",
-      alt: "On a MacBook the search box opens over the desktop, juice is typed and the results list Juice WRLD.",
+      alt: "The search box over the desktop of a MacBook: juice is typed and the results list albums and the artist Juice WRLD.",
       // scorciatoie: src-tauri/src/lib.rs:7359 nel repo dell'app
       caption: "Real footage. ⌘⇧K on a Mac, Ctrl+Alt+K on Windows.",
     },
