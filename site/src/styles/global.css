@@ -384,8 +384,10 @@ html.lenis { scroll-behavior: auto; }
   background-clip: text;
   color: transparent;
 }
+/* L'alone va sulla maschera, non sulla parola: in Safari un filtro sulla parola ritagliata dentro
+   la maschera disegnava un rettangolo scuro dietro ogni parola (25/10, iPhone). */
 .text-halo:has(.w) { filter: none; }
-.text-halo:has(.w) .w { filter: drop-shadow(0 0 24px color-mix(in srgb, var(--c1) 30%, transparent)); }
+.text-halo:has(.w) .w-mask { filter: drop-shadow(0 0 24px color-mix(in srgb, var(--c1) 30%, transparent)); }
 
 /* ── Comparse ─────────────────────────────────────────────────────────────
    Parole: maschera per parola, la parola sale dal 105% ruotata di 4 gradi.
