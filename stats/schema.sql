@@ -56,7 +56,8 @@ CREATE TABLE IF NOT EXISTS leads (
   ts INTEGER NOT NULL,      -- epoch ms, UTC
   email TEXT NOT NULL,      -- minuscolo, già validato
   src TEXT NOT NULL,        -- ?src= / ?utm_source= della visita, '' se manca
-  country TEXT NOT NULL     -- stima di Cloudflare
+  country TEXT NOT NULL,    -- stima di Cloudflare
+  sent_ts INTEGER           -- link partito con Resend (epoch ms); NULL = da mandare a mano. Migrazione 0004
 );
 CREATE UNIQUE INDEX IF NOT EXISTS leads_email ON leads (email);
 CREATE INDEX IF NOT EXISTS leads_ts ON leads (ts);

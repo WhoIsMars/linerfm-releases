@@ -1,15 +1,17 @@
 import { describe, it, expect } from "vitest";
-import { handleLead, normalizeEmail } from "../src/lead";
+import { handleLead, normalizeEmail, LINK_SUBJECT, LINK_TEXT } from "../src/lead";
 import worker from "../src/index";
 
 // D1 finto che risponde solo ai metodi davvero usati: un metodo mancante lancia, non torna undefined.
 function fakeDB(existing: string[] = []) {
   const rows: unknown[][] = [];
+  const sent: unknown[][] = [];
   const emails = new Set(existing);
   const db = {
     prepare: (sql: string) => ({
       bind: (...v: unknown[]) => ({
         run: async () => {
+          if (/^UPDATE leads SET sent_ts = \? WHERE email = \?$/.test(sql)) { sent.push(v); return { meta: { changes: 1 } }; }
           if (!/^INSERT OR IGNORE INTO leads/.test(sql)) throw new Error("unexpected SQL: " + sql);
           if (emails.has(v[1] as string)) return { meta: { changes: 0 } };
           emails.add(v[1] as string);
@@ -19,7 +21,17 @@ function fakeDB(existing: string[] = []) {
       }),
     }),
   } as unknown as D1Database;
-  return { db, rows };
+  return { db, rows, sent };
+}
+
+// Resend finto: registra ogni chiamata e risponde con lo stato dato.
+function fakeResend(status = 200) {
+  const calls: { url: string; init: RequestInit }[] = [];
+  const fetchImpl = (async (url: string, init: RequestInit) => {
+    calls.push({ url, init });
+    return new Response(JSON.stringify({ id: "re_1" }), { status });
+  }) as unknown as typeof fetch;
+  return { calls, fetchImpl };
 }
 
 // Il binding ratelimit di Cloudflare: conta le chiavi viste, permette `limit` chiamate per chiave.
@@ -128,6 +140,58 @@ describe("handleLead", () => {
     const { db, rows } = fakeDB();
     expect((await handleLead(req(LEAD), { DB: db }, "IT", 1)).status).toBe(204);
     expect(rows).toHaveLength(1);
+  });
+});
+
+// 25/10: il link parte da solo con Resend (chiave RESEND_API_KEY, secret del worker), una volta per indirizzo.
+describe("handleLead sends the download link", () => {
+  it("emails the link once to a new address, from hello@linerfm.xyz, and marks it sent", async () => {
+    const { db, sent } = fakeDB();
+    const { calls, fetchImpl } = fakeResend();
+    const res = await handleLead(req(LEAD), { DB: db, RESEND_API_KEY: "re_test" }, "IT", 1_700_000_000_000, undefined, fetchImpl);
+    expect(res.status).toBe(204);
+    expect(calls).toHaveLength(1);
+    expect(calls[0].url).toBe("https://api.resend.com/emails");
+    expect((calls[0].init.headers as Record<string, string>).Authorization).toBe("Bearer re_test");
+    const body = JSON.parse(calls[0].init.body as string);
+    expect(body).toEqual({ from: "LinerFM <hello@linerfm.xyz>", to: ["someone@example.com"], reply_to: "hello@linerfm.xyz", subject: LINK_SUBJECT, text: LINK_TEXT });
+    expect(LINK_TEXT).toContain("https://linerfm.xyz/?src=email#download");
+    expect(sent).toEqual([[1_700_000_000_000, "someone@example.com"]]);
+  });
+
+  it("sends nothing to an address already stored", async () => {
+    const { db } = fakeDB(["someone@example.com"]);
+    const { calls, fetchImpl } = fakeResend();
+    await handleLead(req(LEAD), { DB: db, RESEND_API_KEY: "re_test" }, "IT", 1, undefined, fetchImpl);
+    expect(calls).toHaveLength(0);
+  });
+
+  it("sends nothing without the key, and still stores the address for the manual list", async () => {
+    const { db, rows } = fakeDB();
+    const { calls, fetchImpl } = fakeResend();
+    await handleLead(req(LEAD), { DB: db }, "IT", 1, undefined, fetchImpl);
+    expect(calls).toHaveLength(0);
+    expect(rows).toHaveLength(1);
+  });
+
+  it("when Resend refuses or is down, the visitor still gets 204 and the address stays unsent", async () => {
+    for (const fetchImpl of [fakeResend(500).fetchImpl, (async () => { throw new Error("down"); }) as unknown as typeof fetch]) {
+      const { db, rows, sent } = fakeDB();
+      const res = await handleLead(req(LEAD), { DB: db, RESEND_API_KEY: "re_test" }, "IT", 1, undefined, fetchImpl);
+      expect(res.status).toBe(204);
+      expect(rows).toHaveLength(1);
+      expect(sent).toHaveLength(0);
+    }
+  });
+
+  it("hands the send to waitUntil when the runtime gives a context", async () => {
+    const { db, sent } = fakeDB();
+    const waits: Promise<unknown>[] = [];
+    const ctx = { waitUntil: (p: Promise<unknown>) => waits.push(p) } as unknown as ExecutionContext;
+    await handleLead(req(LEAD), { DB: db, RESEND_API_KEY: "re_test" }, "IT", 5, ctx, fakeResend().fetchImpl);
+    expect(waits).toHaveLength(1);
+    await Promise.all(waits);
+    expect(sent).toEqual([[5, "someone@example.com"]]);
   });
 });
 

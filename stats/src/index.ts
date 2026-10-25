@@ -12,7 +12,7 @@ export default {
     if (req.method !== "POST" || (url.pathname !== "/hit" && url.pathname !== "/lead")) return new Response("not found", { status: 404 });
     try {
       const country = (req as Request & { cf?: { country?: string } }).cf?.country ?? "";
-      if (url.pathname === "/lead") return await handleLead(req, env, country, Date.now());
+      if (url.pathname === "/lead") return await handleLead(req, env, country, Date.now(), ctx);
       return await handleHit(req, env, country, Date.now(), ctx);
     } catch {
       return new Response(null, { status: 500 });

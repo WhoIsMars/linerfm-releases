@@ -134,7 +134,7 @@ export function summaryEmbed(x: SummaryInput): Embed {
     { name: "Rifiuti", value: String(access.filter((r) => r.outcome === "refused").length), inline: true },
     { name: "Vendite", value: x.orders ? sales(x.orders.filter((o) => inWin(o.ts))) : "non leggibili", inline: true },
     { name: "Totale vendite", value: x.orders ? sales(x.orders) : "?", inline: true },
-    // il link va mandato a mano: scripts/leads.mjs nella cartella stats
+    // dal 25/10 il link parte da solo (Resend); quelli non partiti li elenca scripts/leads.mjs
     { name: "Email da telefono", value: x.leads === undefined ? "0" : x.leads === null ? "non leggibili" : leadsText(x.leads), inline: true },
   ];
   const title = `Numeri ${ROME_HM.format(new Date(x.win.from))} → ${ROME_HM.format(new Date(x.win.to))}`;

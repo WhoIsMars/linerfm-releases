@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-// Email lasciate dal sito da telefono (tabella leads, POST /lead). Nessun provider email è
-// configurato: il link lo manda l'owner a mano, da hello@linerfm.xyz o dalla Gmail.
+// Email lasciate dal sito da telefono (tabella leads, POST /lead). Dal 25/10 il link parte da solo
+// con Resend (src/lead.ts); qui restano solo gli indirizzi dove non è partito (sent_ts NULL), da
+// mandare a mano da hello@linerfm.xyz o dalla Gmail.
 //
 //   node scripts/leads.mjs                  elenco degli ultimi 7 giorni, con un link mailto: pronto per ognuna
 //   node scripts/leads.mjs --days 1         solo l'ultimo giorno
@@ -14,8 +15,8 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const DOWNLOAD = "https://linerfm.xyz/?src=email#download";
-const SUBJECT = "Your LinerFM download link";
-const BODY = `Hi,
+export const SUBJECT = "Your LinerFM download link";
+export const BODY = `Hi,
 
 here is the link to download LinerFM on your Mac or PC:
 ${DOWNLOAD}
@@ -37,10 +38,14 @@ export function mailto(email) {
   return `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(SUBJECT)}&body=${encodeURIComponent(BODY)}`;
 }
 
+export function unsentQuery(since) {
+  return `SELECT ts, email, src, country FROM leads WHERE ts > ${Math.floor(since)} AND sent_ts IS NULL ORDER BY ts`;
+}
+
 function readLeads(days) {
   const since = Date.now() - days * 86_400_000;
   const out = execFileSync("npx", ["wrangler", "d1", "execute", "linerfm-site-stats", "--remote", "--json",
-    "--command", `SELECT ts, email, src, country FROM leads WHERE ts > ${Math.floor(since)} ORDER BY ts`],
+    "--command", unsentQuery(since)],
     { cwd: join(dirname(fileURLToPath(import.meta.url)), ".."), encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] });
   return JSON.parse(out)[0]?.results ?? [];
 }

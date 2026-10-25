@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 // @ts-expect-error script .mjs senza tipi
-import { digest, mailto } from "../scripts/leads.mjs";
+import { digest, mailto, SUBJECT, BODY, unsentQuery } from "../scripts/leads.mjs";
+import { LINK_SUBJECT, LINK_TEXT } from "../src/lead";
 
 const rows = [
   { ts: Date.UTC(2026, 9, 21, 15, 0), email: "a@example.com", src: "tiktok", country: "IT" },
@@ -21,5 +22,15 @@ describe("leads.mjs", () => {
     expect(m.startsWith("mailto:a%2Bx%40example.com?subject=")).toBe(true);
     expect(decodeURIComponent(m)).toContain("https://linerfm.xyz/?src=email#download");
     expect(decodeURIComponent(m)).not.toMatch(/—/);
+  });
+
+  // 25/10: il link parte da solo con Resend; a mano restano solo gli indirizzi dove non è partito.
+  it("the manual mail is the same as the automatic one", () => {
+    expect(SUBJECT).toBe(LINK_SUBJECT);
+    expect(BODY).toBe(LINK_TEXT);
+  });
+
+  it("lists only the addresses the automatic send did not reach", () => {
+    expect(unsentQuery(1000)).toBe("SELECT ts, email, src, country FROM leads WHERE ts > 1000 AND sent_ts IS NULL ORDER BY ts");
   });
 });
