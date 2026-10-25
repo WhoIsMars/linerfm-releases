@@ -61,9 +61,11 @@ test.describe("on a phone (375 px, iPhone)", () => {
     await expect(dl.getByText("Not sure? Apple menu", { exact: false })).toBeVisible();
   });
 
-  test("nobody is asked for an email to get the link", async ({ page }) => {
+  // 21/10 il campo email aveva preso il posto dei download; dal 25/10 torna (richiesta dell'owner)
+  // ma solo in #download, sopra i pulsanti: il primo schermo non chiede email (e2e/lead-form.spec.ts).
+  test("the first screen asks for no email", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("textbox", { name: "Your email" })).toHaveCount(0);
+    await expect(page.locator("#top").getByRole("textbox", { name: "Your email" })).toHaveCount(0);
   });
 
   test("no element is wider than the screen", async ({ page }) => {

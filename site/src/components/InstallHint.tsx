@@ -1,6 +1,8 @@
 // Mostrato accanto ai pulsanti appena parte il download: chi non supera SmartScreen o
 // Gatekeeper al primo avvio non apre mai l'app (piano crescita 2026-10). Testi presi da
-// Download.astro, dove restano i passi completi con gli screenshot.
+// Download.astro, dove restano i passi completi con gli screenshot. Dal 25/10 sotto c'è l'invito
+// su Discord: chi ha appena scaricato è chi più probabilmente ha una domanda.
+import { DISCORD_URL } from "../config/links";
 
 export function hintFor(arch: string | null): "mac" | "windows" | null {
   if (arch === "windows") return "windows";
@@ -31,6 +33,9 @@ export default function InstallHint({ arch }: { arch: string | null }) {
           </p>
         </>
       )}
+      <p className="mt-3 pt-3 border-t border-hairline text-xs text-fg-3">
+        Stuck, or want to see what's next? Ask in #support on <a href={DISCORD_URL} className="underline text-fg-2 hover:text-fg">Discord</a>.
+      </p>
     </div>
   );
 }

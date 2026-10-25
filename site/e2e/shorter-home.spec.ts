@@ -16,14 +16,15 @@ test.describe("on a desktop (1280 px)", () => {
   // domande, download) al posto di 8 sezioni lunghe; il prezzo resta prima del 65% (misurato: 59%).
   // Cambiato apposta lo stesso giorno (16:35): l'owner vuole widget, notch, screensaver e AI ciascuna con la
   // sua sezione, quindi 12 sezioni e il prezzo al 73% (misurato a 1280 px); il limite sale al 75%.
-  test("the price comes before 75% of the page, in at most 12 sections", async ({ page }) => {
+  // 25/10: 13, con la sezione Discord chiesta dall'owner; sta dopo il prezzo, quindi il 75% non cambia.
+  test("the price comes before 75% of the page, in at most 13 sections", async ({ page }) => {
     await page.goto("/");
     const r = await page.evaluate(() => ({
       sections: document.querySelectorAll("main > section").length,
       height: document.documentElement.scrollHeight,
       pricing: document.querySelector("#pricing")!.getBoundingClientRect().top + scrollY,
     }));
-    expect(r.sections).toBeLessThanOrEqual(12);
+    expect(r.sections).toBeLessThanOrEqual(13);
     expect(r.pricing / r.height).toBeLessThan(0.75);
   });
 
