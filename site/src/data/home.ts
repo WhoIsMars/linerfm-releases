@@ -152,15 +152,18 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
     halo: "from a sentence.",
     line: "Describe a mood and the AI picks real tracks. Find a playlist by describing it, add tracks from text, and optimize one with the numbers of every song.",
     chips: ["Create playlist", "Find playlist", "Add tracks", "Optimize"],
-    // ai.mp4 (24/10, sera): Create con una frase, poi Add tracks con tre titoli incollati nella
-    // playlist appena creata. Find e Optimize non sono in video: restano testo.
-    cues: [{ label: "Create playlist", at: 0 }, { label: "Add tracks", at: 5.45 }],
+    // ai.mp4 (25/10): le quattro funzioni dalla UI vera, una dopo l'altra. Create con una frase;
+    // Add tracks con tre titoli incollati; Find con due playlist pubbliche vere di Spotify (nome,
+    // autore, copertina e brani dall'anteprima pubblica, follower non mostrati); Optimize su
+    // "Late night drive" con brani veri e numeri d'ascolto di esempio.
+    cues: [{ label: "Create playlist", at: 0 }, { label: "Add tracks", at: 5.45 },
+      { label: "Find playlist", at: 10.35 }, { label: "Optimize", at: 15.65 }],
     from: ["ai-playlists", "discover", "curator", "track-stats", "skip-based-removals"],
     glow: ["#ff8a5c", "#b38cff"],
     media: {
       kind: "screen",
       video: "media/ai.mp4",
-      alt: "Create with AI: Late night drive, melodic rap and dark synth pop is typed and eleven real tracks appear, from Lucid Dreams to SICKO MODE. Then Add tracks: Starboy, goosebumps and HUMBLE. are pasted, found on Spotify and added to the new playlist.",
+      alt: "Four AI tools in the app. Create: a sentence becomes eleven real tracks. Add tracks: three pasted titles are found on Spotify and added. Find: RapCaviar and Most Necessary come up for new rap. Optimize: two often skipped songs go out and two from your history come in.",
       caption: "Captured from the app itself. The AI runs on your own free Groq key.",
     },
   },
