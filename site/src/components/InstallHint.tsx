@@ -34,7 +34,7 @@ export default function InstallHint({ arch }: { arch: string | null }) {
         </>
       )}
       <p className="mt-3 pt-3 border-t border-hairline text-xs text-fg-3">
-        Stuck, or want to see what's next? Ask in #support on <a href={DISCORD_URL} className="underline text-fg-2 hover:text-fg">Discord</a>.
+        Stuck, or want to see what's next? Ask in #support on <a href={DISCORD_URL} data-discord="hint" className="underline text-fg-2 hover:text-fg">Discord</a>.
       </p>
     </div>
   );

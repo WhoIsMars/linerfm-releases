@@ -86,6 +86,11 @@ const og = new URL(`${base}${ogImage.replace(/^\//, "")}`, Astro.site ?? "http:/
       document.querySelectorAll<HTMLDetailsElement>("details[data-faq]").forEach((d) => {
         d.addEventListener("toggle", () => { if (d.open) track("faq_open", d.dataset.faq); });
       });
+      // 25/10: chi apre l'invito Discord e da quale punto della pagina (data-discord sul link)
+      document.addEventListener("click", (ev) => {
+        const a = (ev.target as Element | null)?.closest?.("a[data-discord]") as HTMLAnchorElement | null;
+        if (a) track("discord", a.dataset.discord);
+      }, true);
     </script>
     <ConsentBanner />
   </body>

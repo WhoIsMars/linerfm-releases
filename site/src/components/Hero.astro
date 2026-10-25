@@ -39,7 +39,7 @@ import DownloadButton from "./DownloadButton.tsx";
       <p class="mt-8 text-xs text-fg-3" data-reveal style="--i:5">Spotify, Apple Music, YouTube Music and SoundCloud · Mac and Windows</p>
       {/* I profili: chi arriva da un reel cerca la community e il resto dei video (23/10). */}
       <p class="mt-2 text-xs text-fg-3 flex flex-wrap justify-center lg:justify-start gap-x-4 gap-y-1" data-reveal style="--i:5">
-        {SOCIAL_LINKS.map((s) => <a href={s.href} class="underline underline-offset-4 hover:text-fg" rel="me">{s.name}</a>)}
+        {SOCIAL_LINKS.map((s) => <a href={s.href} data-discord={s.name === "Discord" ? "hero" : undefined} class="underline underline-offset-4 hover:text-fg" rel="me">{s.name}</a>)}
       </p>
     </div>
 
