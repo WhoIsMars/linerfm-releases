@@ -122,6 +122,14 @@ export function summaryEmbed(x: SummaryInput): Embed {
     return `${inside.length} (${[...by].sort((a, b) => b[1] - a[1]).map(([k, n]) => `${k} ${n}`).join(", ")})`;
   };
 
+  // 25/10: persone che aprono l'invito Discord dal sito, per punto della pagina (arch)
+  const discordText = () => {
+    const by = new Map<string, Set<string>>();
+    for (const r of hits.filter((h) => h.kind === "discord")) { const k = r.arch || "?"; if (!by.has(k)) by.set(k, new Set()); by.get(k)!.add(r.sid); }
+    const people = new Set([...by.values()].flatMap((ids) => [...ids])).size;
+    return people ? `${people} (${[...by].map(([k, ids]) => [k, ids.size] as const).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${k} ${n}`).join(", ")})` : "0";
+  };
+
   const fields: Embed["fields"] = [
     { name: "Visite sito", value: `${views.length} (${new Set(views.map((v) => v.sid)).size} persone${phones.size ? `, ${phones.size} da telefono o tablet` : ""})`, inline: true },
     { name: "Persone che hanno scaricato", value: `${downloads.size}${phoneDownloads.size ? ` (+${phoneDownloads.size} da telefono, che non installa)` : ""}`, inline: true },
@@ -135,6 +143,7 @@ export function summaryEmbed(x: SummaryInput): Embed {
     { name: "Vendite", value: x.orders ? sales(x.orders.filter((o) => inWin(o.ts))) : "non leggibili", inline: true },
     { name: "Totale vendite", value: x.orders ? sales(x.orders) : "?", inline: true },
     // dal 25/10 il link parte da solo (Resend); quelli non partiti li elenca scripts/leads.mjs
+    { name: "Clic su Discord", value: discordText(), inline: true },
     { name: "Email da telefono", value: x.leads === undefined ? "0" : x.leads === null ? "non leggibili" : leadsText(x.leads), inline: true },
   ];
   const title = `Numeri ${ROME_HM.format(new Date(x.win.from))} → ${ROME_HM.format(new Date(x.win.to))}`;

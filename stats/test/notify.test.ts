@@ -67,6 +67,14 @@ describe("summaryEmbed", () => {
     expect(fields(summaryEmbed({ ...base, hits }))["Visite sito"]).toBe("4 (3 persone, 1 da telefono o tablet)");
   });
 
+  // 25/10: quante persone aprono l'invito Discord dal sito, e da dove
+  it("counts the people who open the Discord invite, by place", () => {
+    const hits = [row({ sid: "a", kind: "discord", arch: "nav" }), row({ sid: "a", kind: "discord", arch: "nav" }),
+      row({ sid: "b", kind: "discord", arch: "section" }), row({ sid: "c", kind: "discord", arch: "nav" })];
+    expect(fields(summaryEmbed({ ...base, hits }))["Clic su Discord"]).toBe("3 (nav 2, section 1)");
+    expect(fields(summaryEmbed(base))["Clic su Discord"]).toBe("0");
+  });
+
   it("downloads from a phone are counted apart: a phone cannot install LinerFM", () => {
     const hits = [
       row({ sid: "a", kind: "download", client: "desktop" }),

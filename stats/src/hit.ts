@@ -1,5 +1,6 @@
 // POST /hit: one row per page view, DMG click, Buy click (checkout), price reached (pricing_view) or FAQ
-// question opened (faq_open, its id in the arch column) on the published site.
+// question opened (faq_open, its id in the arch column) or Discord invite opened (discord, the place on the
+// page in the arch column) on the published site.
 // Stores no IP and no user agent (only mobile or desktop, decided by the site); the country is Cloudflare's guess (request.cf.country).
 // A DMG click is also announced on Discord #downloads, after the response (notify.ts).
 import { announceDownload } from "./notify";
@@ -11,7 +12,7 @@ export interface Env { DB: D1Database; DISCORD_DOWNLOADS_WEBHOOK?: string }
 export const ORIGINS = new Set(["https://linerfm.xyz", "https://www.linerfm.xyz", "https://whoismars.github.io"]);
 export const BOT = /bot|crawl|spider|slurp|headless|preview|facebookexternalhit|embedly|lighthouse/i;
 const FIELDS = {
-  k: /^(view|download|checkout|pricing_view|faq_open)$/,
+  k: /^(view|download|checkout|pricing_view|faq_open|discord)$/,
   p: /^\/[^\s]{0,199}$/,
   r: /^[a-z0-9.-]{0,100}$/,
   s: /^[a-z0-9_-]{0,40}$/,
