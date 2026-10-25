@@ -9,6 +9,7 @@ import Hero from "../components/Hero.astro";
 import WorksWith from "../components/WorksWith.astro";
 import FeatureScreen from "../components/FeatureScreen.astro";
 import Pricing from "../components/Pricing.astro";
+import Community from "../components/Community.astro";
 import Faq from "../components/Faq.astro";
 import Download from "../components/Download.astro";
 import Footer from "../components/Footer.astro";
@@ -34,6 +35,8 @@ const phones = shown.filter((s) => s.media?.kind !== "screen").map((s) => s.id);
       </FeatureScreen>
     ))}
     <Pricing />
+    <Community />
+
     <Faq />
     <Download />
   </main>

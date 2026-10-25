@@ -1,0 +1,26 @@
+---
+import { DISCORD_URL } from "../config/links";
+// 25/10, richiesta dell'owner: un motivo per entrare nel Discord, anche da telefono (nella barra il
+// link è solo da md in su). Ogni motivo è vero oggi: #support e /ticket stanno nel bot
+// (worker/src/discord.ts dell'app), il ruolo Customer arriva con "Discord in one click" (1.2.4).
+const reasons = [
+  { t: "Help from the maker", d: "Post in #support, or type /ticket for a private thread. LinerFM is made by one person, and that person answers." },
+  { t: "Updates as they ship", d: "New versions are announced there first, with what changed." },
+  { t: "The Customer role", d: "Bought a license? Discord in one click links it from Settings and gives you the Customer role, no key to paste." },
+];
+---
+<section id="community" class="section" aria-labelledby="community-title">
+  <div class="max-w-[1240px] w-full mx-auto px-5 sm:px-6 text-center">
+    <p class="eyebrow" data-reveal>Community</p>
+    <h2 id="community-title" class="t-section mt-5 mx-auto max-w-[16ch]" data-words>Come say hi <span class="text-halo">on Discord.</span></h2>
+    <ul class="mt-12 grid md:grid-cols-3 gap-4 text-left">
+      {reasons.map((r, i) => (
+        <li class="panel p-6" data-reveal style={`--i:${i}`}>
+          <h3 class="font-semibold">{r.t}</h3>
+          <p class="mt-2 text-sm text-fg-3 leading-relaxed">{r.d}</p>
+        </li>
+      ))}
+    </ul>
+    <a href={DISCORD_URL} class="btn-ghost mt-10 inline-flex items-center font-semibold px-7 py-3.5 rounded-full" data-reveal style="--i:3">Join the Discord</a>
+  </div>
+</section>

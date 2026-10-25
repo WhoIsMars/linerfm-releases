@@ -44,3 +44,6 @@ export const RELEASES_LIST_API_URL =
 
 /** Stats worker (`stats/` in this repo): counts visits and DMG clicks, no cookies. */
 export const STATS_URL = "https://linerfm-site-stats.piccoletto.workers.dev/hit";
+
+/** Same worker: an email left from a phone to get the download link (stats/src/lead.ts). */
+export const LEAD_URL = "https://linerfm-site-stats.piccoletto.workers.dev/lead";
