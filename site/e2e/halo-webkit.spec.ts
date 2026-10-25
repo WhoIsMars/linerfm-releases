@@ -40,3 +40,29 @@ for (const id of ["notch", "ai-playlists", "search"]) {
   });
 }
 
+
+// 25/10, sempre da iPhone: dietro ogni parola accesa Safari disegnava un rettangolo scuro (l'alone
+// sulla parola dentro la maschera che la fa salire). Sotto "becomes", dove non c'e' testo, il colore
+// deve essere quello dello sfondo.
+test("no dark box behind the lit words in Safari", async ({ page }) => {
+  await page.goto("/");
+  const h = page.locator("#notch h2");
+  await h.evaluate((x) => x.scrollIntoView({ block: "center" }));
+  await expect(h).toHaveClass(/is-in/);
+  await page.waitForTimeout(1500);
+  // stessa riga, in fondo alla maschera dove non c'e' testo: dentro "becomes" e nello spazio dopo
+  const masks = h.locator(".text-halo .w-mask");
+  const m1 = (await masks.nth(0).boundingBox())!;
+  const m2 = (await masks.nth(1).boundingBox())!;
+  const y = m1.y + m1.height - 2;
+  const png = await page.screenshot({ clip: { x: m1.x, y, width: m2.x - m1.x, height: 1 } });
+  const [inside, gap] = await page.evaluate(async ([b64, w1, wAll]) => {
+    const img = new Image(); img.src = `data:image/png;base64,${b64}`; await img.decode();
+    const c = document.createElement("canvas"); c.width = img.width; c.height = img.height;
+    const ctx = c.getContext("2d")!; ctx.drawImage(img, 0, 0);
+    const k = img.width / wAll;
+    const avg = (x0: number, x1: number) => { const d = ctx.getImageData(Math.round(x0 * k), 0, Math.max(1, Math.round((x1 - x0) * k)), 1).data; let s = 0; for (let i = 0; i < d.length; i += 4) s += d[i] + d[i + 1] + d[i + 2]; return s / (d.length / 4) / 3; };
+    return [avg(w1 * 0.3, w1 * 0.6), avg(w1 + 2, wAll - 2)];
+  }, [png.toString("base64"), m1.width, m2.x - m1.x] as const);
+  expect(Math.abs(inside - gap)).toBeLessThan(2);
+});

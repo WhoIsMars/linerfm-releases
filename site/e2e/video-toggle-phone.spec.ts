@@ -13,7 +13,9 @@ test("the pause button is small on a phone and still pauses the video", async ({
   await page.goto("/");
   const toggle = page.locator("#notch [data-video-toggle]");
   await toggle.evaluate((x) => x.scrollIntoView({ block: "center" }));
-  const box = (await toggle.boundingBox())!;
+  // il video entra salendo di 50 px in 1,2 s: si clicca solo a tasto fermo
+  let box = (await toggle.boundingBox())!;
+  await expect.poll(async () => { const b = (await toggle.boundingBox())!; const still = Math.abs(b.y - box.y) < 0.5; box = b; return still; }, { intervals: [200] }).toBe(true);
   expect(box.width).toBeLessThanOrEqual(32);
   // un tocco 6 px fuori dal cerchio cade ancora sul tasto
   await page.mouse.click(box.x - 6, box.y + box.height / 2);
