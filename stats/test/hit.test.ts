@@ -98,6 +98,9 @@ describe("handleHit", () => {
     expect((await handleHit(req({ ...VIEW, k: "pricing_view" }), { DB: db }, "IT", 1)).status).toBe(204);
     expect((await handleHit(req({ ...VIEW, k: "faq_open", a: "warning-mac" }), { DB: db }, "IT", 2)).status).toBe(204);
     expect(rows.map((r) => [r[1], r[5]])).toEqual([["pricing_view", ""], ["faq_open", "warning-mac"]]);
+    // 25/10: il clic su un link Discord, col punto della pagina nella colonna arch
+    expect((await handleHit(req({ ...VIEW, k: "discord", a: "section" }), { DB: db }, "IT", 3)).status).toBe(204);
+    expect(rows.at(-1)!.slice(1, 2).concat(rows.at(-1)![5])).toEqual(["discord", "section"]);
   });
 
   it("refuses an unknown kind", async () => {

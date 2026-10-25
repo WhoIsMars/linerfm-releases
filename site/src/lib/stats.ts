@@ -24,7 +24,8 @@ export function optOutFromSearch(search: string): "on" | "off" | null {
 export const clean = (s: string | null) => (s ?? "").toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 40);
 
 // pricing_view: #pricing came into view; faq_open: a FAQ question was opened. Where people stop before downloading.
-export type HitKind = "view" | "download" | "checkout" | "pricing_view" | "faq_open";
+// discord: a Discord invite was opened, with its place on the page (data-discord).
+export type HitKind = "view" | "download" | "checkout" | "pricing_view" | "faq_open" | "discord";
 
 /**
  * The Buy link with the visit's ?src= tag and tab id as Lemon Squeezy custom data, so an order says which
@@ -51,8 +52,8 @@ export function hitPayload(o: {
     p: o.pathname.slice(0, 200),
     r: r.slice(0, 100),
     s: clean(q.get("src") ?? q.get("utm_source")) || o.sessionSrc,
-    // the architecture of a download, or which FAQ question was opened (the worker keeps 20 characters)
-    a: o.kind === "download" || o.kind === "faq_open" ? clean(o.arch ?? "").slice(0, 20) : "",
+    // the architecture of a download, which FAQ question was opened, or where the Discord link was (the worker keeps 20 characters)
+    a: o.kind === "download" || o.kind === "faq_open" || o.kind === "discord" ? clean(o.arch ?? "").slice(0, 20) : "",
     i: o.sid,
     d: o.mobile ? "mobile" : "desktop",
   };

@@ -30,7 +30,7 @@ const faqs = [
     <div class="md:sticky md:top-28 self-start">
       <p class="eyebrow" data-reveal>FAQ</p>
       <h2 id="faq-title" class="t-section mt-5" data-words>Questions, <span class="text-halo">answered.</span></h2>
-      <p class="mt-5 text-sm text-fg-3 leading-relaxed max-w-[34ch]" data-reveal style="--i:1">Something else on your mind? Ask on <a href={DISCORD_URL} class="underline underline-offset-2 hover:text-fg">Discord</a>. LinerFM is a solo project, so a real person answers.</p>
+      <p class="mt-5 text-sm text-fg-3 leading-relaxed max-w-[34ch]" data-reveal style="--i:1">Something else on your mind? Ask on <a href={DISCORD_URL} data-discord="faq" class="underline underline-offset-2 hover:text-fg">Discord</a>. LinerFM is a solo project, so a real person answers.</p>
     </div>
     <div class="space-y-3">
       {faqs.map((f, i) => (

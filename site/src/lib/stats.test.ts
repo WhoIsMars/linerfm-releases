@@ -98,6 +98,8 @@ describe("hitPayload", () => {
   it("says which FAQ question was opened, cleaned and within the worker's 20 characters", () => {
     expect(hitPayload({ ...base, kind: "faq_open", arch: "Is-it-SAFE?" }).a).toBe("is-it-safe");
     expect(hitPayload({ ...base, kind: "faq_open", arch: "a-very-long-question-id-indeed" }).a).toHaveLength(20);
+    // 25/10: il clic su un invito Discord porta il punto della pagina, come la domanda delle FAQ
+    expect(hitPayload({ ...base, kind: "discord", arch: "nav" }).a).toBe("nav");
   });
 });
 
