@@ -59,8 +59,8 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
     eyebrow: "Live desktop",
     title: "Every song",
     halo: "repaints your desktop.",
-    line: "Skip a track and the wallpaper, the colors and the albums under the clock change with it.",
-    from: ["live-desktop", "dynamic-color"],
+    line: "Skip a track and the wallpaper, the colors and the albums under the clock change with it. The Spotify canvas can fill your whole desktop, like a music video.",
+    from: ["live-desktop", "dynamic-color", "desktop-cover"],
     // la luce ciano attorno al portatile nella ripresa, il rosa della copertina di Lucid Dreams
     glow: ["#5ad1ff", "#ff6fa8"],
     media: {
@@ -204,7 +204,8 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
 
 /** Una riga, senza media: le cose vere che non hanno (ancora) una schermata. Nomi dalle card. */
 export const ALSO = [
-  "synced lyrics under the notch",
+  // lyrics-every-source (1.2.0), lyrics-from-spotify (1.2.2), lyrics-song-colors (1.2.3)
+  "synced lyrics for Spotify, YouTube and SoundCloud, in the song's colors",
   "your listening stats",
   "Last.fm scrobbling",
   "Discord presence",

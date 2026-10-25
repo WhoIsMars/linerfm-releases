@@ -389,6 +389,46 @@
         "mac",
         "windows"
       ]
+    },
+    {
+      "id": "desktop-cover",
+      "t": "Full-screen video desktop",
+      "d": "The Spotify canvas or the cover fills your whole desktop, cropped at the edges like a music video, with a soft blurred copy behind it. One smooth fade at every song change.",
+      "since": "1.2.3",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "lyrics-song-colors",
+      "t": "Lyrics in the song's colors",
+      "d": "Big synced lyrics in the middle of your screen, colored by the song: the cover's color, a gradient, neon or colors that flow through the letters, in six fonts from tall and thin to gothic and pixel. The clock takes two colors from the cover too.",
+      "since": "1.2.3",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "bottom-waves",
+      "t": "Waves of light at the bottom",
+      "d": "A band of light rises from the bottom edge of the screen in the cover's colors and moves with the beat. One of eight edge light effects.",
+      "since": "1.2.3",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "discord-link",
+      "t": "Discord in one click",
+      "d": "Link your license to Discord from Settings in one click: you join the LinerFM server with the Customer role, no command to type and no key to paste.",
+      "since": "1.2.4",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
     }
   ],
   "surfaces": [
