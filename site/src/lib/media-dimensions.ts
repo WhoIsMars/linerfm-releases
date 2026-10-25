@@ -15,9 +15,10 @@ const SIZES: Record<string, MediaSize> = {
   "media/light.mp4": { width: 720, height: 1000 },
   // search: inquadratura che segue la casella di ricerca (il telefono si muove), 24/10.
   "media/search.mp4": { width: 600, height: 440 },
+  // notch: IMG_8758.MOV dal 6o al 14o secondo, quadrato sulla notch (25/10).
+  "media/notch.mp4": { width: 560, height: 560 },
   // Catture della UI vera (24/10/2026, .planning/site-v2/site-takes.cjs nel repo dell'app).
   "media/widget.mp4": { width: 944, height: 720 },
-  "media/notch.mp4": { width: 1072, height: 360 },
   "media/screensaver.mp4": { width: 1280, height: 800 },
   "media/ai.mp4": { width: 1140, height: 840 },
   "video/clip-notch.mp4": { width: 1200, height: 900 },

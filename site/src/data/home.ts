@@ -112,16 +112,15 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
     halo: "becomes a player.",
     line: "Hover it for the track, the controls and a seek bar you can drag, with the lyrics line by line right under it.",
     chips: ["Artwork", "Onyx", "Glass", "Vinyl", "Midnight"],
-    // notch.mp4: setTheme di site-takes.cjs, verificati fotogramma per fotogramma
-    cues: [{ label: "Artwork", at: 0 }, { label: "Onyx", at: 1.6 }, { label: "Glass", at: 3.0 },
-      { label: "Vinyl", at: 4.4 }, { label: "Midnight", at: 6.43 }],
+    // notch.mp4 (25/10): ripresa vera dal telefono dell'owner, IMG_8758.MOV da 6 a 14,4 s.
+    // Cambi di canzone dal pannello e testi veri; i temi non passano uno per uno: restano testo.
     from: ["notch-hover", "karaoke", "vinyl-midnight-themes"],
     glow: ["#39b0ea", "#a18cff"],
     media: {
-      kind: "screen",
+      kind: "phone",
       video: "media/notch.mp4",
-      alt: "The notch player open on Lucid Dreams by Juice WRLD, changing theme from Artwork to Onyx, Glass, Vinyl and Midnight, then moving on to SICKO MODE by Travis Scott.",
-      caption: SCREEN_CAPTION,
+      alt: "Filmed on a MacBook: the notch player is open and the song changes from it, from Party By Myself to Legends and Fast by Juice WRLD, while the synced lyrics run on the desktop below.",
+      caption: "Real footage. Songs change right from the notch, the lyrics follow.",
     },
   },
   {

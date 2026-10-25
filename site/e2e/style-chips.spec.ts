@@ -28,8 +28,6 @@ const current = (page: Page, id: string) => page.locator(`#${id} [data-cue][aria
 for (const [id, t, label] of [
   ["widget", 4.8, "Compact"],
   ["widget", 6.2, "Terminal"],
-  ["notch", 4.6, "Vinyl"],
-  ["notch", 7.0, "Midnight"],
   ["screensaver", 2.4, "Onyx"],
   ["screensaver", 4.0, "Glass"],
   ["screensaver", 5.6, "Vinyl"],
@@ -48,12 +46,22 @@ for (const [id, t, label] of [
 
 test("clicking a style chip moves the video to that style", async ({ page }) => {
   await page.goto("/");
-  await seek(page, "notch", 0.5);
-  await page.locator("#notch").getByRole("button", { name: "Glass" }).click();
-  const t = await page.locator("#notch video").evaluate((v: HTMLVideoElement) => v.currentTime);
-  expect(t).toBeGreaterThanOrEqual(3.0);
-  expect(t).toBeLessThan(4.4);
-  await expect(current(page, "notch")).toHaveText("Glass");
+  await seek(page, "screensaver", 0.5);
+  await page.locator("#screensaver").getByRole("button", { name: "Glass" }).click();
+  const t = await page.locator("#screensaver video").evaluate((v: HTMLVideoElement) => v.currentTime);
+  expect(t).toBeGreaterThanOrEqual(3.2);
+  expect(t).toBeLessThan(4.8);
+  await expect(current(page, "screensaver")).toHaveText("Glass");
+});
+
+// 25/10, scelta dell'owner: la notch mostra la sua ripresa vera dal telefono (cambi di canzone e
+// testi), che non passa per i temi uno per uno: i nomi dei temi restano testo, non bottoni.
+test("the notch is real footage and its themes stay plain text", async ({ page }) => {
+  await page.goto("/");
+  const notch = page.locator("#notch");
+  await expect(notch.locator("[data-cue]")).toHaveCount(0);
+  await expect(notch.locator(".chip")).toHaveCount(5);
+  await expect(notch.locator("figure[data-take] > figcaption")).toContainText("Real footage");
 });
 
 test("the screensaver shows all five styles as buttons", async ({ page }) => {
