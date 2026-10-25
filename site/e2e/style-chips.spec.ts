@@ -54,14 +54,27 @@ test("clicking a style chip moves the video to that style", async ({ page }) => 
   await expect(current(page, "screensaver")).toHaveText("Glass");
 });
 
-// 25/10, scelta dell'owner: la notch mostra la sua ripresa vera dal telefono (cambi di canzone e
-// testi), che non passa per i temi uno per uno: i nomi dei temi restano testo, non bottoni.
-test("the notch is real footage and its themes stay plain text", async ({ page }) => {
+// 25/10 pomeriggio, owner: da iPhone la notch era tagliata e i temi non si cliccavano. Ora il video
+// è la ripresa vera (0-8,4 s, tema Artwork) seguita dai cinque temi presi dalla UI dell'app.
+for (const [t, label] of [[3.0, "Artwork"], [9.0, "Artwork"], [10.6, "Onyx"], [12.0, "Glass"], [13.4, "Vinyl"], [15.6, "Midnight"]] as const) {
+  test(`notch at ${t}s lights ${label}`, async ({ page }) => {
+    await page.goto("/");
+    await seek(page, "notch", t);
+    await expect(current(page, "notch")).toHaveText(label);
+  });
+}
+
+test("clicking a notch theme moves the video to that theme, and says which part is real", async ({ page }) => {
   await page.goto("/");
+  await seek(page, "notch", 0.5);
   const notch = page.locator("#notch");
-  await expect(notch.locator("[data-cue]")).toHaveCount(0);
-  await expect(notch.locator(".chip")).toHaveCount(5);
-  await expect(notch.locator("figure[data-take] > figcaption")).toContainText("Real footage");
+  for (const name of ["Artwork", "Onyx", "Glass", "Vinyl", "Midnight"]) await expect(notch.getByRole("button", { name })).toHaveCount(1);
+  await notch.getByRole("button", { name: "Vinyl" }).click();
+  const t = await page.locator("#notch video").evaluate((v: HTMLVideoElement) => v.currentTime);
+  expect(t).toBeGreaterThanOrEqual(12.8);
+  expect(t).toBeLessThan(14.83);
+  await expect(current(page, "notch")).toHaveText("Vinyl");
+  await expect(notch.locator("figure[data-take] > figcaption")).toContainText("Real footage first");
 });
 
 test("the screensaver shows all five styles as buttons", async ({ page }) => {
