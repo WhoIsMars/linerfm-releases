@@ -3,14 +3,14 @@ import { CHECKOUT_URL, DISCORD_URL } from "../config/links";
 // "No account. Pay once." (24/10/2026, owner: iBaila lo dice e noi no). A sinistra le due promesse
 // in grande, a destra la scheda del prezzo con le quattro righe di sempre, la prova per prima.
 // Ogni riga e' gia' detta altrove sul sito e verificata: card `local` di features.json (no account,
-// no telemetry), FAQ "free" (nessun livello gratuito dopo la prova), EULA (un computer alla volta).
+// niente sugli ascolti esce dal computer; "no telemetry" tolto con la 1.2.8, che manda i dati d'uso), FAQ "free" (nessun livello gratuito dopo la prova), EULA (un computer alla volta).
 // Le due righe sotto il pulsante sono fg-2: sulla luce della copertina fg-3 scendeva a ~4,5:1.
 // Lemon Squeezy e' il Merchant of Record (privacy.astro), quindi le tasse le gestisce lui.
 const perks = [
   "5 days free, no card. Every feature from the first day.",
   "10€ once, no subscription. Minor updates included forever.",
   "One computer at a time, Mac or Windows. Move your license anytime.",
-  "Runs on your computer: no account, no telemetry.",
+  "Runs on your computer: no account, and what you listen to stays there.",
 ];
 const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
 ---

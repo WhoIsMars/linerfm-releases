@@ -59,7 +59,7 @@ test.describe("pricing is four clear rows, the trial first", () => {
     await expect(rows.nth(0)).toContainText("5 days free, no card");
     await expect(rows.nth(1)).toContainText("10€ once, no subscription");
     await expect(rows.nth(2)).toContainText("Mac or Windows");
-    await expect(rows.nth(3)).toContainText("no account, no telemetry");
+    await expect(rows.nth(3)).toContainText("no account, and what you listen to stays there");
   });
 
   test("the trial is said once, in a row, not again under the button", async ({ page }) => {

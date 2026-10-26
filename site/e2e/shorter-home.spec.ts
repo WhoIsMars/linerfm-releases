@@ -58,7 +58,7 @@ for (const [path, h1] of [
     await expect(page.locator("main a.lemonsqueezy-button")).toHaveCount(1);
     expect(await page.locator("body").innerText()).not.toMatch(/Mac only/i);
     await page.goto("/");
-    await expect(page.locator(`footer a[href$="${path}"]`)).toHaveCount(1);
+    await expect(page.locator(`footer a[href$="${path}/"]`)).toHaveCount(1);
   });
 }
 
