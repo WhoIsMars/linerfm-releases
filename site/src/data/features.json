@@ -105,7 +105,7 @@
     {
       "id": "discord-presence",
       "t": "Discord presence",
-      "d": "Show what you are listening to on your Discord profile. One toggle, on by default.",
+      "d": "Show what you are listening to on your Discord profile, with the album cover and the player you use, Apple Music included. One toggle, on by default.",
       "since": "0.8.0",
       "platforms": [
         "mac",
@@ -154,8 +154,8 @@
     },
     {
       "id": "local",
-      "t": "100% local",
-      "d": "No account, no telemetry, no server. Your listening data never leaves your Mac.",
+      "t": "Private by design",
+      "d": "No account, and nothing about what you listen to leaves your computer: your listening history and your taste model stay there. Only for songs with lyrics nowhere, short clips of the player's sound go to our server to be transcribed, and you can turn that off.",
       "since": "0.1.0",
       "platforms": [
         "mac",
@@ -423,8 +423,28 @@
     {
       "id": "discord-link",
       "t": "Discord in one click",
-      "d": "Link your license to Discord from Settings in one click: you join the LinerFM server with the Customer role, no command to type and no key to paste.",
+      "d": "Link your Discord in one click, from the first launch or from Settings, also during the free trial: you join the LinerFM server with your role, no command to type and no key to paste.",
       "since": "1.2.4",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "lyrics-written",
+      "t": "Lyrics for every song",
+      "d": "When a song has lyrics nowhere, unreleased tracks and SoundCloud uploads included, LinerFM listens to the player and writes them as the song plays, in time. The next time they are there from the start.",
+      "since": "1.2.5",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "lyrics-wheel",
+      "t": "Lyrics on a curved wheel",
+      "d": "The lyrics roll on a curved wheel: the line being sung flat and large, the others bending away, and the line can appear word by word.",
+      "since": "1.2.5",
       "platforms": [
         "mac",
         "windows"
