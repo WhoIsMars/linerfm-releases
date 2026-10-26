@@ -3,7 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import Nav from "../components/Nav.astro";
 import Footer from "../components/Footer.astro";
 ---
-<BaseLayout title="LinerFM: Privacy Policy" description="LinerFM runs on Mac and Windows. No account, no telemetry in the app. The website uses the TikTok pixel only if you accept it.">
+<BaseLayout title="LinerFM: Privacy Policy" description="LinerFM runs on Mac and Windows, with no account. What the app tells our server, and why. The website uses the TikTok pixel only if you accept it.">
   <Nav />
   <main id="main-content" class="max-w-3xl mx-auto px-5 py-16">
     <h1 class="text-3xl font-semibold tracking-[-0.02em]">Privacy Policy</h1>
@@ -13,8 +13,21 @@ import Footer from "../components/Footer.astro";
     <ul class="mt-4 space-y-3 text-fg-2 text-sm list-disc pl-5">
       <li>Your Spotify and Groq API keys are stored locally on your device and used only to call those services directly from your computer.</li>
       <li>Your listening history and playlist data never leave your machine. The only exception is the artist and title of a song whose lyrics are written from the audio, below.</li>
-      <li>The app sends no telemetry and no usage data.</li>
+      <li>The app tells our server a few facts about how it is used, listed below. Never what you listen to.</li>
     </ul>
+
+    <section id="license-check">
+    <h2 class="mt-10 text-lg font-semibold">What the app tells our server</h2>
+    <ul class="mt-4 space-y-3 text-fg-2 text-sm list-disc pl-5">
+      <li><strong>When:</strong> once an hour while the app is open, when it checks your trial or license, and when you send a bug report or a feature request from the app.</li>
+      <li><strong>What:</strong> an anonymous id of your computer (we keep only its first 8 characters), the app version, Mac or Windows with the system version and processor type, the system language, which music players you have played from in LinerFM (Spotify, Apple Music, YouTube Music, SoundCloud), how many times you have opened the app and when you first opened it. With a license, also the last 4 characters of the key. Nothing about the songs: never what you listen to, nor when.</li>
+      <li><strong>What our server adds:</strong> the country, as estimated by our hosting provider (Cloudflare), and the day of the trial you are on. If you linked your license to Discord, the Discord account it is linked to.</li>
+      <li><strong>Why:</strong> to know who uses LinerFM and how, so we can fix what breaks on your system and language, support the players you use, and answer a bug report knowing which version and computer it comes from.</li>
+      <li><strong>What is never sent or kept:</strong> not your IP address, no email, no name, no files, no listening history.</li>
+      <li><strong>Who sees it:</strong> only us, in a private dashboard and in our private Discord channels. It is never sold or shared.</li>
+      <li><strong>How long:</strong> one record per computer, updated at each check, until you ask us to delete it. Send the request from the app (Report a bug), which tells us which computer it is, and we delete its record.</li>
+    </ul>
+    </section>
 
     <section id="lyrics-from-audio">
     <h2 class="mt-10 text-lg font-semibold">Lyrics written from the audio</h2>
@@ -42,7 +55,7 @@ import Footer from "../components/Footer.astro";
     <h2 class="mt-10 text-lg font-semibold">Payments</h2>
     <p class="mt-3 text-fg-2 text-sm">Payments are processed by Lemon Squeezy (our Merchant of Record); their privacy policy governs the checkout.</p>
 
-    <p class="mt-8 text-xs text-fg-3">Last updated: 2026-10-25. Questions: open an issue on GitHub.</p>
+    <p class="mt-8 text-xs text-fg-3">Last updated: 2026-10-26. Questions: open an issue on GitHub.</p>
   </main>
   <Footer />
 </BaseLayout>
