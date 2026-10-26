@@ -28,5 +28,5 @@ test("the privacy page says what Write missing lyrics sends, to whom, what is ke
   await expect(s.getByRole("link", { name: "privacy policy" })).toHaveAttribute("href", "https://groq.com/privacy-policy/");
   // l'elenco "The app" non può più dire che nulla lascia il computer senza eccezioni
   await expect(page.getByText("Your listening history and playlist data never leave your machine.", { exact: true })).toHaveCount(0);
-  await expect(page.getByText("Last updated: 2026-10-25", { exact: false })).toBeVisible();
+  await expect(page.getByText("Last updated: 2026-10-26", { exact: false })).toBeVisible();
 });
