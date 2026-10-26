@@ -1,4 +1,4 @@
-import { TABS, navHtml, summarizeUsers, readLedger, cachedJson, loadGithub, githubReleases, readOrders, tabUsers, tabActivity, tabDownloads, tabSales, tabSecurity, tabEvents, tabSocial, type GhRelease, type SocialRow } from "./admin";
+import { TABS, navHtml, summarizeUsers, readDevices, readLedger, cachedJson, loadGithub, githubReleases, readOrders, tabUsers, tabActivity, tabDownloads, tabSales, tabSecurity, tabEvents, tabSocial, type GhRelease, type SocialRow } from "./admin";
 
 // GET /dashboard: the owner's private view of the site numbers, last 30 days.
 // HTTP Basic auth against the DASH_PASSWORD secret (`wrangler secret put DASH_PASSWORD`);
@@ -509,8 +509,8 @@ export async function handleDashboard(req: Request, env: Env, now: number, fetch
   let body: string;
   switch (tab) {
     case "utenti": {
-      const [ledger, access] = await Promise.all([readLedger(env.TRIAL_LEDGER), accessQ()]);
-      body = tabUsers(summarizeUsers(ledger, access, now), now); break;
+      const [ledger, access, devices] = await Promise.all([readLedger(env.TRIAL_LEDGER), accessQ(), readDevices(env.DB)]);
+      body = tabUsers(summarizeUsers(ledger, access, now, devices), now); break;
     }
     case "attivita": body = tabActivity(await accessQ(), now); break;
     case "download": {

@@ -11,18 +11,35 @@ const HASH = /^[0-9a-f]{64}$/;
 // ── Dati ──────────────────────────────────────────────────────────────────────
 export interface LedgerEntry { hash: string; started_at: number }
 
+/** Scheda di un computer (tabella devices, migrations/0005_devices.sql), scritta dal worker licenze. */
+export interface DeviceRow {
+  device: string; first_ts: number; last_ts: number; checks: number; state: string; trial_day: number | null; key: string; country: string;
+  os: string; os_version: string; arch: string; locale: string; app_version: string; players: string; launches: number;
+  app_first_seen: number; discord_id: string; discord_name: string;
+}
+
+/** Le schede dei computer; prima della migrazione 0005 una lista vuota, e la pagina resta quella di prima. */
+export async function readDevices(db: D1Database): Promise<DeviceRow[]> {
+  try { return (await db.prepare("SELECT * FROM devices ORDER BY last_ts DESC LIMIT 1000").all<DeviceRow>()).results ?? []; } catch { return []; }
+}
+
 export interface User {
   device: string; os: string; state: "trial" | "expired" | "license"; key: string; daysLeft: number; activeDays: number;
   country: string; firstSeen: number; lastSeen: number; started: number;
+  /** Dalla scheda in devices (vuoti per i computer che non hanno un'app 1.2.8 o per un D1 senza la 0005). */
+  discordName: string; discordId: string; appVersion: string; osVersion: string; arch: string; locale: string;
+  players: string; launches: number; checks: number; trialDay: number;
 }
 
-/** Una riga per Mac: il registro delle prove (da sempre) unito al registro accessi (dal 17/10). */
-export function summarizeUsers(ledger: LedgerEntry[], access: AccessRow[], now: number): User[] {
+/** Una riga per computer: il registro delle prove (da sempre), il registro accessi (dal 17/10) e le schede di devices (dalla 1.2.8). */
+export function summarizeUsers(ledger: LedgerEntry[], access: AccessRow[], now: number, devices: DeviceRow[] = []): User[] {
   const users = new Map<string, User & { days: Set<string>; lastTrial: string; real: boolean }>();
   const get = (device: string) => {
     let u = users.get(device);
     if (!u) {
-      u = { device, os: "", state: "trial", key: "", daysLeft: 0, activeDays: 0, country: "", firstSeen: 0, lastSeen: 0, started: 0, days: new Set(), lastTrial: "", real: false };
+      u = { device, os: "", state: "trial", key: "", daysLeft: 0, activeDays: 0, country: "", firstSeen: 0, lastSeen: 0, started: 0,
+        discordName: "", discordId: "", appVersion: "", osVersion: "", arch: "", locale: "", players: "", launches: 0, checks: 0, trialDay: 0,
+        days: new Set(), lastTrial: "", real: false };
       users.set(device, u);
     }
     return u;
@@ -46,6 +63,21 @@ export function summarizeUsers(ledger: LedgerEntry[], access: AccessRow[], now: 
     if ((r.kind === "validate" || r.kind === "activate") && r.outcome === "ok" && r.key) u.key = r.key;
     if (r.kind === "trial") u.lastTrial = r.outcome;
     if (r.os) u.os = r.os;
+  }
+  for (const d of devices) {
+    if (!d.device) continue;
+    const u = get(d.device);
+    u.real = true;
+    u.firstSeen = u.firstSeen ? Math.min(u.firstSeen, d.first_ts) : d.first_ts;
+    u.lastSeen = Math.max(u.lastSeen, d.last_ts);
+    if (d.country && !u.country) u.country = d.country;
+    if (d.os && !u.os) u.os = d.os;
+    if (d.key && (d.state === "validate:ok" || d.state === "activate:ok")) u.key = u.key || d.key;
+    if (d.state === "trial:expired") u.lastTrial = "expired";
+    Object.assign(u, {
+      discordName: d.discord_name ?? "", discordId: d.discord_id ?? "", appVersion: d.app_version ?? "", osVersion: d.os_version ?? "",
+      arch: d.arch ?? "", locale: d.locale ?? "", players: d.players ?? "", launches: d.launches ?? 0, checks: d.checks ?? 0, trialDay: d.trial_day ?? 0,
+    });
   }
   return [...users.values()].filter((u) => u.real).map((u) => {
     const ends = u.started + TRIAL_DAYS * DAY;
@@ -155,18 +187,34 @@ function bars30(values: number[], days: string[], color: string, marks: number[]
 const stateOf = (st: User["state"]): [string, string] => ({ trial: ["In prova", C.orange], expired: ["Prova finita", C.gray], license: ["Licenza", C.green] } as Record<User["state"], [string, string]>)[st];
 
 // ── Schede ────────────────────────────────────────────────────────────────────
+const PLAYER_NAME: Record<string, string> = {
+  spotify: "Spotify", "apple-music": "Apple Music", youtube: "YouTube Music", "linerfm-player": "Player LinerFM", soundcloud: "SoundCloud",
+};
+const playersText = (p: string) => p.split(",").filter(Boolean).map((k) => PLAYER_NAME[k] ?? k).join(", ");
+/** "macOS 26.1 · Apple Silicon", come la scheda Discord del worker (devices.ts systemText). */
+export function systemText(os: string, osVersion: string, arch: string): string {
+  const name = os === "macos" ? "macOS" : os === "windows" ? "Windows" : "";
+  const chip = arch === "aarch64" ? (os === "windows" ? "ARM" : "Apple Silicon") : arch === "x86_64" ? (os === "windows" ? "x64" : "Intel") : "";
+  return [[name, osVersion].filter(Boolean).join(" "), chip].filter(Boolean).join(" · ");
+}
+
 export function tabUsers(users: User[], now: number): string {
   const n = (st: User["state"]) => users.filter((u) => u.state === st).length;
   const active7 = users.filter((u) => now - u.lastSeen < 7 * DAY).length;
   const system = (os: string) => (os === "macos" ? "Mac" : os === "windows" ? "Windows" : "");
+  const unknown = '<span class="muted">non noto</span>';
   const rows = users.map((u) => {
     const [label, color] = stateOf(u.state);
-    const trial = u.state === "license" ? "" : u.state === "trial" ? (u.daysLeft ? `${u.daysLeft} ${u.daysLeft === 1 ? "giorno" : "giorni"} rimasti` : "in corso") : u.started ? `finita il ${rome(u.started + TRIAL_DAYS * DAY).slice(0, 5)}` : "finita";
-    return `<tr><td class="mono">${esc(u.device)}</td><td>${system(u.os) ? esc(system(u.os)) : '<span class="muted">non noto</span>'}</td><td><span class="state" style="--c:${color}">${label}</span></td><td>${u.key ? `<span class="mono">····${esc(u.key)}</span>` : `<span class="muted">${esc(trial)}</span>`}</td><td>${esc(u.activeDays || "")}</td><td>${esc(rome(u.firstSeen))}</td><td>${esc(ago(u.lastSeen, now))}</td><td>${u.country ? `${flag(u.country)} ${esc(countryName(u.country))}` : '<span class="muted">non noto</span>'}</td></tr>`;
+    const trial = u.state === "license" ? "" : u.state === "trial" ? (u.trialDay ? `giorno ${u.trialDay} di ${TRIAL_DAYS}` : u.daysLeft ? `${u.daysLeft} ${u.daysLeft === 1 ? "giorno" : "giorni"} rimasti` : "in corso") : u.started ? `finita il ${rome(u.started + TRIAL_DAYS * DAY).slice(0, 5)}` : "finita";
+    // chi è: l'account Discord se la licenza è legata, se no paese e sistema
+    const where = [u.country ? `${flag(u.country)} ${countryName(u.country)}` : "", system(u.os)].filter(Boolean).join(" · ");
+    const person = u.discordName ? `<b>${esc(u.discordName)}</b>` : where ? esc(where) : unknown;
+    const sys = systemText(u.os, u.osVersion, u.arch);
+    return `<tr><td>${person}</td><td class="mono">${esc(u.device)}</td><td>${sys ? esc(sys) : unknown}</td><td>${u.appVersion ? esc(u.appVersion) : unknown}</td><td><span class="state" style="--c:${color}">${label}</span></td><td>${u.key ? `<span class="mono">····${esc(u.key)}</span>` : `<span class="muted">${esc(trial)}</span>`}</td><td>${u.players ? esc(playersText(u.players)) : unknown}</td><td>${esc(u.launches || "")}</td><td>${esc(u.activeDays || "")}</td><td>${esc(rome(u.firstSeen))}</td><td>${esc(ago(u.lastSeen, now))}</td><td>${u.locale ? esc(u.locale) : unknown}</td></tr>`;
   }).join("");
   return `<section class="kpis" style="margin-top:16px">${kpi(C.blue, "mac", "Computer in tutto", users.length, `${active7} attivi negli ultimi 7 giorni`, osSplit(users.map((u) => u.os)))}${kpi(C.orange, "mac", "In prova", n("trial"))}${kpi(C.gray, "mac", "Prova finita, senza licenza", n("expired"))}${kpi(C.green, "key", "Con licenza", n("license"))}</section>
-<div class="grid">${card("s12", "Tutti i computer", "dal più recente", users.length ? `<div class="scroll"><table class="table"><thead><tr><th>Computer</th><th>Sistema</th><th>Stato</th><th>Licenza o prova</th><th>Giorni attivi</th><th>Primo accesso</th><th>Ultimo accesso</th><th>Paese</th></tr></thead><tbody>${rows}</tbody></table></div>` : empty("Ancora nessun computer ha aperto l'app."))}</div>
-<p class="foot">Mac e PC Windows chiedono la prova allo stesso server. Il sistema lo scrive il registro accessi dal 21/10, quando l'app lo manda: "non noto" vuol dire un'app uscita prima, o un computer che non ha più aperto l'app da allora. Un computer è il suo identificativo anonimo (8 caratteri). Le prove partono dal registro delle prove gratuite (TRIAL_LEDGER, da sempre); giorni attivi, paese e licenza dal registro accessi, attivo dal 17/10. "Giorni attivi" vuoto vuol dire che il computer non ha più aperto l'app da quando c'è il registro.</p>`;
+<div class="grid">${card("s12", "Tutti i computer", "dal più recente", users.length ? `<div class="scroll"><table class="table"><thead><tr><th>Persona</th><th>Computer</th><th>Sistema</th><th>App</th><th>Stato</th><th>Licenza o prova</th><th>Player</th><th>Avvii</th><th>Giorni attivi</th><th>Primo accesso</th><th>Ultimo accesso</th><th>Lingua</th></tr></thead><tbody>${rows}</tbody></table></div>` : empty("Ancora nessun computer ha aperto l'app."))}</div>
+<p class="foot">Mac e PC Windows chiedono la prova allo stesso server. Il sistema lo scrive il registro accessi dal 21/10, quando l'app lo manda: "non noto" vuol dire un'app uscita prima, o un computer che non ha più aperto l'app da allora. Un computer è il suo identificativo anonimo (8 caratteri). Le prove partono dal registro delle prove gratuite (TRIAL_LEDGER, da sempre); giorni attivi, paese e licenza dal registro accessi, attivo dal 17/10. "Giorni attivi" vuoto vuol dire che il computer non ha più aperto l'app da quando c'è il registro. Persona, versione, player, avvii e lingua arrivano dall'app dalla 1.2.8 (tabella devices): "non noto" vuol dire un'app più vecchia. La persona è l'account Discord quando la licenza è legata, altrimenti paese e sistema; niente email, niente IP.</p>`;
 }
 
 export function tabActivity(access: AccessRow[], now: number): string {
