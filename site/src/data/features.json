@@ -1,6 +1,6 @@
 {
   "_generated": "da docs/product-surface.json nel repo linerfm — non modificare a mano, gira scripts/sync-product-surface.mjs",
-  "updated": "2026-10-24",
+  "updated": "2026-10-27",
   "cards": [
     {
       "id": "widget",
@@ -445,6 +445,16 @@
       "t": "Lyrics on a curved wheel",
       "d": "The lyrics roll on a curved wheel: the line being sung flat and large, the others bending away, and the line can appear word by word.",
       "since": "1.2.5",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "lyrics-bubble",
+      "t": "Bubble lyrics",
+      "d": "A big round font for the lyrics on your desktop, with a 3D edge in the dark tone of the cover. The line being sung stands alone in a narrow column, one or two words per line, between the clock and the covers. The song playing in the Up next list takes the color of its cover.",
+      "since": "1.2.9",
       "platforms": [
         "mac",
         "windows"
