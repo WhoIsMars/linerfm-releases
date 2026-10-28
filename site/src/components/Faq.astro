@@ -40,7 +40,7 @@ const faqs = [
     </div>
     <div class="space-y-3">
       {faqs.map((f, i) => (
-        <details class="group faq-item" data-faq={f.id} data-reveal style={`--i:${i}`}>
+        <details id={`faq-${f.id}`} class="group faq-item" data-faq={f.id} data-reveal style={`--i:${i}`}>
           <summary class="flex items-center justify-between gap-6 cursor-pointer list-none font-medium text-[1.0625rem] tracking-[-0.01em]">
             {f.q}
             <span class="faq-item__plus" aria-hidden="true">+</span>
@@ -51,3 +51,12 @@ const faqs = [
     </div>
   </div>
 </section>
+<script>
+  // Un link altrove nella pagina (data-open-faq) porta alla domanda gia' aperta: chiusa, la risposta non si vede.
+  document.querySelectorAll<HTMLAnchorElement>("a[data-open-faq]").forEach((a) => {
+    a.addEventListener("click", () => {
+      const d = document.querySelector<HTMLDetailsElement>(`details[data-faq="${a.dataset.openFaq}"]`);
+      if (d) d.open = true;
+    });
+  });
+</script>
