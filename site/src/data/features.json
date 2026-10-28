@@ -242,6 +242,16 @@
       ]
     },
     {
+      "id": "update-notify-auto",
+      "t": "Updates without checking",
+      "d": "A system notification tells you when a new version is out. Or switch on automatic updates in Settings: LinerFM installs the new version by itself as soon as no music is playing.",
+      "since": "1.4.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
       "id": "track-stats",
       "t": "Every song, with its numbers",
       "d": "See how many times each song in a playlist was played or skipped, when you last played it and how often you cut it short.",
@@ -455,6 +465,16 @@
       "t": "Bubble lyrics",
       "d": "A big round font for the lyrics on your desktop, with a 3D edge in the dark tone of the cover. The line being sung stands alone in a narrow column, one or two words per line, between the clock and the covers. The song playing in the Up next list takes the color of its cover.",
       "since": "1.2.9",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "screensaver-desktop",
+      "t": "Desktop screen saver",
+      "d": "The screen saver can now look like your desktop background: the song's video or cover full screen, the lyrics, the covers of what plays next and the player bar, all clickable. It uses the same settings as your desktop background on each screen.",
+      "since": "1.4.0",
       "platforms": [
         "mac",
         "windows"
