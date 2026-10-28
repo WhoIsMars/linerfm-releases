@@ -23,6 +23,12 @@ const faqs = [
   { id: "microphone", q: "Does it use my microphone or record anything?", a: "No. LinerFM never asks for the microphone. The only sound it can listen to is the output of Spotify (or Music, on a Mac), and only while the glow around your screen edge is on with Reacts to music switched on. It turns that sound into two numbers, bass and mids, kept in memory. Nothing is recorded, saved or sent." },
   { id: "permissions", q: "Which permissions does it ask for?", a: "On a Mac you may see three. Automation, so it can read the current track and control Spotify or Music. Audio, only if you turn on Reacts to music for the screen-edge glow (macOS 14.2 or later): it lets LinerFM listen to the player and nothing else. Accessibility, only if you turn on the Volume HUD, which is off by default, so it can replace the macOS volume overlay." },
   { id: "power", q: "Will it slow my computer down or use my battery?", a: "I have no battery numbers to quote, so here is what the app does instead. With Low Power Mode on a Mac, or Energy saver on Windows, the live desktop shows the still cover instead of video. The listening for the glow stops when you pause. The live desktop is one switch in Settings, Desktop background, and the rest of LinerFM keeps working without it." },
+  // 28/10/2026: dalla 1.3.0 la prova parte solo collegando Discord, e chi apriva l'app si fermava li'.
+  // Verificato nel repo dell'app: si apre il browser e la finestra si sblocca da sola (LicenseGate.tsx:127-129);
+  // si entra nel server (worker discordLink.ts, PUT guilds/members); un account, una prova, un computer
+  // (discordLink.ts dt:<id>); uscire dal server blocca di nuovo (handlers.ts left_server); Discord serve
+  // solo alla prova, l'attivazione di una licenza non lo chiede (handlers.ts: requiresDiscord solo in handleTrial).
+  { id: "discord", q: "Why does the free trial need Discord?", a: "You need a free Discord account to start the 5-day trial, so each person gets one trial. No account yet? You can make one at discord.com. Click Link Discord in LinerFM: Discord opens in your browser and asks you to approve. Approve, go back to the app, and the trial starts on its own. You also join the LinerFM server, where updates and help live. One Discord account gets one trial, on one computer. If you leave the server during the trial, LinerFM asks you to link again. Bought a license? Then you don't need Discord." },
 ];
 ---
 <section id="faq" class="section" aria-labelledby="faq-title">

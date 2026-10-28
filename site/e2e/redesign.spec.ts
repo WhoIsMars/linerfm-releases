@@ -133,10 +133,21 @@ test.describe("at 1440x900", () => {
     await expect(p).toContainText("Move your license");
   });
 
-  test("the FAQ is short: six questions, the battery one without numbers", async ({ page }) => {
+  // 28/10/2026: la settima domanda e' Discord. Dalla 1.3.0 la prova non parte senza, e chi apriva
+  // l'app si fermava alla schermata "Link Discord" senza sapere cosa sarebbe successo al clic.
+  test("the FAQ is short: seven questions, the battery one without numbers", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("#faq details")).toHaveCount(6);
+    await expect(page.locator("#faq details")).toHaveCount(7);
     await expect(page.locator('#faq details[data-faq="power"] p')).toContainText("I have no battery numbers to quote");
+  });
+
+  test("the FAQ says why the trial needs Discord and what the click does", async ({ page }) => {
+    await page.goto("/");
+    const a = page.locator('#faq details[data-faq="discord"] p');
+    await expect(a).toContainText("free Discord account");
+    await expect(a).toContainText("opens in your browser");
+    await expect(a).toContainText("one trial");
+    await expect(page.locator("#download")).toContainText("Discord opens in your browser");
   });
 
   test("the download comes last, for Mac and Windows, with the SmartScreen steps", async ({ page }) => {
