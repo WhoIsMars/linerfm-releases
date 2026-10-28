@@ -155,7 +155,7 @@
     {
       "id": "local",
       "t": "Private by design",
-      "d": "No account, and nothing about what you listen to leaves your computer: your listening history and your taste model stay there. Only for songs with lyrics nowhere, short clips of the player's sound go to our server to be transcribed, and you can turn that off.",
+      "d": "No LinerFM account, and nothing about what you listen to leaves your computer: your listening history and your taste model stay there. Only for songs with lyrics nowhere, short clips of the player's sound go to our server to be transcribed, and you can turn that off.",
       "since": "0.1.0",
       "platforms": [
         "mac",
@@ -423,7 +423,7 @@
     {
       "id": "discord-link",
       "t": "Discord in one click",
-      "d": "Link your Discord in one click, from the first launch or from Settings, also during the free trial: you join the LinerFM server with your role, no command to type and no key to paste.",
+      "d": "Your free trial starts with your Discord account, in one click from LinerFM: you join the LinerFM server with your role, no command to type and no key to paste. Already bought? Link it from Settings and you get the Customer role.",
       "since": "1.2.4",
       "platforms": [
         "mac",

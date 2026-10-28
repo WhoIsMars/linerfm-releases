@@ -1,6 +1,6 @@
 ---
 // Il primo schermo (24/10/2026, sul modello di iBaila): la promessa, una riga, il pulsante che
-// scarica la build di questo computer, la riga "No account. 5 days free. 10€ once." e i profili;
+// scarica la build di questo computer, la riga "5 days free with Discord. 10€ once. No LinerFM account." e i profili;
 // accanto, la ripresa vera del desktop che diventa la canzone (telefono dell'owner, ph8700).
 // La prova gratuita e' il vantaggio che iBaila non ha: si dice qui e una volta a meta' pagina.
 import { CHECKOUT_URL, SOCIAL_LINKS } from "../config/links";
@@ -31,7 +31,7 @@ import DownloadButton from "./DownloadButton.tsx";
       <div class="mt-9 flex flex-col items-center lg:items-start gap-3" data-reveal style="--i:4">
         <div class="desktop-only hero-dl"><DownloadButton compact client:load /></div>
         <a href="#download" class="phone-only btn-primary font-semibold text-base px-7 py-3.5 rounded-full">Try free for 5 days</a>
-        <p class="text-[0.9375rem] font-medium text-fg">No account. 5 days free. 10€ once.</p>
+        <p class="text-[0.9375rem] font-medium text-fg">5 days free with Discord. 10€ once. No LinerFM account.</p>
         <p class="text-sm text-fg-3">
           Sure already? <a href={CHECKOUT_URL} class="lemonsqueezy-button text-fg-2 underline underline-offset-4 hover:text-fg">Buy · 10€</a>
         </p>
