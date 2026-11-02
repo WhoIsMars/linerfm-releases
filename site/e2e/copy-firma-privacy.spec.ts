@@ -40,3 +40,10 @@ test("the Boring Notch page no longer says nothing leaves the computer", async (
   expect(text).toContain("no account, and your listening history stays there.");
   expect(text).not.toContain("never leaves it");
 });
+
+test("the cookie banner no longer says the app is 100% local", async ({ page }) => {
+  await page.goto("/");
+  const text = await textOf(page);
+  expect(text.match(/Your choice here doesn't change what the app sends\./g)).toHaveLength(2);
+  expect(text).not.toContain("100% local");
+});
