@@ -16,7 +16,7 @@ export const LINK_TEXT = `Hi,
 here is the link to download LinerFM on your Mac or PC:
 https://linerfm.xyz/?src=email#download
 
-It's free for 5 days, no card and no account. Open it on your computer and pick Mac or Windows.
+It's free for 3 days with no card and no account, and up to 7 days if you link Discord and post about it. Open it on your computer and pick Mac or Windows.
 
 LinerFM`;
 

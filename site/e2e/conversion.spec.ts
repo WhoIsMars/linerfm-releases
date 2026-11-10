@@ -49,7 +49,7 @@ test.describe("on a phone (375 px, iPhone)", () => {
     await expect(line).toBeVisible();
     const box = (await line.boundingBox())!;
     expect(box.y + box.height).toBeLessThanOrEqual(667);
-    await expect(hero.getByRole("link", { name: "Try free for 5 days" })).toBeVisible();
+    await expect(hero.getByRole("link", { name: "Try free for up to 7 days" })).toBeVisible();
     await expect(hero.getByRole("link", { name: "Buy · 10€" })).toBeVisible();
   });
 
@@ -94,11 +94,11 @@ test.describe("on a desktop (1280 px, Mac)", () => {
     const main = hero.getByRole("link", { name: /Download for Mac/ });
     await expect(main).toBeVisible();
     await expect(main).toHaveAttribute("href", /aarch64\.dmg$/);
-    await expect(main).toContainText("5 days free");
+    await expect(main).toContainText("Up to 7 days free");
     await expect(hero.getByRole("link", { name: "Intel Mac" })).toHaveAttribute("href", /x64\.dmg$/);
     await expect(hero.getByRole("link", { name: "Windows" })).toHaveAttribute("href", /setup\.exe$/);
     await expect(hero.getByRole("link", { name: "Buy · 10€" })).toBeVisible();
-    await expect(hero.getByRole("link", { name: "Try free for 5 days" })).toBeHidden();
+    await expect(hero.getByRole("link", { name: "Try free for up to 7 days" })).toBeHidden();
     await expect(hero.getByText(PHONE_LINE)).toBeHidden();
   });
 

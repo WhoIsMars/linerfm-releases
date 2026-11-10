@@ -17,7 +17,8 @@ const setup = [
   { t: "Open it once", d: "It isn't signed by Apple or Microsoft yet. On a Mac, click Open Anyway in Privacy & Security; on Windows, More info, then Run anyway." },
   // 23/10: widget e desktop seguono Spotify senza Client ID (dev app su profilo vuoto, visto
   // dall'owner). Gli account vengono dopo e sono facoltativi: prima diceva "paste every key".
-  { t: "Link Discord, press play", d: "Click Link Discord in the app: Discord opens in your browser, you approve, and the 5-day trial starts. Then play a song in Spotify: the wallpaper, the widget and the lyrics follow it." },
+  // 10/11/2026 (1.5.0): la prova parte da sola al primo avvio, Discord non la blocca piu'.
+  { t: "Press play", d: "No key, no account: the free trial starts on its own. Play a song in Spotify: the wallpaper, the widget and the lyrics follow it." },
   { t: "Connect, if you want", d: "Link Spotify, Apple Music or YouTube Music for playlists, search and the AI tools. The guided setup checks each key while you paste it." },
 ];
 ---
@@ -28,7 +29,7 @@ const setup = [
     <div class="final-head">
     <div class="final-ring" aria-hidden="true"><span class="final-ring__bloom"></span><span class="final-ring__line"></span></div>
     <h2 id="download-title" class="t-display mx-auto max-w-[13ch]" data-words>Press play. <span class="text-halo">Watch your desktop follow.</span></h2>
-    <p class="t-lead mt-5 mx-auto max-w-[44ch]" data-reveal style="--i:1">Native builds for macOS 11 or later, for your Mac's chip, and for Windows 10 and 11. Every feature, free for 5 days.</p>
+    <p class="t-lead mt-5 mx-auto max-w-[44ch]" data-reveal style="--i:1">Native builds for macOS 11 or later, for your Mac's chip, and for Windows 10 and 11. Every feature, free for up to 7 days.</p>
 
     <p class="phone-only mt-4 text-sm text-fg-2">LinerFM runs on Mac and Windows. Open this page on your computer to install it.</p>
     {/* 25/10: da telefono anche l'email per ricevere il link, sopra i pulsanti che restano. */}
@@ -37,9 +38,9 @@ const setup = [
     <div class="mt-9 flex justify-center" data-reveal style="--i:2">
       <DownloadButton client:visible />
     </div>
-    {/* 28/10/2026 (owner, "più visibile"): dalla 1.3.0 la prova chiede Discord, e chi apriva l'app si
-        fermava alla schermata "Link Discord". Detto qui, prima di scaricare, non solo nella FAQ chiusa. */}
-    <p data-discord-note class="mt-4 text-sm text-fg-2 relative">The free trial starts when you link a free Discord account in the app. <a href="#faq-discord" data-open-faq="discord" class="text-fg underline underline-offset-4 hover:text-fg">How it works</a></p>
+    {/* 10/11/2026 (1.5.0): la prova parte da sola con 3 giorni; Discord ne aggiunge 2 e un post altri 2.
+        Detto qui, prima di scaricare, non solo nella FAQ chiusa (dal 28/10 la riga diceva che serviva Discord). */}
+    <p data-trial-note class="mt-4 mx-auto max-w-[52ch] text-sm text-fg-2 text-pretty relative">The free trial starts on its own: 3 days, no account. Link Discord in the app for 2 more, and post about LinerFM for 2 more. <a href="#faq-trial" data-open-faq="trial" class="text-fg underline underline-offset-4 hover:text-fg">How it works</a></p>
     <p class="mt-3 text-xs text-fg-3 relative">Not sure? Apple menu, then About This Mac. “Apple M1/M2/M3…” is Apple Silicon, “Intel” is Intel.</p>
     </div>
 

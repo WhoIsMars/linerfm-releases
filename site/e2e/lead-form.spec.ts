@@ -52,7 +52,7 @@ test.describe("on a phone (375 px, iPhone)", () => {
     await mockWorker(page);
     await page.goto("/");
     const hero = page.locator("#top");
-    await expect(hero.getByRole("link", { name: "Try free for 5 days" })).toBeVisible();
+    await expect(hero.getByRole("link", { name: "Try free for up to 7 days" })).toBeVisible();
     await expect(hero.getByRole("link", { name: "Buy · 10€" })).toBeVisible();
     await expect(hero.getByRole("textbox", { name: "Your email" })).toHaveCount(0);
   });

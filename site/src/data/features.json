@@ -1,6 +1,6 @@
 {
   "_generated": "da docs/product-surface.json nel repo linerfm — non modificare a mano, gira scripts/sync-product-surface.mjs",
-  "updated": "2026-10-27",
+  "updated": "2026-11-10",
   "cards": [
     {
       "id": "widget",
@@ -433,7 +433,7 @@
     {
       "id": "discord-link",
       "t": "Discord in one click",
-      "d": "Your free trial starts with your Discord account, in one click from LinerFM: you join the LinerFM server with your role, no command to type and no key to paste. Already bought? Link it from Settings and you get the Customer role.",
+      "d": "Link your Discord account in one click from LinerFM: you join the LinerFM server with your role, no command to type and no key to paste. On the free trial it adds 2 days. Already bought? Link it from Settings and you get the Customer role.",
       "since": "1.2.4",
       "platforms": [
         "mac",
@@ -475,6 +475,16 @@
       "t": "Desktop screen saver",
       "d": "The screen saver can now look like your desktop background: the song's video or cover full screen, the lyrics, the covers of what plays next and the player bar, all clickable. It uses the same settings as your desktop background on each screen.",
       "since": "1.4.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "trial-extra-days",
+      "t": "A free trial you can make longer",
+      "d": "The free trial starts the moment you install LinerFM: 3 days with every feature, no account and no card. Link Discord from the app for 2 more days. Posted about LinerFM on TikTok or Instagram? Send us the post in a ticket on Discord and you get 2 more.",
+      "since": "1.5.0",
       "platforms": [
         "mac",
         "windows"

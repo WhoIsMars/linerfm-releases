@@ -27,12 +27,17 @@ test("the privacy page lists what the license check sends, why, and what is neve
     "day of the trial",
     "country",
     "Discord account",
+    "it adds 2 days to the free trial",
+    "seconds after the first launch",
+    "end-of-trial screen",
+    "link to your post",
+    "for one day",
     "bug report",
-    "not your IP address",
+    "your IP address is not kept",
     "no email",
     "delete",
   ]) expect(text, fact).toContain(fact);
   // non è più vero: l'app manda dati d'uso
   await expect(page.getByText("The app sends no telemetry and no usage data.", { exact: true })).toHaveCount(0);
-  await expect(page.getByText("Last updated: 2026-10-26", { exact: false })).toBeVisible();
+  await expect(page.getByText("Last updated: 2026-11-10", { exact: false })).toBeVisible();
 });
