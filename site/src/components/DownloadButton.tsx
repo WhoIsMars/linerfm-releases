@@ -37,7 +37,7 @@ export default function DownloadButton({ preferWindows = false, compact = false 
     if (compact) {
       return (
         <a href={RELEASES_LATEST_URL} onClick={() => track("download", "github-page")} className="btn-primary inline-flex items-center font-semibold text-base px-7 py-3.5 rounded-full">
-          Download free · 5 days
+          Download free · up to 7 days
         </a>
       );
     }
@@ -51,7 +51,7 @@ export default function DownloadButton({ preferWindows = false, compact = false 
   if (compact) {
     const { primary, others } = heroChoice(onWindows, dmgs, exe);
     const href = primary.info?.url ?? RELEASES_LATEST_URL;
-    const sub = primary.info ? `5 days free · v${primary.info.version} · ${formatBytes(primary.info.size)}` : "5 days free · latest on GitHub";
+    const sub = primary.info ? `Up to 7 days free · v${primary.info.version} · ${formatBytes(primary.info.size)}` : "Up to 7 days free · latest on GitHub";
     return (
       <div className="flex flex-col items-center gap-3">
         <a href={href} onClick={() => { track("download", primary.arch); setClicked(primary.arch); }} className="btn-primary inline-flex flex-col items-center font-semibold text-base px-7 py-3.5 rounded-full">

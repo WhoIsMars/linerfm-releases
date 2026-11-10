@@ -56,7 +56,7 @@ test.describe("pricing is four clear rows, the trial first", () => {
     await page.goto("/");
     const rows = page.locator("#pricing ul > li");
     await expect(rows).toHaveCount(4);
-    await expect(rows.nth(0)).toContainText("5 days free, no card");
+    await expect(rows.nth(0)).toContainText("Up to 7 days free, no card");
     await expect(rows.nth(1)).toContainText("10€ once, no subscription");
     await expect(rows.nth(2)).toContainText("Mac or Windows");
     await expect(rows.nth(3)).toContainText("no account, and your listening history stays there");
@@ -65,7 +65,7 @@ test.describe("pricing is four clear rows, the trial first", () => {
   test("the trial is said once, in a row, not again under the button", async ({ page }) => {
     await page.goto("/");
     const text = await page.locator("#pricing").innerText();
-    expect(text.match(/5[- ]days? free/gi) ?? []).toHaveLength(1);
+    expect(text.match(/7 days free/gi) ?? []).toHaveLength(1);
     expect(text).not.toContain("5-day free trial first");
     await expect(page.locator("#pricing")).toContainText("After the trial a license is required");
     await expect(page.locator("#pricing a.lemonsqueezy-button")).toHaveCount(1);

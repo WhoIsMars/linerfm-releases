@@ -27,7 +27,7 @@ const faq = [
   { q: "Which music services work on Windows?", a: "Spotify, and YouTube, YouTube Music and SoundCloud playing in your browser." },
   { q: "Is everything from the Mac version there?", a: "Almost. Since 1.1.0 you get the screensaver, the volume HUD, the live desktop and a top bar in place of the notch. Only the track next to the menu bar icon stays on the Mac." },
   { q: "Do I need Rainmeter or Wallpaper Engine?", a: "No. LinerFM is its own app: install it, connect Spotify, and the widget is on your desktop." },
-  { q: "How much is it?", a: "Free for 5 days with your Discord account, then 10 € once. No subscription." },
+  { q: "How much is it?", a: "Free for 3 days with no account, and up to 7 days if you link Discord and post about it. Then 10 € once, no subscription." },
 ];
 const faqLd = JSON.stringify({
   "@context": "https://schema.org",
@@ -37,7 +37,7 @@ const faqLd = JSON.stringify({
 ---
 <BaseLayout
   title="Spotify widget for Windows 10 and 11, with lyrics on your desktop | LinerFM"
-  description="LinerFM puts a Spotify widget, synced lyrics across the top of the screen, Ctrl+Alt+K search and your listening stats on your Windows 10 or 11 desktop. Free for 5 days, then 10 € once."
+  description="LinerFM puts a Spotify widget, synced lyrics across the top of the screen, Ctrl+Alt+K search and your listening stats on your Windows 10 or 11 desktop. Free for up to 7 days, then 10 € once."
 >
   <script type="application/ld+json" set:html={faqLd} />
   <Nav />
@@ -50,7 +50,7 @@ const faqLd = JSON.stringify({
         <div class="mt-8">
           <DownloadButton client:load preferWindows />
         </div>
-        <p class="mt-3 text-xs text-fg-3">Free for 5 days, then 10 € once. Already decided? <a href={CHECKOUT_URL} class="lemonsqueezy-button underline hover:text-fg">Buy now</a>.</p>
+        <p class="mt-3 text-xs text-fg-3">Free for up to 7 days, then 10 € once. Already decided? <a href={CHECKOUT_URL} class="lemonsqueezy-button underline hover:text-fg">Buy now</a>.</p>
       </div>
       <AmbientVideo
         src="video/clip-windows.mp4"

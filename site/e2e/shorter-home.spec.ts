@@ -54,7 +54,7 @@ for (const [path, h1] of [
   test(`${path} has its title, the two buttons and is linked from the home`, async ({ page }) => {
     await page.goto(path);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(h1);
-    await expect(page.getByRole("link", { name: "Try free for 5 days" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Try free for up to 7 days" })).toBeVisible();
     await expect(page.locator("main a.lemonsqueezy-button")).toHaveCount(1);
     expect(await page.locator("body").innerText()).not.toMatch(/Mac only/i);
     await page.goto("/");
