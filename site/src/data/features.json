@@ -1,6 +1,6 @@
 {
   "_generated": "da docs/product-surface.json nel repo linerfm — non modificare a mano, gira scripts/sync-product-surface.mjs",
-  "updated": "2026-11-10",
+  "updated": "2026-11-11",
   "cards": [
     {
       "id": "widget",
@@ -485,6 +485,56 @@
       "t": "A free trial you can make longer",
       "d": "The free trial starts the moment you install LinerFM: 3 days with every feature, no account and no card. Link Discord from the app for 2 more days. Posted about LinerFM on TikTok or Instagram? Send us the post in a ticket on Discord and you get 2 more.",
       "since": "1.5.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "desktop-arc",
+      "t": "Arc covers",
+      "d": "A new look for the covers on your desktop: they sit on an arc of light, and the arc is the progress bar. A dot shows where the song is. Drag it to jump to any second.",
+      "since": "1.6.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "desktop-dial",
+      "t": "Dial",
+      "d": "The song in a round disc in the middle of your desktop, with the volume as an arc you drag around it. What plays next opens next to it like a fan: scroll it with the wheel or the arrow keys and click a cover to play it.",
+      "since": "1.6.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "desktop-artist",
+      "t": "Artist panel",
+      "d": "A glass panel on your desktop with who is playing: the photo, the most played songs and the albums, in two lists you scroll with the wheel or the arrow keys. Click a song or an album to play it. Works with Spotify.",
+      "since": "1.6.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "desktop-bar-buttons",
+      "t": "Looks from the player bar",
+      "d": "Three buttons in the player bar on your desktop: lyrics on or off, the list on or off, and one that goes through the four looks of the covers (Cover Flow, Arc, Artist, Dial). The change shows right away.",
+      "since": "1.6.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "desktop-move-panels",
+      "t": "Panels where you want them",
+      "d": "Drag the bar, the list or the covers on your desktop by the handle at the top and they stay where you leave them, on each display. Double click the handle to put a panel back.",
+      "since": "1.6.0",
       "platforms": [
         "mac",
         "windows"
