@@ -208,6 +208,9 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
 
 /** Una riga, senza media: le cose vere che non hanno (ancora) una schermata. Nomi dalle card. */
 export const ALSO = [
+  // desktop-arc, desktop-artist, desktop-dial, desktop-bar-buttons, desktop-move-panels (1.6.0):
+  // senza schermata perche' public/media e' a 5,93 MB su un tetto di 6 (media-dimensions.test.ts).
+  "four looks for the covers on your desktop (Cover Flow, Arc, Artist, Dial) that you can drag where you want",
   // lyrics-every-source (1.2.0), lyrics-from-spotify (1.2.2), lyrics-song-colors (1.2.3)
   "synced lyrics for Spotify, YouTube and SoundCloud, in the song's colors",
   "your listening stats",
