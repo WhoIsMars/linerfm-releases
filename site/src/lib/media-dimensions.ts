@@ -13,6 +13,8 @@ const SIZES: Record<string, MediaSize> = {
   "media/hero.mp4": { width: 720, height: 1000 },
   "media/colors.mp4": { width: 720, height: 1000 },
   "media/light.mp4": { width: 720, height: 1000 },
+  // looks: i quattro look delle copertine, quattro riprese del telefono da 3 s (11/11/2026, 1.6.0).
+  "media/looks.mp4": { width: 720, height: 1000 },
   // search: inquadratura che segue la casella di ricerca (il telefono si muove), 24/10.
   "media/search.mp4": { width: 600, height: 440 },
   // notch: striscia sul pannello, ripresa vera (IMG_8758.MOV) e poi i cinque temi dalla UI (25/10).

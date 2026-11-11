@@ -36,11 +36,12 @@ describe("mediaSize", () => {
   });
 });
 
-// Le riprese della home (24/10/2026): tetto di 6 MB per tutta la cartella, video, poster e immagini.
+// Le riprese della home (24/10/2026): un tetto per tutta la cartella, video, poster e immagini.
+// 6 MB fino all'11/11/2026; l'owner l'ha alzato a 8 per la schermata dei quattro look (1.6.0).
 describe("public/media", () => {
-  it("stays under 6 MB in total", () => {
+  it("stays under 8 MB in total", () => {
     const total = readdirSync(dir("media")).reduce((sum, f) => sum + statSync(dir("media") + f).size, 0);
     console.log(`public/media: ${(total / 1e6).toFixed(2)} MB`);
-    expect(total).toBeLessThan(6_000_000);
+    expect(total).toBeLessThan(8_000_000);
   });
 });

@@ -71,6 +71,26 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
     },
   },
   {
+    id: "looks",
+    eyebrow: "Live desktop",
+    title: "Four looks",
+    halo: "for your covers.",
+    line: "A button in the player bar switches how the covers sit on your desktop. Drag the bar, the list and the covers where you want them: they stay there.",
+    chips: ["Cover Flow", "Arc", "Artist", "Dial"],
+    // looks.mp4 (11/11/2026, 1.6.0): quattro riprese del telefono dell'owner da 3 s l'una, montate
+    // una dopo l'altra (IMG_9011, 9006, 9009, 9007), quindi i cue cadono a 0, 3, 6 e 9 s.
+    cues: [{ label: "Cover Flow", at: 0 }, { label: "Arc", at: 3 }, { label: "Artist", at: 6 }, { label: "Dial", at: 9 }],
+    from: ["desktop-bar-buttons", "desktop-arc", "desktop-artist", "desktop-dial", "desktop-move-panels"],
+    // il magenta della copertina di Graduation e l'azzurro dell'arco
+    glow: ["#ff5fa2", "#6cc5f5"],
+    media: {
+      kind: "phone",
+      video: "media/looks.mp4",
+      alt: "A MacBook and a monitor filmed with a phone, in four looks one after the other: album covers in a row, covers on an arc of light, a panel with Travis Scott's top songs and albums, and a round disc with the song and a volume ring.",
+      caption: "Real footage, filmed on the owner's desk.",
+    },
+  },
+  {
     id: "widget",
     eyebrow: "Widget",
     title: "One widget,",
@@ -208,9 +228,6 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
 
 /** Una riga, senza media: le cose vere che non hanno (ancora) una schermata. Nomi dalle card. */
 export const ALSO = [
-  // desktop-arc, desktop-artist, desktop-dial, desktop-bar-buttons, desktop-move-panels (1.6.0):
-  // senza schermata perche' public/media e' a 5,93 MB su un tetto di 6 (media-dimensions.test.ts).
-  "four looks for the covers on your desktop (Cover Flow, Arc, Artist, Dial) that you can drag where you want",
   // lyrics-every-source (1.2.0), lyrics-from-spotify (1.2.2), lyrics-song-colors (1.2.3)
   "synced lyrics for Spotify, YouTube and SoundCloud, in the song's colors",
   "your listening stats",
