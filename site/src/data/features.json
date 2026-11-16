@@ -1,6 +1,6 @@
 {
   "_generated": "da docs/product-surface.json nel repo linerfm — non modificare a mano, gira scripts/sync-product-surface.mjs",
-  "updated": "2026-11-11",
+  "updated": "2026-11-16",
   "cards": [
     {
       "id": "widget",
@@ -535,6 +535,86 @@
       "t": "Panels where you want them",
       "d": "Drag the bar, the list or the covers on your desktop by the handle at the top and they stay where you leave them, on each display. Double click the handle to put a panel back.",
       "since": "1.6.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "one-word-lyrics",
+      "t": "One word at a time",
+      "d": "A new lyrics style on your desktop: the word being sung is huge, the rest of the line small and blurred around it. Choose lowercase, UPPERCASE or as written.",
+      "since": "1.7.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "vinyl-covers",
+      "t": "Vinyl",
+      "d": "A new covers style for the desktop: a spinning record with the cover in the middle and a tonearm that moves with the song. Click the record to play or pause.",
+      "since": "1.7.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "new-fonts-1-7",
+      "t": "12 new fonts",
+      "d": "Twelve new fonts for the clock and the lyrics on your desktop, and for the karaoke lyrics strip: Bebas, Black, Syne, Display, Playfair, Grotesk, Retro, Neon line, Sign, Marker, Wide, Block.",
+      "since": "1.7.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "lyric-effects-1-7",
+      "t": "10 lyric effects",
+      "d": "Ten new effects for the lyrics on your desktop: Chrome, Outline, Retro, Glitch, Fire, Aurora, Holo, Long shadow, Frost and Duotone, most of them in the colors of the cover.",
+      "since": "1.7.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "desktop-presets",
+      "t": "Presets",
+      "d": "Eight ready looks for your desktop, each a mix of font, lyrics style, effect and covers. One click in Settings, or the button in the player bar to go through them.",
+      "since": "1.7.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "saved-setups",
+      "t": "Your setups",
+      "d": "Save everything on a screen under a name and bring it back on any screen with one click. The button in the player bar goes through your setups first.",
+      "since": "1.7.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "edge-effects-1-7",
+      "t": "8 new edge effects",
+      "d": "Eight new effects for the light around your screen: Comet, Rainbow, Bottom bars, Top waves, Corners, Marquee, Bubbles and Rain. They move with the music.",
+      "since": "1.7.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "smooth-track-change",
+      "t": "Smooth song changes",
+      "d": "When the song changes, the colors of the lyrics, the edge light and the widget fade into the new cover instead of flashing.",
+      "since": "1.7.0",
       "platforms": [
         "mac",
         "windows"
