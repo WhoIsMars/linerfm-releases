@@ -228,6 +228,9 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
 
 /** Una riga, senza media: le cose vere che non hanno (ancora) una schermata. Nomi dalle card. */
 export const ALSO = [
+  // one-word-lyrics, vinyl-covers, desktop-presets, saved-setups, edge-effects-1-7 (1.7.0):
+  // senza schermata per lo stesso tetto di public/media.
+  "lyrics one word at a time, a spinning vinyl, presets and your own saved setups, and 16 lights around the screen",
   // lyrics-every-source (1.2.0), lyrics-from-spotify (1.2.2), lyrics-song-colors (1.2.3)
   "synced lyrics for Spotify, YouTube and SoundCloud, in the song's colors",
   "your listening stats",
