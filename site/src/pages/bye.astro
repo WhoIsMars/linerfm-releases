@@ -1,0 +1,37 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+
+// Aperta dal disinstallatore Windows. Quattro risposte fisse, contate dal Worker licenze
+// (worker/src/bye.ts): niente identificativi, niente testo libero.
+const BYE_URL = "https://linerfm-license.piccoletto.workers.dev/v1/bye";
+const answers = [
+  { id: "bye_try", label: "I only wanted to try it" },
+  { id: "bye_hidden", label: "It covered my windows / I couldn't see it" },
+  { id: "bye_player", label: "It didn't work with my player" },
+  { id: "bye_buggy", label: "Too slow or buggy" },
+];
+---
+<BaseLayout title="LinerFM: Goodbye" description="Thanks for trying LinerFM." noindex>
+  <Nav />
+  <main id="main-content" class="max-w-xl mx-auto px-5 py-16">
+    <h1 class="text-3xl font-semibold tracking-[-0.02em]">Sorry to see you go</h1>
+    <div id="ask">
+      <p class="mt-4 text-fg-2">What was the main reason? One tap, nothing else is sent.</p>
+      <div class="mt-8 flex flex-col gap-3">
+        {answers.map((a) => <button type="button" class="btn-ghost rounded-control px-5 py-3.5 text-left text-sm font-semibold" data-answer={a.id}>{a.label}</button>)}
+      </div>
+    </div>
+    <p id="thanks" class="mt-4 text-fg-2" hidden>Thank you, that helps. You are always welcome back.</p>
+  </main>
+  <Footer />
+  <script is:inline define:vars={{ BYE_URL }}>
+    document.querySelectorAll("[data-answer]").forEach((b) => b.addEventListener("click", () => {
+      fetch(BYE_URL, { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answer: b.dataset.answer }) }).catch(() => {});
+      document.getElementById("ask").hidden = true;
+      document.getElementById("thanks").hidden = false;
+    }));
+  </script>
+</BaseLayout>

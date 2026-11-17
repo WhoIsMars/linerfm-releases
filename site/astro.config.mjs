@@ -12,8 +12,8 @@ const BASE = process.env.PUBLIC_BASE_PATH || "/linerfm-releases";
 export default defineConfig({
   site: SITE,
   base: BASE,
-  // /tt è solo un rimando per la bio di TikTok: fuori dalla sitemap.
-  integrations: [react(), sitemap({ filter: (page) => !/\/tt\/?$/.test(page) })],
+  // /tt è solo un rimando per la bio di TikTok, /bye la apre il disinstallatore: fuori dalla sitemap.
+  integrations: [react(), sitemap({ filter: (page) => !/\/(tt|bye)\/?$/.test(page) })],
   // lenis va pre-ottimizzato: scoperto a meta' caricamento, il dev server ricaricava la pagina e i test
   // in browser andavano in timeout sul primo goto.
   // assetsInlineLimit 0: gli script piccoli (video, consenso) vanno in file a parte invece che dentro
