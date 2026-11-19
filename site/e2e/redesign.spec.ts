@@ -33,9 +33,9 @@ for (const [label, viewport] of [["1440x900", { width: 1440, height: 900 }], ["3
       for (const s of list) expect(s.height, s.id).toBeGreaterThanOrEqual(viewport.height * 0.5);
     });
 
-    test("the hero says no account, the trial and the price in one line", async ({ page }) => {
+    test("the hero says no account and the price in one line", async ({ page }) => {
       await page.goto("/");
-      await expect(page.locator("#top").getByText("No account. Up to 7 days free. 10€ once.")).toBeVisible();
+      await expect(page.locator("#top").getByText("No account. 10€ once, no subscription.")).toBeVisible();
     });
 
     test("nothing is wider than the screen", async ({ page }) => {
@@ -141,16 +141,12 @@ test.describe("at 1440x900", () => {
     await expect(page.locator('#faq details[data-faq="power"] p')).toContainText("I have no battery numbers to quote");
   });
 
-  // 10/11/2026 (1.5.0): la prova parte da sola, Discord e il post la allungano fino a 7 giorni.
-  test("the FAQ says how the trial works: 3 days, 2 more with Discord, 2 more for a post", async ({ page }) => {
+  // Dal 19/11/2026 niente prova per i computer nuovi (1.7.2): la FAQ lo dice.
+  test("the FAQ says there is no free trial", async ({ page }) => {
     await page.goto("/");
     const a = page.locator('#faq details[data-faq="trial"] p');
-    await expect(a).toContainText("3 days with every feature, no account and no card");
-    await expect(a).toContainText("2 more days");
-    await expect(a).toContainText("TikTok or Instagram");
-    await expect(a).toContainText("ticket");
-    await expect(a).toContainText("up to 7 days");
-    await expect(page.locator('#faq details[data-faq="discord"]')).toHaveCount(0);
+    await expect(a).toContainText("No. LinerFM is 10€ once");
+    await expect(a).toContainText("TikTok and Instagram");
     await expect(page.locator("#download")).not.toContainText("Discord opens in your browser");
   });
 

@@ -1,13 +1,14 @@
 ---
 import { CHECKOUT_URL, DISCORD_URL } from "../config/links";
 // "No account. Pay once." (24/10/2026, owner: iBaila lo dice e noi no). A sinistra le due promesse
-// in grande, a destra la scheda del prezzo con le quattro righe di sempre, la prova per prima.
+// in grande, a destra la scheda del prezzo con le quattro righe di sempre, la prima riga dice che non c'e' prova.
+// Dal 19/11/2026 niente prova per i computer nuovi (1.7.2): si compra e l'app funziona.
 // Ogni riga e' gia' detta altrove sul sito e verificata: card `local` di features.json (no account,
-// la cronologia d'ascolto resta sul computer, salvo le clip per i testi mancanti; "no telemetry" tolto con la 1.2.8, che manda i dati d'uso), FAQ "free" (nessun livello gratuito dopo la prova), EULA (un computer alla volta).
+// la cronologia d'ascolto resta sul computer, salvo le clip per i testi mancanti; "no telemetry" tolto con la 1.2.8, che manda i dati d'uso), FAQ "free" (nessun livello gratuito), EULA (un computer alla volta).
 // Le due righe sotto il pulsante sono fg-2: sulla luce della copertina fg-3 scendeva a ~4,5:1.
 // Lemon Squeezy e' il Merchant of Record (privacy.astro), quindi le tasse le gestisce lui.
 const perks = [
-  "Up to 7 days free, no card: 3 to start, 2 more with Discord, 2 more for a post about LinerFM. Every feature from the first day.",
+  "No free trial: buy it, download it, and every feature works from the first day. Want a look first? Watch it on TikTok and Instagram, or ask in Discord.",
   "10€ once, no subscription. Minor updates included forever.",
   "One computer at a time, Mac or Windows. Move your license anytime.",
   "Runs on your computer: no account, and your listening history stays there.",
@@ -54,7 +55,7 @@ const base = (import.meta.env.BASE_URL as string).replace(/\/?$/, "/");
       </ul>
       <a href={CHECKOUT_URL} class="lemonsqueezy-button btn-primary mt-8 block text-center font-semibold px-6 py-3.5 rounded-full">Buy LinerFM · 10€</a>
       <p class="mt-4 text-center text-xs text-fg-2">Secure checkout by Lemon Squeezy, taxes handled for you.</p>
-      <p class="mt-1 text-center text-xs text-fg-2">After the trial a license is required: there is no limited free tier.</p>
+      <p class="mt-1 text-center text-xs text-fg-2">A license is required: there is no free tier.</p>
       </div>
     </div>
   </div>

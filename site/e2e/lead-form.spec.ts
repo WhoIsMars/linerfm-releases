@@ -48,11 +48,11 @@ test.describe("on a phone (375 px, iPhone)", () => {
     expect((await box.boundingBox())!.y).toBeLessThan((await install.boundingBox())!.y);
   });
 
-  test("the first screen is unchanged: Try free and Buy, no email box", async ({ page }) => {
+  test("the first screen is unchanged: Download and Buy, no email box", async ({ page }) => {
     await mockWorker(page);
     await page.goto("/");
     const hero = page.locator("#top");
-    await expect(hero.getByRole("link", { name: "Try free for up to 7 days" })).toBeVisible();
+    await expect(hero.getByRole("link", { name: "Download", exact: true })).toBeVisible();
     await expect(hero.getByRole("link", { name: "Buy · 10€" })).toBeVisible();
     await expect(hero.getByRole("textbox", { name: "Your email" })).toHaveCount(0);
   });

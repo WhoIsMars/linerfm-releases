@@ -27,7 +27,7 @@ test("the privacy page lists what the license check sends, why, and what is neve
     "day of the trial",
     "country",
     "Discord account",
-    "it adds 2 days to the free trial",
+    "with a license it gives you the Customer role",
     "seconds after the first launch",
     "end-of-trial screen",
     "link to your post",

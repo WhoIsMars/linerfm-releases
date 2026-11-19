@@ -9,7 +9,7 @@ import Footer from "../components/Footer.astro";
     <h1 class="text-3xl font-semibold tracking-[-0.02em]">Privacy Policy</h1>
 
     <h2 class="mt-8 text-lg font-semibold">The app</h2>
-    <p class="mt-3 text-fg-2">LinerFM runs on your Mac or Windows PC and has no account system. The app contacts our server to check your trial or license, when you send a bug report, and to write lyrics that no archive has (see below).</p>
+    <p class="mt-3 text-fg-2">LinerFM runs on your Mac or Windows PC and has no account system. The app contacts our server to check your license (or a trial started before 19 November 2026), when you send a bug report, and to write lyrics that no archive has (see below).</p>
     <ul class="mt-4 space-y-3 text-fg-2 text-sm list-disc pl-5">
       <li>Your Spotify and Groq API keys are stored locally on your device and used only to call those services directly from your computer.</li>
       <li>Your listening history and playlist data never leave your machine. The only exception is the artist and title of a song whose lyrics are written from the audio, below.</li>
@@ -19,9 +19,9 @@ import Footer from "../components/Footer.astro";
     <section id="license-check">
     <h2 class="mt-10 text-lg font-semibold">What the app tells our server</h2>
     <ul class="mt-4 space-y-3 text-fg-2 text-sm list-disc pl-5">
-      <li><strong>When:</strong> once an hour while the app is open, when it checks your trial or license, and when you send a bug report or a feature request from the app.</li>
+      <li><strong>When:</strong> once an hour while the app is open, when it checks your license (or a trial started before 19 November 2026), and when you send a bug report or a feature request from the app.</li>
       <li><strong>What:</strong> an anonymous id of your computer, the same one that runs your trial (the usage record keeps only its first 8 characters), the app version, Mac or Windows with the system version and processor type, the system language, which music players you have played from in LinerFM (Spotify, Apple Music, YouTube Music, SoundCloud), how many times you have opened the app and when you first opened it. With a license, also the last 4 characters of the key. Nothing about the songs: never what you listen to, nor when.</li>
-      <li><strong>What our server adds:</strong> the country, as estimated by our hosting provider (Cloudflare), and the day of the trial you are on. If you linked Discord (optional: it adds 2 days to the free trial, and with a license it gives you the Customer role), the Discord account it is linked to; while those 2 days count, our server also checks that this account is still in the LinerFM Discord server.</li>
+      <li><strong>What our server adds:</strong> the country, as estimated by our hosting provider (Cloudflare), and the day of the trial you are on. If you linked Discord (optional: with a license it gives you the Customer role), the Discord account it is linked to; on a trial started before 19 November 2026, where the link added 2 days, our server also checks while those days count that this account is still in the LinerFM Discord server.</li>
       <li><strong>Your first steps (from version 1.5.0):</strong> the first time each of these happens, the app tells our server which one and how many seconds after the first launch: the app opens, a song plays, you open the main window, you finish or skip the tutorial, you connect Spotify, you turn on the live desktop, you see the end-of-trial screen, you click Buy. Our server keeps it with the first 8 characters of the anonymous computer id, Mac or Windows, the app version and the country. It tells us where people stop on the first day.</li>
       <li><strong>If you ask for the 2 extra days for a post:</strong> when you send the link to your post from the app, our server keeps that link with the anonymous id of your computer, for 30 days at most while it waits, and passes it to us on Discord so a person can look at it. Once the days are added we keep which post was used, so it is not used twice. To limit abuse, our server also counts these requests per IP address for one day. If you send the post in a ticket on Discord instead, it stays on Discord.</li>
       <li><strong>Why:</strong> to know who uses LinerFM and how, so we can fix what breaks on your system and language, support the players you use, and answer a bug report knowing which version and computer it comes from.</li>
@@ -33,6 +33,7 @@ import Footer from "../components/Footer.astro";
 
     <section id="trial-reminder">
     <h2 class="mt-10 text-lg font-semibold">Trial reminder email (optional)</h2>
+    <p class="mt-3 text-fg-2 text-sm">This only concerns trials started before 19 November 2026. New computers have no trial.</p>
     <ul class="mt-4 space-y-3 text-fg-2 text-sm list-disc pl-5">
       <li><strong>When:</strong> only if you turn on <strong>Email me before my trial ends</strong> in the first-run guide and type your address. It is off by default, and nothing is sent unless you finish the guide with it on.</li>
       <li><strong>What we keep:</strong> your email address, the first 8 characters of the anonymous computer id, and the date your trial ends. Nothing else.</li>

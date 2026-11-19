@@ -15,12 +15,12 @@ test.beforeEach(async ({ page }) => {
 test.describe("on a phone (375 px, iPhone)", () => {
   test.use({ viewport: { width: 375, height: 667 }, userAgent: IPHONE_UA, isMobile: true, hasTouch: true });
 
-  test("the top bar shows Discord next to Try free, inside the screen", async ({ page }) => {
+  test("the top bar shows Discord next to Download, inside the screen", async ({ page }) => {
     await page.goto("/");
     const link = page.locator("header").getByRole("link", { name: "Discord" });
     await expect(link).toBeVisible();
     await expect(link).toHaveAttribute("href", INVITE);
-    await expect(page.locator("header").getByRole("link", { name: "Try free" })).toBeVisible();
+    await expect(page.locator("header").getByRole("link", { name: "Download", exact: true })).toBeVisible();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow).toBeLessThanOrEqual(0);
   });

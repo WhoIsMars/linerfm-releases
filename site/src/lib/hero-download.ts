@@ -1,5 +1,5 @@
 // Il pulsante dell'hero scarica subito la build del computer di chi guarda (conversione 21/10:
-// chi scarica decide in 6-64 secondi, e "Try free" mandava 9.105 px piu' in basso).
+// chi scarica decide in 6-64 secondi, e il vecchio pulsante "Try free" mandava 9.105 px piu' in basso).
 import type { DmgInfo, MacDmgs } from "./release";
 
 export interface HeroBuild { label: string; arch: string; info: DmgInfo | null; }

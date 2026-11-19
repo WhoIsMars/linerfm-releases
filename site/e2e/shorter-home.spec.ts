@@ -56,7 +56,7 @@ for (const [path, h1] of [
   test(`${path} has its title, the two buttons and is linked from the home`, async ({ page }) => {
     await page.goto(path);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(h1);
-    await expect(page.getByRole("link", { name: "Try free for up to 7 days" })).toBeVisible();
+    await expect(page.locator("main").getByRole("link", { name: "Download", exact: true })).toBeVisible();
     await expect(page.locator("main a.lemonsqueezy-button")).toHaveCount(1);
     expect(await page.locator("body").innerText()).not.toMatch(/Mac only/i);
     await page.goto("/");
@@ -75,7 +75,7 @@ test("a comparison names its sources and the day they were read", async ({ page 
 test.describe("after the iBaila comparison (1280 px)", () => {
   test.use({ viewport: { width: 1280, height: 800 } });
 
-  test("the hero has one filled button, the download of the trial; Buy is a text link", async ({ page }) => {
+  test("the hero has one filled button, the download; Buy is a text link", async ({ page }) => {
     await page.goto("/");
     // Due nel DOM (computer e telefono), uno solo visibile: dal 23/10 sul computer scarica subito.
     const filled = page.locator("#top .btn-primary").filter({ visible: true });

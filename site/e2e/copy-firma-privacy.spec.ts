@@ -15,7 +15,7 @@ test("the home says how the Mac app is signed and what leaves the computer", asy
   expect(text).toContain("It's signed with my own self-signed certificate, not an Apple one; the install steps are right below.");
   expect(text).toContain("your listening history stays on your computer, apart from audio clips for missing lyrics, which you can turn off.");
   expect(text).toContain("Runs on your computer: no account, and your listening history stays there.");
-  expect(text).toContain("Our server checks your trial or license and writes lyrics no archive has, and the privacy policy lists what it receives and keeps.");
+  expect(text).toContain("Our server checks your license (or a trial started before 19 November 2026) and writes lyrics no archive has, and the privacy policy lists what it receives and keeps.");
   for (const old of ["signed ad-hoc", "nothing you listen to sent to a server", "what you listen to stays there", "stores nothing on any server", "runs entirely on your computer"]) {
     expect(text, old).not.toContain(old);
   }

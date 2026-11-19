@@ -42,14 +42,14 @@ test("the live desktop footage is shown once, in the hero", async ({ page }) => 
 test.describe("on a phone (375 px, iPhone)", () => {
   test.use({ viewport: { width: 375, height: 667 }, userAgent: IPHONE_UA, isMobile: true, hasTouch: true });
 
-  test("says it is a computer app in the first screen, and keeps Try free and Buy", async ({ page }) => {
+  test("says it is a computer app in the first screen, and keeps Download and Buy", async ({ page }) => {
     await page.goto("/");
     const hero = page.locator("#top");
     const line = hero.getByText(PHONE_LINE);
     await expect(line).toBeVisible();
     const box = (await line.boundingBox())!;
     expect(box.y + box.height).toBeLessThanOrEqual(667);
-    await expect(hero.getByRole("link", { name: "Try free for up to 7 days" })).toBeVisible();
+    await expect(hero.getByRole("link", { name: "Download", exact: true })).toBeVisible();
     await expect(hero.getByRole("link", { name: "Buy · 10€" })).toBeVisible();
   });
 
@@ -94,11 +94,11 @@ test.describe("on a desktop (1280 px, Mac)", () => {
     const main = hero.getByRole("link", { name: /Download for Mac/ });
     await expect(main).toBeVisible();
     await expect(main).toHaveAttribute("href", /aarch64\.dmg$/);
-    await expect(main).toContainText("Up to 7 days free");
+    await expect(main).not.toContainText("free");
     await expect(hero.getByRole("link", { name: "Intel Mac" })).toHaveAttribute("href", /x64\.dmg$/);
     await expect(hero.getByRole("link", { name: "Windows" })).toHaveAttribute("href", /setup\.exe$/);
     await expect(hero.getByRole("link", { name: "Buy · 10€" })).toBeVisible();
-    await expect(hero.getByRole("link", { name: "Try free for up to 7 days" })).toBeHidden();
+    await expect(hero.getByRole("link", { name: "Download", exact: true })).toBeHidden();
     await expect(hero.getByText(PHONE_LINE)).toBeHidden();
   });
 
