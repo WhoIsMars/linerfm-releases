@@ -219,7 +219,7 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
   {
     id: "source",
     title: "Switch the source with one click.",
-    line: "Spotify, Apple Music, YouTube Music or the browser player, from the widget menu. The whole app follows.",
+    line: "Spotify, Apple Music, YouTube Music, Amazon Music or the browser player, from the widget menu. The whole app follows.",
     from: ["youtube-music", "soundcloud"],
     media: null,
     wanted: "QuickTime, 5 s: menu del widget, riga Source, clic da Spotify a YouTube, il widget cambia.",
@@ -228,6 +228,8 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
 
 /** Una riga, senza media: le cose vere che non hanno (ancora) una schermata. Nomi dalle card. */
 export const ALSO = [
+  // ai-every-source, copy-playlists, amazon-music (1.8.0)
+  "AI playlists on Spotify, YouTube Music and Apple Music, playlists copied from one source to another, and Amazon Music",
   // one-word-lyrics, vinyl-covers, desktop-presets, saved-setups, edge-effects-1-7 (1.7.0):
   // senza schermata per lo stesso tetto di public/media.
   "lyrics one word at a time, a spinning vinyl, presets and your own saved setups, and 16 lights around the screen",

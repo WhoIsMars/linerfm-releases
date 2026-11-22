@@ -1,6 +1,6 @@
 {
   "_generated": "da docs/product-surface.json nel repo linerfm — non modificare a mano, gira scripts/sync-product-surface.mjs",
-  "updated": "2026-11-16",
+  "updated": "2026-11-22",
   "cards": [
     {
       "id": "widget",
@@ -608,6 +608,64 @@
       "platforms": [
         "mac",
         "windows"
+      ]
+    },
+    {
+      "id": "ai-every-source",
+      "t": "AI playlists on every source",
+      "d": "Describe a playlist and the AI builds it on Spotify, YouTube Music or your Apple Music library, checking every track on that catalog first.",
+      "since": "1.8.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "apple-music-library",
+      "t": "Apple Music library",
+      "d": "Your Music.app library is a full source on Mac: playlists, likes, AI playlists. Songs from the Apple Music catalog go into your library without playing anything.",
+      "since": "1.8.0",
+      "platforms": [
+        "mac"
+      ]
+    },
+    {
+      "id": "amazon-music",
+      "t": "Amazon Music",
+      "d": "Amazon Music shows up in the widget, the notch and the desktop with its cover and controls, on Mac and Windows.",
+      "since": "1.8.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "copy-playlists",
+      "t": "Copy playlists between sources",
+      "d": "Copy a playlist from one source to another, or align two playlists so they hold the same songs.",
+      "since": "1.8.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "new-main-window",
+      "t": "New main window",
+      "d": "The main window is redesigned, with settings grouped by category and its own style, separate from the widget.",
+      "since": "1.8.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "sharp-canvas",
+      "t": "Sharp full-screen canvas",
+      "d": "On macOS 26 the song's canvas video is upscaled to stay sharp on the whole desktop. Low quality videos can fall back to the cover.",
+      "since": "1.8.0",
+      "platforms": [
+        "mac"
       ]
     }
   ],
