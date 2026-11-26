@@ -228,6 +228,10 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
 
 /** Una riga, senza media: le cose vere che non hanno (ancora) una schermata. Nomi dalle card. */
 export const ALSO = [
+  // desktop-ambient-light, desktop-big-title, desktop-covers-1-9, fill-lyrics, widget-themes-1-9 (1.9.0)
+  "an ambient light and a big title on your desktop, five more cover styles (Polaroid, Jewel case, Wall, Tilt and Slices), Fill lyrics, and the Pill, Receipt and Tape widgets",
+  // soundcloud-full-source, hide-spotify (1.9.0)
+  "SoundCloud as a full source, with search, your playlists and Discover, and Spotify hidden if you don't use it",
   // ai-every-source, copy-playlists, amazon-music (1.8.0)
   "AI playlists on Spotify, YouTube Music and Apple Music, playlists copied from one source to another, and Amazon Music",
   // one-word-lyrics, vinyl-covers, desktop-presets, saved-setups, edge-effects-1-7 (1.7.0):
