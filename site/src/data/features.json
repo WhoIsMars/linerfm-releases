@@ -1,6 +1,6 @@
 {
   "_generated": "da docs/product-surface.json nel repo linerfm — non modificare a mano, gira scripts/sync-product-surface.mjs",
-  "updated": "2026-11-22",
+  "updated": "2026-11-26",
   "cards": [
     {
       "id": "widget",
@@ -666,6 +666,76 @@
       "since": "1.8.0",
       "platforms": [
         "mac"
+      ]
+    },
+    {
+      "id": "desktop-ambient-light",
+      "t": "Ambient light",
+      "d": "A soft light behind the cover on your desktop, in the colors of the song: Drift, Bokeh, Halo or Silk. It moves with the music, like the edge light.",
+      "since": "1.9.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "desktop-big-title",
+      "t": "Big title",
+      "d": "The title and the artist, large on your desktop. Ticker scrolls them behind the cover, Spine runs the title up the left edge, Credits sets them like a film title, Collage writes the title by hand across the artist.",
+      "since": "1.9.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "fill-lyrics",
+      "t": "Fill lyrics",
+      "d": "A new lyrics style on your desktop: the whole line is dimmed and fills with color as it is sung.",
+      "since": "1.9.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "desktop-covers-1-9",
+      "t": "5 new covers styles",
+      "d": "Five new ways to show the cover on your desktop: Polaroid, Jewel case, Wall, Tilt and Slices. A photo, a CD case, a wall of covers, a tilting card or moving strips. They are also in the player bar button.",
+      "since": "1.9.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "widget-themes-1-9",
+      "t": "Pill, Receipt and Tape widgets",
+      "d": "Three new widget themes: Pill, a small capsule; Receipt, the song printed like a shop receipt; Tape, a cassette with handwritten labels.",
+      "since": "1.9.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "soundcloud-full-source",
+      "t": "SoundCloud as a full source",
+      "d": "SoundCloud is a full source for everyone: search, your playlists and Discover, with the widget and the desktop. On Mac, LinerFM picks up your session from Chrome and Copy to builds the playlist on SoundCloud for you.",
+      "since": "1.9.0",
+      "platforms": [
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "id": "hide-spotify",
+      "t": "Hide Spotify",
+      "d": "Don't use Spotify? In Setup you can hide it from the source bars, so only the services you use are there. The source you chose always stays visible.",
+      "since": "1.9.0",
+      "platforms": [
+        "mac",
+        "windows"
       ]
     }
   ],
