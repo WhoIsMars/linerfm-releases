@@ -73,23 +73,24 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
   {
     id: "looks",
     eyebrow: "Live desktop",
-    // dieci stili delle copertine: FLOW_STYLES in sidecar/linerfm/ui/src/desktop/style.ts:93 (1.9.0);
-    // il video mostra i primi quattro, i cinque nuovi sono nella schermata "styles" qui sotto
+    // dieci stili delle copertine: FLOW_STYLES in sidecar/linerfm/ui/src/desktop/style.ts:93 (1.9.0)
     title: "Ten styles",
     halo: "for your covers.",
     line: "A button in the player bar goes through them: Cover Flow, Arc, Artist, Dial, Vinyl, Polaroid, Jewel case, Wall, Tilt and Slices. Drag the bar, the list and the covers where you want them: they stay there.",
-    chips: ["Cover Flow", "Arc", "Artist", "Dial"],
-    // looks.mp4 (11/11/2026, 1.6.0): quattro riprese del telefono dell'owner da 3 s l'una, montate
-    // una dopo l'altra (IMG_9011, 9006, 9009, 9007), quindi i cue cadono a 0, 3, 6 e 9 s.
-    cues: [{ label: "Cover Flow", at: 0 }, { label: "Arc", at: 3 }, { label: "Artist", at: 6 }, { label: "Dial", at: 9 }],
+    chips: ["Cover Flow", "Arc", "Artist", "Dial", "Vinyl", "Polaroid", "Jewel case", "Wall", "Tilt", "Slices"],
+    // covers.mp4 (28/11/2026, 1.9.0): il desktop vero dell'app (desktop-harness.cjs, pagine /desktop e
+    // /desktop-ui della 1.9.0) a 1440x900 con scala 2, ritaglio 864x504 su copertine e barra, nativo
+    // 1728x1008. Uno stile ogni 2,5 s (75 fotogrammi a 30 fps), il brano cambia a 0,6 s di ognuno.
+    cues: [{ label: "Cover Flow", at: 0 }, { label: "Arc", at: 2.5 }, { label: "Artist", at: 5 }, { label: "Dial", at: 7.5 },
+      { label: "Vinyl", at: 10 }, { label: "Polaroid", at: 12.5 }, { label: "Jewel case", at: 15 }, { label: "Wall", at: 17.5 },
+      { label: "Tilt", at: 20 }, { label: "Slices", at: 22.5 }],
     from: ["desktop-bar-buttons", "desktop-arc", "desktop-artist", "desktop-dial", "desktop-move-panels", "vinyl-covers", "desktop-covers-1-9"],
-    // il magenta della copertina di Graduation e l'azzurro dell'arco
-    glow: ["#ff5fa2", "#6cc5f5"],
+    glow: ["#ff8a3d", "#e8c25a"],
     media: {
-      kind: "phone",
-      video: "media/looks.mp4",
-      alt: "A MacBook and a monitor filmed with a phone, in four looks one after the other: album covers in a row, covers on an arc of light, a panel with Travis Scott's top songs and albums, and a round disc with the song and a volume ring.",
-      caption: "Real footage, filmed on the owner's desk.",
+      kind: "screen",
+      video: "media/covers.mp4",
+      alt: "The live desktop on a Mac with the player bar, going through the ten cover styles while the song changes: Cover Flow, Arc, Artist, Dial, Vinyl, Polaroid, Jewel case, Wall, Tilt and Slices.",
+      caption: "Recorded from the app's own desktop pages, with sample songs.",
     },
   },
   {
@@ -97,25 +98,20 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
     eyebrow: "Desktop and screensaver",
     title: "Dress your screen",
     halo: "in the song's colors.",
-    line: "A soft light behind the cover, the title large across the screen, the cover as a Polaroid, a CD case or a wall of albums. Set the screensaver to Desktop and it looks like your desktop.",
-    chips: ["Drift", "Bokeh", "Halo", "Silk", "Ticker", "Spine", "Credits", "Collage", "Polaroid", "Jewel case", "Wall", "Tilt", "Slices"],
-    // styles.mp4 (28/11/2026, 1.9.0): tre catture OBS dell'app vera sul Mac dell'owner (26/11,
-    // LinerFM-Social/montaggio/2026-11-26-1-9-{luce,titolo,copertine}/assets/clip.mp4), tagli secchi
-    // di ~2,5 s per stile (ffmpeg trim + concat, 1200x750, 24 fps, crf 34), la clip delle copertine
-    // ritagliata 1080x674 al centro. Tempi misurati sui fotogrammi a passo 0,25 s, non dalle
-    // etichette dei reel (sfasate). Spine dura 0,6 s nella ripresa.
-    cues: [{ label: "Drift", at: 0 }, { label: "Bokeh", at: 2.25 }, { label: "Halo", at: 4.75 }, { label: "Silk", at: 7.25 },
-      { label: "Ticker", at: 9.75 }, { label: "Spine", at: 12.25 }, { label: "Credits", at: 12.85 }, { label: "Collage", at: 15.35 },
-      { label: "Polaroid", at: 17.85 }, { label: "Jewel case", at: 20.35 }, { label: "Wall", at: 22.85 }, { label: "Tilt", at: 23.6 },
-      { label: "Slices", at: 25.1 }],
-    from: ["desktop-ambient-light", "desktop-big-title", "desktop-covers-1-9", "screensaver-desktop"],
-    // il ciano della luce Drift e il rosa delle copertine della ripresa
-    glow: ["#4fb3d9", "#e06fae"],
+    line: "A soft light behind the cover in four styles, or the song's title large across the screen in four more. Set the screensaver to Desktop and it looks like your desktop.",
+    chips: ["Drift", "Bokeh", "Halo", "Silk", "Ticker", "Spine", "Credits", "Collage"],
+    // styles.mp4 (28/11/2026, 1.9.0): il desktop vero dell'app (desktop-harness.cjs) a schermo intero,
+    // 1440x900 con scala 2, ridotto a 1728x1080. Uno stile ogni 2,5 s, il brano cambia a 1 s di ognuno.
+    // Le copertine (Polaroid, Jewel case, Wall, Tilt, Slices) sono in covers.mp4, sezione "looks".
+    cues: [{ label: "Drift", at: 0 }, { label: "Bokeh", at: 2.5 }, { label: "Halo", at: 5 }, { label: "Silk", at: 7.5 },
+      { label: "Ticker", at: 10 }, { label: "Spine", at: 12.5 }, { label: "Credits", at: 15 }, { label: "Collage", at: 17.5 }],
+    from: ["desktop-ambient-light", "desktop-big-title", "screensaver-desktop"],
+    glow: ["#e06f4f", "#e8c25a"],
     media: {
       kind: "screen",
       video: "media/styles.mp4",
-      alt: "The live desktop on a Mac, recorded from the app: a soft light behind the cover in four styles (Drift, Bokeh, Halo, Silk), the song title large in four styles (Ticker, Spine, Credits, Collage), then the cover as a Polaroid, a CD in its case, a wall of albums, a tilting card and slices.",
-      caption: "Recorded from the app on a Mac, playing real songs.",
+      alt: "The live desktop on a Mac, recorded from the app: a soft light behind the cover in four styles (Drift, Bokeh, Halo, Silk), then the song title large in four styles (Ticker, Spine, Credits, Collage), while the song changes.",
+      caption: "Recorded from the app's own desktop pages, with sample songs.",
     },
   },
   {
@@ -125,18 +121,18 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
     halo: "eight looks.",
     line: "It plays the song's video on your desktop. Its menu switches the Source, picks where it plays, opens Search and the AI playlist tools.",
     chips: ["Glass", "Cinematic", "Minimal", "Compact", "Pill", "Receipt", "Tape", "Terminal"],
-    // widget.mp4 (28/11/2026, 1.9.0): gli otto temi di THEME_CHOICES (src/widget.jsx:933) resi da
-    // site-takes.cjs con LOOKS=... e sfondo trasparente, posati sullo stesso fondale; 1,4 s a tema,
-    // dissolvenze di 0,4 s, il cue a metà dissolvenza (offset i*1,4 + 0,2).
-    cues: [{ label: "Glass", at: 0 }, { label: "Cinematic", at: 1.6 }, { label: "Minimal", at: 3.0 },
-      { label: "Compact", at: 4.4 }, { label: "Pill", at: 5.8 }, { label: "Receipt", at: 7.2 },
-      { label: "Tape", at: 8.6 }, { label: "Terminal", at: 10.0 }, { label: "Glass", at: 11.4 }],
+    // widget.mp4 (28/11/2026, 1.9.0): gli otto temi di THEME_CHOICES (src/widget.jsx:933) che suonano,
+    // resi da site-takes.cjs (take wanim) a scala 2 su sfondo trasparente e posati al centro dello
+    // stesso fondale, 1888x1440, a grandezza vera. 1,8 s a tema, il brano cambia a 0,7 s di ognuno.
+    cues: [{ label: "Glass", at: 0 }, { label: "Cinematic", at: 1.8 }, { label: "Minimal", at: 3.6 },
+      { label: "Compact", at: 5.4 }, { label: "Pill", at: 7.2 }, { label: "Receipt", at: 9.0 },
+      { label: "Tape", at: 10.8 }, { label: "Terminal", at: 12.6 }],
     from: ["widget", "terminal-theme", "ai-playlists", "widget-themes-1-9"],
     glow: ["#69c1ea", "#ff6b8b"],
     media: {
       kind: "screen",
       video: "media/widget.mp4",
-      alt: "The LinerFM widget playing Lucid Dreams by Juice WRLD, switching through its eight looks: Glass, Cinematic, Minimal, Compact, Pill, Receipt, Tape and Terminal.",
+      alt: "The LinerFM widget in its eight looks, each playing Lucid Dreams by Juice WRLD and then SICKO MODE by Travis Scott: Glass, Cinematic, Minimal, Compact, Pill, Receipt, Tape and Terminal.",
       caption: SCREEN_CAPTION,
     },
   },
@@ -205,22 +201,23 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
     title: "Playlists",
     halo: "from a sentence.",
     line: "Describe a mood and the AI picks real tracks, or optimize a playlist with the numbers of every song. Copy a playlist from Spotify to Apple Music or YouTube Music and back, or align them so they hold the same songs.",
-    // "Copy to…" e "Align playlists": i pulsanti di PlaylistSync.tsx:32,214 nel repo dell'app;
-    // senza ripresa, restano chip di testo
     chips: ["Create playlist", "Find playlist", "Add tracks", "Optimize", "Copy to…", "Align playlists"],
     // ai.mp4 (25/10): le quattro funzioni dalla UI vera, una dopo l'altra. Create con una frase;
     // Add tracks con tre titoli incollati; Find con due playlist pubbliche vere di Spotify (nome,
     // autore, copertina e brani dall'anteprima pubblica, follower non mostrati); Optimize su
     // "Late night drive" con brani veri e numeri d'ascolto di esempio.
     cues: [{ label: "Create playlist", at: 0 }, { label: "Add tracks", at: 5.45 },
-      { label: "Find playlist", at: 10.35 }, { label: "Optimize", at: 15.65 }],
+      { label: "Find playlist", at: 10.35 }, { label: "Optimize", at: 15.65 },
+      // da 20,9 s (28/11/2026, 1.9.0): Align playlists e Copy to… dalla UI vera (site-takes.cjs, take sync)
+      // con playlist d'esempio e le risposte di /api/playlist-sync simulate; ridotta a 1140 di larghezza
+      { label: "Align playlists", at: 20.9 }, { label: "Copy to…", at: 29.9 }],
     from: ["ai-playlists", "discover", "curator", "track-stats", "skip-based-removals", "copy-playlists", "apple-music-library"],
     glow: ["#ff8a5c", "#b38cff"],
     media: {
       kind: "screen",
       video: "media/ai.mp4",
-      alt: "Four AI tools in the app. Create: a sentence becomes eleven real tracks. Add tracks: three pasted titles are found on Spotify and added. Find: RapCaviar and Most Necessary come up for new rap. Optimize: two often skipped songs go out and two from your history come in.",
-      caption: "Captured from the app itself. The AI runs on your own free Groq key. Apple Music playlists on Mac.",
+      alt: "Four AI tools in the app. Create: a sentence becomes eleven real tracks. Add tracks: three pasted titles are found on Spotify and added. Find: RapCaviar and Most Necessary come up for new rap. Optimize: two often skipped songs go out and two from your history come in. Then Align playlists creates the missing playlists on Apple Music, YouTube Music and Spotify, and Copy to sends one playlist to YouTube Music.",
+      caption: "Captured from the app itself, with sample playlists. The AI runs on your own free Groq key. Apple Music playlists on Mac.",
     },
   },
   {

@@ -13,16 +13,15 @@ const SIZES: Record<string, MediaSize> = {
   "media/hero.mp4": { width: 720, height: 1000 },
   "media/colors.mp4": { width: 720, height: 1000 },
   "media/light.mp4": { width: 720, height: 1000 },
-  // looks: i quattro look delle copertine, quattro riprese del telefono da 3 s (11/11/2026, 1.6.0).
-  "media/looks.mp4": { width: 720, height: 1000 },
   // search: inquadratura che segue la casella di ricerca (il telefono si muove), 24/10.
   "media/search.mp4": { width: 600, height: 440 },
   // notch: striscia sul pannello, ripresa vera (IMG_8758.MOV) e poi i cinque temi dalla UI (25/10).
   "media/notch.mp4": { width: 960, height: 426 },
   // Catture della UI vera (24/10/2026, .planning/site-v2/site-takes.cjs nel repo dell'app).
-  "media/widget.mp4": { width: 944, height: 720 },
-  // styles: luce, titolo e copertine della 1.9.0, catture OBS dell'app vera (28/11/2026).
-  "media/styles.mp4": { width: 1200, height: 750 },
+  "media/widget.mp4": { width: 1888, height: 1440 },
+  // covers e styles: il desktop vero della 1.9.0 (desktop-harness.cjs) a scala 2 (28/11/2026).
+  "media/covers.mp4": { width: 1728, height: 1008 },
+  "media/styles.mp4": { width: 1728, height: 1080 },
   "media/screensaver.mp4": { width: 1280, height: 800 },
   "media/ai.mp4": { width: 1140, height: 840 },
   "video/clip-notch.mp4": { width: 1200, height: 900 },
