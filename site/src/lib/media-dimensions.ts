@@ -21,6 +21,8 @@ const SIZES: Record<string, MediaSize> = {
   "media/notch.mp4": { width: 960, height: 426 },
   // Catture della UI vera (24/10/2026, .planning/site-v2/site-takes.cjs nel repo dell'app).
   "media/widget.mp4": { width: 944, height: 720 },
+  // styles: luce, titolo e copertine della 1.9.0, catture OBS dell'app vera (28/11/2026).
+  "media/styles.mp4": { width: 1200, height: 750 },
   "media/screensaver.mp4": { width: 1280, height: 800 },
   "media/ai.mp4": { width: 1140, height: 840 },
   "video/clip-notch.mp4": { width: 1200, height: 900 },
