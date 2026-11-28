@@ -25,3 +25,11 @@ name = "LEAD_LIMIT"
 type = "ratelimit"
 namespace_id = "1001"
 simple = { limit = 5, period = 60 }
+
+# Anteprime dei video da votare e copertine della dashboard online (/dashboard/f/...), dal 28/11/2026: KV e non R2
+# (R2 chiede una carta). Solo l'ultima versione dei contenuti da pubblicare, ricompressa a 720p da
+# ~/LinerFM-Social/review/push.py, tetto 300 MB (src/dash-online.ts). Mai pubblici. Separato da TRIAL_LEDGER,
+# che è il registro delle prove del worker licenze. Creato con: npx wrangler kv namespace create linerfm-dash-media
+[[kv_namespaces]]
+binding = "MEDIA_KV"
+id = "5861e1e8d627435db639102b490de1e3"

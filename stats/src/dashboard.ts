@@ -479,6 +479,16 @@ function readCookie(req: Request, name: string): string {
   return "";
 }
 
+/** Password Basic o cookie del link segreto: lo stesso cancello per le vecchie schede e per la pagina nuova (dash-online.ts). */
+export async function dashAccess(req: Request, env: Env): Promise<boolean> {
+  if (!env.DASH_PASSWORD) return false;
+  const token = env.DASH_LINK_TOKEN && env.DASH_LINK_TOKEN.length >= 32 ? env.DASH_LINK_TOKEN : "";
+  const viaCookie = token ? sameText(readCookie(req, COOKIE), await cookieValue(token)) : false;
+  return viaCookie || authorized(req, env.DASH_PASSWORD);
+}
+export const passwordRequired = () =>
+  new Response("password required", { status: 401, headers: { "WWW-Authenticate": 'Basic realm="LinerFM stats", charset="UTF-8"', "Cache-Control": "no-store" } });
+
 export async function handleDashboard(req: Request, env: Env, now: number, fetchImpl: typeof fetch = fetch): Promise<Response> {
   if (!env.DASH_PASSWORD) return new Response("dashboard closed: DASH_PASSWORD not set", { status: 503 });
   const token = env.DASH_LINK_TOKEN && env.DASH_LINK_TOKEN.length >= 32 ? env.DASH_LINK_TOKEN : "";
@@ -489,10 +499,7 @@ export async function handleDashboard(req: Request, env: Env, now: number, fetch
       "Set-Cookie": `${COOKIE}=${await cookieValue(token)}; Max-Age=31536000; Path=/dashboard; HttpOnly; Secure; SameSite=Lax`,
     } });
   }
-  const viaCookie = token ? sameText(readCookie(req, COOKIE), await cookieValue(token)) : false;
-  if (!viaCookie && !authorized(req, env.DASH_PASSWORD)) {
-    return new Response("password required", { status: 401, headers: { "WWW-Authenticate": 'Basic realm="LinerFM stats", charset="UTF-8"', "Cache-Control": "no-store" } });
-  }
+  if (!(await dashAccess(req, env))) return passwordRequired();
   if (req.method === "POST") return dismiss(req, env);
   const tabParam = new URL(req.url).searchParams.get("tab") ?? "";
   const tab = TABS.some(([k]) => k === tabParam) ? tabParam : "panoramica";
