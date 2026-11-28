@@ -81,3 +81,18 @@ describe("notBought", () => {
     expect(n2.stepsSince).toBeNull();
   });
 });
+
+describe("users senza prove (28/11)", () => {
+  const u = dashData(raw({ access: ACCESS, firstRun: FIRST_RUN, orders: ORDERS }), NOW).users;
+  const kind = Object.fromEntries(u.rows.map((r) => [r.device, r.kind]));
+
+  it("ogni computer è licenza, prova vecchia in corso o aperto senza comprare", () => {
+    expect(kind).toMatchObject({ aaaa0001: "notbought", bbbb0002: "notbought", cccc0003: "license", dddd0004: "legacy" });
+  });
+
+  it("i conteggi seguono gli stessi stati, il computer di prova incluso fra i computer", () => {
+    expect(u.notBought).toBe(3);   // a, b e il server di prova: Users mostra ogni computer
+    expect(u.legacy).toBe(1);
+    expect(u.license).toBe(1);
+  });
+});

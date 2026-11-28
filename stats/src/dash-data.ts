@@ -27,9 +27,16 @@ const STILL = 3 * DAY;                      // visto negli ultimi 3 giorni: non 
 
 /** Chi apre l'app e non compra (la prova non c'è più dalla 1.7.2, 19/11/2026). Coorte: computer visti la prima volta
  * negli ultimi 30 giorni, senza licenza; le prove vere ancora in corso (ultimo controllo "active") vanno a parte. */
-function notBought(users: A.User[], access: AccessRow[], firstRun: FirstRunRow[], paid: Order[], now: number) {
-  const lastTrial = new Map<string, string>();
-  for (const r of access) if (r.kind === "trial" && r.device && r.outcome !== "refused") lastTrial.set(r.device, r.outcome);
+/** Ultimo esito del controllo all'avvio per computer: "active" solo per una prova vera ancora in corso (dalla 1.7.2 non ne nascono più). */
+function lastTrialOf(access: AccessRow[]) {
+  const m = new Map<string, string>();
+  for (const r of access) if (r.kind === "trial" && r.device && r.outcome !== "refused") m.set(r.device, r.outcome);
+  return m;
+}
+/** Stato di un computer senza la prova: licenza, prova vecchia ancora in corso, oppure aperto senza comprare. */
+const kindOf = (u: A.User, lastTrial: Map<string, string>) => u.key ? "license" : lastTrial.get(u.device) === "active" ? "legacy" : "notbought";
+
+function notBought(users: A.User[], lastTrial: Map<string, string>, firstRun: FirstRunRow[], paid: Order[], now: number) {
   const fresh = users.filter((u) => !OWN_DEVICES.has(u.device) && now - u.firstSeen < 30 * DAY);
   const legacy = users.filter((u) => !u.key && !OWN_DEVICES.has(u.device) && lastTrial.get(u.device) === "active");
   const cohort = fresh.filter((u) => !u.key && lastTrial.get(u.device) !== "active");
@@ -59,6 +66,7 @@ export function dashData(raw: Raw, now: number) {
   const hits = raw.hits.filter((x) => !Wx.TEST_SOURCES.has(x.src));
   const site = Wx.summarize(hits, now), x = Wx.summarizeAccess(raw.access, now), access = raw.access, orders = raw.orders;
   const users = Wx.summarizeUsers(raw.ledger, access, now, raw.devices);
+  const lastTrial = lastTrialOf(access), kinds = users.map((u) => kindOf(u, lastTrial));
   const rel = raw.gh ? Wx.githubReleases(raw.gh) : null;
   const week = (ts: number) => now - ts < 7 * DAY, sum = (a: number[]) => a.reduce((n, v) => n + v, 0);
   const paid = (orders ?? []).filter((o) => o.state === "pagato");
@@ -112,7 +120,9 @@ export function dashData(raw: Raw, now: number) {
       sales7: paid.filter((o) => week(o.ts)).length, list: events.slice(0, 200) },
     users: { total: users.length, active7: users.filter((u) => now - u.lastSeen < 7 * DAY).length, os: osCount(users.map((u) => u.os)),
       trial: users.filter((u) => u.state === "trial").length, expired: users.filter((u) => u.state === "expired").length,
-      license: users.filter((u) => u.state === "license").length, rows: users },
+      license: users.filter((u) => u.state === "license").length,
+      notBought: kinds.filter((k) => k === "notbought").length, legacy: kinds.filter((k) => k === "legacy").length,
+      rows: users.map((u, i) => ({ ...u, kind: kinds[i] })) },
     activity: { today: macs(DAY), week: macs(7 * DAY), newTrials7: newTrials.length, events30: access.length, days: Wx.activeByDay(access, now),
       history: access.filter((r) => !(r.kind === "validate" && r.outcome === "ok")).slice(-100).reverse().map(accessOut) },
     downloads: { downloaders: site.downloaders, clicks: site.downloads, dmg: rel ? sum(rel.map((r) => r.dmgArm + r.dmgIntel)) : 0,
@@ -123,7 +133,7 @@ export function dashData(raw: Raw, now: number) {
       fake: refused.filter((r) => r.reason === "bad_device").length, shared: refused.filter((r) => r.reason === "device_mismatch").length,
       reasons: [...reasons.entries()].sort((a, b) => b[1] - a[1]).map(([k, n]) => { const [kind, reason] = k.split(":"); return { kind, reason, n }; }),
       list: refused.slice(-50).reverse().map(accessOut) },
-    notBought: notBought(users, access, raw.firstRun ?? [], paid, now),
+    notBought: notBought(users, lastTrial, raw.firstRun ?? [], paid, now),
     social: { total: sum(latest.map((r) => r.views)), lastRead: raw.social.length ? Math.max(...raw.social.map((r) => r.ts)) : null, platforms, rows: latest },
   };
 }
