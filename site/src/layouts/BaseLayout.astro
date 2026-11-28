@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import ConsentBanner from "../components/ConsentBanner.astro";
 import { isMobileUA } from "../lib/device";
+import { SITE_VERIFICATION } from "../config/links";
 const {
   title = "LinerFM: Spotify widget and live lyrics for Mac and Windows",
   description = "A notch player, live lyrics, a desktop widget that matches every album, a screensaver and AI playlists for Spotify, Apple Music and YouTube Music. Runs on Mac and Windows, no account. 10€ once, no subscription.",
@@ -41,6 +42,8 @@ const og = new URL(`${base}${ogImage.replace(/^\//, "")}`, Astro.site ?? "http:/
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="canonical" href={canonical} />
+    {SITE_VERIFICATION.bing && <meta name="msvalidate.01" content={SITE_VERIFICATION.bing} />}
+    {SITE_VERIFICATION.yandex && <meta name="yandex-verification" content={SITE_VERIFICATION.yandex} />}
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />

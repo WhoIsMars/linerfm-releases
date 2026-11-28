@@ -47,3 +47,8 @@ export const STATS_URL = "https://linerfm-site-stats.piccoletto.workers.dev/hit"
 
 /** Same worker: an email left from a phone to get the download link (stats/src/lead.ts). */
 export const LEAD_URL = "https://linerfm-site-stats.piccoletto.workers.dev/lead";
+
+/** Codici di verifica del dominio dei pannelli per i proprietari dei siti (gratis). Vuoto = nessun
+ *  meta in pagina. Li incolla l'owner dopo la registrazione: Bing Webmaster Tools ("HTML Meta Tag",
+ *  il valore di content del meta msvalidate.01) e Yandex Webmaster (il meta yandex-verification). */
+export const SITE_VERIFICATION = { bing: "", yandex: "" };

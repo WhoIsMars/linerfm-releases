@@ -45,3 +45,17 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # IndexNow: dice a Bing (e quindi DuckDuckGo, Yahoo, Ecosia), Yandex, Seznam e Naver che le
+  # pagine sono cambiate. Gratis, senza account. Un ping fallito non tocca il sito già pubblicato.
+  indexnow:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # Pages impiega qualche secondo a servire i file nuovi (la chiave al primo giro)
+      - run: sleep 30 && node scripts/indexnow.mjs https://linerfm.xyz
+        working-directory: site
