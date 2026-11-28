@@ -70,9 +70,10 @@ function feedbackList(rows: J[]): J[] {
   for (const r of rows) if (r.kind === "ack") acks.set(r.ref, [...(acks.get(r.ref) ?? []), r]);
   return rows.filter((r) => r.kind !== "ack").map((r) => ({ ...r, acks: acks.get(r.fid) ?? [] })).reverse();
 }
-function decisionsOf(list: J[], rows: J[]): J[] {
+// sull'anteprima (DASH_TEST_WRITES) le righe di prova contano, o una scelta fatta lì sembrerebbe persa
+function decisionsOf(list: J[], rows: J[], withTest = false): J[] {
   const last = new Map<unknown, J>();
-  for (const r of rows) if (r.kind === "decision" && !r.test) last.set(r.decision, { fid: r.fid, ts: r.ts, choice: r.choice, note: r.note });
+  for (const r of rows) if (r.kind === "decision" && (withTest || !r.test)) last.set(r.decision, { fid: r.fid, ts: r.ts, choice: r.choice, note: r.note });
   return list.map((d) => ({ ...d, decided: last.get(d.id) ?? null }));
 }
 function itemsOf(all: J[], statuses: string[], now: number): J[] {
@@ -184,14 +185,14 @@ export async function handleDashOnline(req: Request, env: Env, now: number, fetc
     case "published": return json(await piece(env, "published", []));
     case "montaggio": case "variants": return json([]);      // Compare resta sulla pagina del Mac: online c'è solo l'ultima versione
     case "feedback": return json(feedbackList(await feedbackRows(env)));
-    case "decisions": return json(decisionsOf(await piece<J[]>(env, "decisions", []), await feedbackRows(env)));
+    case "decisions": return json(decisionsOf(await piece<J[]>(env, "decisions", []), await feedbackRows(env), env.DASH_TEST_WRITES === "1"));
     case "overview": {
-      const rows = await feedbackRows(env), list = feedbackList(rows);
+      const rows = await feedbackRows(env), list = feedbackList(rows), withTest = env.DASH_TEST_WRITES === "1";
       const local = {
         ...(await piece<J>(env, "local", {})),
         overdue: itemsOf(await piece<J[]>(env, "items", []), OPEN, now).filter((i) => i.overdue).length,
-        unread: list.filter((r) => r.kind === "review" && !(r.acks as J[]).length && !r.test).length,
-        decisions_open: decisionsOf(await piece<J[]>(env, "decisions", []), rows).filter((d) => !d.decided).length,
+        unread: list.filter((r) => r.kind === "review" && !(r.acks as J[]).length && (withTest || !r.test)).length,
+        decisions_open: decisionsOf(await piece<J[]>(env, "decisions", []), rows, withTest).filter((d) => !d.decided).length,
         synced: await env.DB.prepare("SELECT MAX(ts) AS ts FROM dash_snapshot").first<{ ts: number | null }>().then((r) => r?.ts ?? null).catch(() => null),
       };
       if (url.searchParams.has("lite")) return json({ local });

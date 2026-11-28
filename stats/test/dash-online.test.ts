@@ -64,7 +64,9 @@ describe("dashboard online: un solo cancello per tutto", () => {
   const ROUTES: [string, string][] = [
     ["GET", "/dashboard"], ["GET", "/dashboard/api/items"], ["GET", "/dashboard/api/overview"], ["GET", "/dashboard/api/feedback"],
     ["GET", "/dashboard/api/decisions"], ["GET", "/dashboard/api/unlinked"], ["GET", "/dashboard/api/published"],
-    ["POST", "/dashboard/api/feedback"], ["POST", "/dashboard/api/decision"], ["GET", "/dashboard/f/queue/a-reel/video.mp4"],
+    ["POST", "/dashboard/api/feedback"], ["POST", "/dashboard/api/decision"], ["POST", "/dashboard/api/pick"],
+    ["POST", "/dashboard/api/schedule"], ["POST", "/dashboard/api/discord"], ["GET", "/dashboard/f/queue/a-reel/video.mp4"],
+    ["GET", "/dashboard/nope"], ["GET", "/dashboard/api/nope"],
   ];
   for (const [m, p] of ROUTES) {
     it(`${m} ${p} senza password risponde 401`, async () => {
@@ -182,6 +184,21 @@ describe("voti e decisioni dal telefono", () => {
     const { env } = await setup({ DASH_TEST_WRITES: "1" }); await push(env);
     const row = await (await postJson(env, "/dashboard/api/feedback", { item: "a-reel", vote: 2 })).json() as { test: boolean };
     expect(row.test).toBe(true);
+  });
+  it("sull'anteprima una scelta di prova si vede come fatta: il badge scende, la scelta resta", async () => {
+    const { env } = await setup({ DASH_TEST_WRITES: "1" }); await push(env);
+    await postJson(env, "/dashboard/api/decision", { id: "fb", choice: "on" });
+    const d = await (await call(env, "/dashboard/api/decisions", { headers: AUTH })).json() as { decided: { choice: string } | null }[];
+    expect(d[0].decided?.choice).toBe("on");
+    const ov = await (await call(env, "/dashboard/api/overview?lite=1", { headers: AUTH })).json() as { local: { decisions_open: number } };
+    expect(ov.local.decisions_open).toBe(0);
+  });
+  it("sul worker vero una riga di prova arrivata dal Mac non conta, come in server.py", async () => {
+    const { env } = await setup(); await push(env);
+    const t = { fid: "20261128-100000-tttt", ts: "2026-11-28T10:00:00+01:00", kind: "decision", decision: "fb", choice: "on", note: "", test: true };
+    await call(env, "/dashboard/sync/snapshot", { method: "PUT", headers: { ...SYNC, "Content-Type": "application/json" }, body: JSON.stringify({ feedback: [t] }) });
+    const d = await (await call(env, "/dashboard/api/decisions", { headers: AUTH })).json() as { decided: unknown }[];
+    expect(d[0].decided).toBe(null);
   });
   it("il Mac legge le righe nuove e le segna, senza riprenderle due volte", async () => {
     const { env } = await setup(); await push(env);
