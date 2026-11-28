@@ -61,13 +61,14 @@ const SNAPSHOT = {
   ],
   local: { overdue: 1, status: { pronto: 1 }, next: [], unread: 0, new_edits: 1, decisions_open: 1 },
   discord: 20,
+  audio: { "queue/a-reel/video.mp4": true, "montaggio/a/reel-v1.mp4": false },
 };
 const push = (env: Env) => call(env, "/dashboard/sync/snapshot", { method: "PUT", headers: { ...SYNC, "Content-Type": "application/json" }, body: JSON.stringify(SNAPSHOT) });
 
 describe("dashboard online: un solo cancello per tutto", () => {
   const ROUTES: [string, string][] = [
     ["GET", "/dashboard"], ["GET", "/dashboard/api/items"], ["GET", "/dashboard/api/overview"], ["GET", "/dashboard/api/feedback"],
-    ["GET", "/dashboard/api/decisions"], ["GET", "/dashboard/api/unlinked"], ["GET", "/dashboard/api/published"], ["GET", "/dashboard/api/montaggio"], ["GET", "/dashboard/api/variants?dir=montaggio/a"],
+    ["GET", "/dashboard/api/decisions"], ["GET", "/dashboard/api/unlinked"], ["GET", "/dashboard/api/published"], ["GET", "/dashboard/api/montaggio"], ["GET", "/dashboard/api/variants?dir=montaggio/a"], ["GET", "/dashboard/api/audio?f=queue/a-reel/video.mp4"],
     ["POST", "/dashboard/api/feedback"], ["POST", "/dashboard/api/decision"], ["POST", "/dashboard/api/pick"],
     ["POST", "/dashboard/api/schedule"], ["POST", "/dashboard/api/discord"], ["GET", "/dashboard/f/queue/a-reel/video.mp4"],
     ["GET", "/dashboard/nope"], ["GET", "/dashboard/api/nope"],
@@ -229,6 +230,19 @@ describe("voti e decisioni dal telefono", () => {
     expect(ok.status).toBe(200);
     expect(await ok.json()).toMatchObject({ kind: "pick", dir: "montaggio/a", item: "a-reel", winner: "montaggio/a/v7/reel-v3.mp4" });
     expect((await postJson(env, "/dashboard/api/pick", { dir: "montaggio/a", winner: "montaggio/a/reel-v1.mp4", eliminated: ["montaggio/x/reel.mp4"] })).status).toBe(400);
+  });
+  it("audio per file come review/server.py: true, false, null quando non si sa; al massimo 200 per chiamata", async () => {
+    const { env } = await setup(); await push(env);
+    const q = (fs: string[]) => call(env, "/dashboard/api/audio?" + fs.map((f) => "f=" + encodeURIComponent(f)).join("&"), { headers: AUTH }).then((r) => r.json() as Promise<Record<string, boolean | null>>);
+    expect(await q(["queue/a-reel/video.mp4", "montaggio/a/reel-v1.mp4", "montaggio/zz/reel.mp4"])).toEqual({ "queue/a-reel/video.mp4": true, "montaggio/a/reel-v1.mp4": false, "montaggio/zz/reel.mp4": null });
+    expect(Object.keys(await q(Array.from({ length: 250 }, (_, i) => `montaggio/x/r${i}.mp4`)))).toHaveLength(200);
+    expect(await q([])).toEqual({});
+  });
+  it("una spinta vecchia senza audio: ogni file è null, la pagina lo tratta come non noto", async () => {
+    const { env } = await setup();
+    const { audio, ...old } = SNAPSHOT; void audio;
+    await call(env, "/dashboard/sync/snapshot", { method: "PUT", headers: { ...SYNC, "Content-Type": "application/json" }, body: JSON.stringify(old) });
+    expect(await (await call(env, "/dashboard/api/audio?f=queue/a-reel/video.mp4", { headers: AUTH })).json()).toEqual({ "queue/a-reel/video.mp4": null });
   });
   it("i montaggi di Compare si possono votare", async () => {
     const { env } = await setup(); await push(env);

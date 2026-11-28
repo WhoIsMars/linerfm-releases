@@ -16,7 +16,7 @@ export interface Env extends DashEnv { DASH_SYNC_SECRET?: string; MEDIA_KV?: KVN
 
 type J = Record<string, unknown>;
 const OPEN = ["pronto", "da creare", "bloccato", "da rifare"];
-const PIECES = ["ids", "items", "montaggio", "unlinked", "published", "decisions", "feedback", "local", "discord"] as const;
+const PIECES = ["ids", "items", "montaggio", "unlinked", "published", "decisions", "feedback", "local", "discord", "audio"] as const;
 const SETTABLE = ["pronto", "saltato", "da rifare", "pubblicato"];
 // KV gratis: 1 GB, 25 MB per valore, 1.000 scritture e 1.000 list al giorno. Chiavi "f:<percorso>" più "manifest"
 // ({percorso: byte}), così l'elenco costa una lettura e non una list. push.py carica solo i file nuovi o cambiati.
@@ -186,6 +186,9 @@ export async function handleDashOnline(req: Request, env: Env, now: number, fetc
     case "montaggio": return json((await piece<J[]>(env, "montaggio", [])).map((g) => g.dir));
     case "variants": return json((await piece<J[]>(env, "montaggio", [])).find((g) => g.dir === url.searchParams.get("dir"))?.variants ?? []);
     case "feedback": return json(feedbackList(await feedbackRows(env)));
+    // come review/server.py App.has_audio: letto dal Mac con ffprobe sull'originale (l'anteprima tiene la stessa traccia)
+    case "audio": { const m = await piece<Record<string, boolean | null>>(env, "audio", {});
+      return json(Object.fromEntries(url.searchParams.getAll("f").slice(0, 200).map((f) => [f, m[f] ?? null]))); }
     case "decisions": return json(decisionsOf(await piece<J[]>(env, "decisions", []), await feedbackRows(env), env.DASH_TEST_WRITES === "1"));
     case "overview": {
       const rows = await feedbackRows(env), list = feedbackList(rows), withTest = env.DASH_TEST_WRITES === "1";
