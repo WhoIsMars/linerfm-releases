@@ -7,16 +7,53 @@ import * as A from "./admin";
 import type { AccessRow, Row } from "./dashboard";
 import type { DeviceRow, GhRelease, LedgerEntry, Order, SocialRow } from "./admin";
 
-export interface Raw { hits: Row[]; access: AccessRow[]; devices: DeviceRow[]; social: SocialRow[]; ledger: LedgerEntry[]; orders: Order[] | null; gh: GhRelease[] | null }
+/** Passi del primo avvio (tabella first_run del D1, scritta dal worker licenze): una riga per computer e passo. */
+export interface FirstRunRow { device: string; step: string; secs: number; ts: number; os: string; country: string }
+export interface Raw { hits: Row[]; access: AccessRow[]; devices: DeviceRow[]; social: SocialRow[]; ledger: LedgerEntry[]; orders: Order[] | null; gh: GhRelease[] | null; firstRun?: FirstRunRow[] }
 const Wx = { ...W, ...A };
 
-const DAY = 864e5;
+const DAY = 864e5, H = 36e5;
 const osCount = (list: string[]) => ({ macos: list.filter((o) => o === "macos").length, windows: list.filter((o) => o === "windows").length,
   unknown: list.filter((o) => o !== "macos" && o !== "windows").length });
 const name = (src: string) => { const n = Wx.prettySource(src); return n === "Diretto o sconosciuto" ? "Direct or unknown" : n; };
 const person = (p: W.Session) => ({ ts: p.firstClick, last: p.last, arches: p.arches, from: name(p.from), country: p.country, clicks: p.clicks,
   minutes: Math.max(1, Math.round((p.lastClick - p.firstClick) / 60000)) });
 const accessOut = (r: AccessRow) => ({ id: r.id, ts: r.ts, kind: r.kind, outcome: r.outcome, reason: r.reason, device: r.device, key: r.key, country: r.country, os: r.os, tone: Wx.eventLine(r).tone });
+
+// I passi mostrati in "Downloaded, not bought", nell'ordine del primo avvio (nomi di usage.rs STEPS).
+const FUNNEL = ["launch", "track", "widget_shown", "main_window", "desktop_on", "alive_10m", "alive_30m", "second_launch", "buy_click"];
+const OWN_DEVICES = new Set(["8a995069"]);  // server Windows di prova dell'owner (Hetzner)
+const STILL = 3 * DAY;                      // visto negli ultimi 3 giorni: non ha ancora smesso
+
+/** Chi apre l'app e non compra (la prova non c'è più dalla 1.7.2, 19/11/2026). Coorte: computer visti la prima volta
+ * negli ultimi 30 giorni, senza licenza; le prove vere ancora in corso (ultimo controllo "active") vanno a parte. */
+function notBought(users: A.User[], access: AccessRow[], firstRun: FirstRunRow[], paid: Order[], now: number) {
+  const lastTrial = new Map<string, string>();
+  for (const r of access) if (r.kind === "trial" && r.device && r.outcome !== "refused") lastTrial.set(r.device, r.outcome);
+  const fresh = users.filter((u) => !OWN_DEVICES.has(u.device) && now - u.firstSeen < 30 * DAY);
+  const legacy = users.filter((u) => !u.key && !OWN_DEVICES.has(u.device) && lastTrial.get(u.device) === "active");
+  const cohort = fresh.filter((u) => !u.key && lastTrial.get(u.device) !== "active");
+  const ids = new Set(cohort.map((u) => u.device));
+  const day = (ts: number) => new Date(ts).toISOString().slice(0, 10);
+  const days = Array.from({ length: 30 }, (_, i) => ({ day: day(now - (29 - i) * DAY), macos: 0, windows: 0, unknown: 0 }));
+  const byDay = new Map(days.map((d) => [d.day, d]));
+  for (const u of cohort) { const d = byDay.get(day(u.firstSeen)); if (d) d[u.os === "macos" || u.os === "windows" ? u.os : "unknown"]++; }
+  const reached = new Map<string, Set<string>>();
+  for (const r of firstRun) if (ids.has(r.device)) (reached.get(r.step) ?? reached.set(r.step, new Set()).get(r.step)!).add(r.device);
+  const count = (prefix: string) => [...reached.entries()].filter(([k]) => k.startsWith(prefix)).map(([step, s]) => ({ step, n: s.size })).sort((a, b) => b.n - a.n);
+  const gone = cohort.filter((u) => now - u.lastSeen >= STILL).map((u) => u.lastSeen - u.firstSeen);
+  const edges: [string, number][] = [["10m", 10 * 60_000], ["1h", H], ["1d", DAY], ["7d", 7 * DAY], ["more", Infinity]];
+  return {
+    total: cohort.length, os: osCount(cohort.map((u) => u.os)), days,
+    base: reached.get("launch")?.size ?? 0, stepsSince: firstRun.length ? Math.min(...firstRun.map((r) => r.ts)) : null,
+    steps: FUNNEL.map((step) => ({ step, n: reached.get(step)?.size ?? 0 })),
+    why: count("why_"), quitWhy: count("quitwhy_"),
+    stopped: { still: cohort.length - gone.length, buckets: edges.map(([k, ms], i) => ({ k, n: gone.filter((t) => t < ms && (i === 0 || t >= edges[i - 1][1])).length })) },
+    conversion: { opened: fresh.length - fresh.filter((u) => !u.key && lastTrial.get(u.device) === "active").length,
+      licensed: fresh.filter((u) => u.key).length, sales: paid.filter((o) => now - o.ts < 30 * DAY).length },
+    legacy: { n: legacy.length, os: osCount(legacy.map((u) => u.os)) },
+  };
+}
 
 export function dashData(raw: Raw, now: number) {
   const hits = raw.hits.filter((x) => !Wx.TEST_SOURCES.has(x.src));
@@ -86,6 +123,7 @@ export function dashData(raw: Raw, now: number) {
       fake: refused.filter((r) => r.reason === "bad_device").length, shared: refused.filter((r) => r.reason === "device_mismatch").length,
       reasons: [...reasons.entries()].sort((a, b) => b[1] - a[1]).map(([k, n]) => { const [kind, reason] = k.split(":"); return { kind, reason, n }; }),
       list: refused.slice(-50).reverse().map(accessOut) },
+    notBought: notBought(users, access, raw.firstRun ?? [], paid, now),
     social: { total: sum(latest.map((r) => r.views)), lastRead: raw.social.length ? Math.max(...raw.social.map((r) => r.ts)) : null, platforms, rows: latest },
   };
 }

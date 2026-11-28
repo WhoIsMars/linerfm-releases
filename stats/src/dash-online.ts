@@ -9,7 +9,7 @@
 // backup, come la pagina di casa) e intanto la pagina online la mostra già. Mandare su Discord resta sul Mac.
 import { dashAccess, passwordRequired, DAY, type Env as DashEnv, type AccessRow, type Row } from "./dashboard";
 import { cachedJson, loadGithub, readDevices, readLedger, readOrders, type GhRelease, type SocialRow } from "./admin";
-import { dashData } from "./dash-data";
+import { dashData, type FirstRunRow } from "./dash-data";
 import { PAGE } from "./dash/page";
 
 export interface Env extends DashEnv { DASH_SYNC_SECRET?: string; MEDIA_KV?: KVNamespace; DASH_MEDIA_CAP?: string; DASH_TEST_WRITES?: string }
@@ -108,7 +108,7 @@ async function numbers(env: Env, now: number, force: boolean, fetchImpl: typeof 
   const since = now - 30 * DAY;
   const load = async () => {
     const all = <T>(sql: string, ...b: unknown[]) => env.DB.prepare(sql).bind(...b).all<T>().then((r) => r.results ?? []);
-    const [hits, access, devices, social, ledger, orders, gh] = await Promise.all([
+    const [hits, access, devices, social, ledger, orders, gh, firstRun] = await Promise.all([
       all<Row>("SELECT ts, kind, ref, src, arch, sid, country FROM hits WHERE ts > ? ORDER BY ts", since),
       all<AccessRow>("SELECT rowid AS id, ts, kind, outcome, reason, device, key, country, os FROM access WHERE ts > ? AND rowid NOT IN (SELECT id FROM dismissed) ORDER BY ts", since),
       readDevices(env.DB),
@@ -116,8 +116,9 @@ async function numbers(env: Env, now: number, force: boolean, fetchImpl: typeof 
       readLedger(env.TRIAL_LEDGER),
       readOrders(fetchImpl, env.LS_API_KEY, env.LS_STORE_ID ?? "406309"),
       cachedJson<GhRelease[]>(env.DB, "github-releases", now, 30 * 60_000, () => loadGithub(fetchImpl)),
+      all<FirstRunRow>("SELECT device, step, secs, ts, os, country FROM first_run WHERE ts > ? ORDER BY ts", since).catch(() => [] as FirstRunRow[]),
     ]);
-    return { readAt: new Date(now).toISOString(), dash: dashData({ hits, access: access.map((r) => ({ ...r, os: r.os ?? "" })), devices, social, ledger, orders, gh }, now) };
+    return { readAt: new Date(now).toISOString(), dash: dashData({ hits, access: access.map((r) => ({ ...r, os: r.os ?? "" })), devices, social, ledger, orders, gh, firstRun }, now) };
   };
   let data: J | null = null, error: string | null = null;
   try { data = await cachedJson<J>(env.DB, "dash-numbers", now, force ? 0 : 5 * 60_000, load); } catch (e) { error = String(e); }
