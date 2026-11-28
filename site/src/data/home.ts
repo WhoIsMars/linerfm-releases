@@ -80,7 +80,8 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
     chips: ["Cover Flow", "Arc", "Artist", "Dial", "Vinyl", "Polaroid", "Jewel case", "Wall", "Tilt", "Slices"],
     // covers.mp4 (28/11/2026, 1.9.0): il desktop vero dell'app (desktop-harness.cjs, pagine /desktop e
     // /desktop-ui della 1.9.0) a 1440x900 con scala 2, ritaglio 864x504 su copertine e barra, nativo
-    // 1728x1008. Uno stile ogni 2,5 s (75 fotogrammi a 30 fps), il brano cambia a 0,6 s di ognuno.
+    // 1728x1008. Uno stile ogni 2,5 s (75 fotogrammi a 30 fps), da Blinding Lights a SICKO MODE a 0,6 s di
+    // ognuno. Brani, artisti e copertine veri (scratchpad desk/real.cjs: art-real/ al posto dei brani finti).
     cues: [{ label: "Cover Flow", at: 0 }, { label: "Arc", at: 2.5 }, { label: "Artist", at: 5 }, { label: "Dial", at: 7.5 },
       { label: "Vinyl", at: 10 }, { label: "Polaroid", at: 12.5 }, { label: "Jewel case", at: 15 }, { label: "Wall", at: 17.5 },
       { label: "Tilt", at: 20 }, { label: "Slices", at: 22.5 }],
@@ -89,8 +90,8 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
     media: {
       kind: "screen",
       video: "media/covers.mp4",
-      alt: "The live desktop on a Mac with the player bar, going through the ten cover styles while the song changes: Cover Flow, Arc, Artist, Dial, Vinyl, Polaroid, Jewel case, Wall, Tilt and Slices.",
-      caption: "Recorded from the app's own desktop pages, with sample songs.",
+      alt: "The live desktop on a Mac with the player bar, going through the ten cover styles while the song changes from Blinding Lights by The Weeknd to SICKO MODE by Travis Scott: Cover Flow, Arc, Artist, Dial, Vinyl, Polaroid, Jewel case, Wall, Tilt and Slices.",
+      caption: "Recorded from the app's own desktop pages, playing real songs.",
     },
   },
   {
@@ -101,7 +102,8 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
     line: "A soft light behind the cover in four styles, or the song's title large across the screen in four more. Set the screensaver to Desktop and it looks like your desktop.",
     chips: ["Drift", "Bokeh", "Halo", "Silk", "Ticker", "Spine", "Credits", "Collage"],
     // styles.mp4 (28/11/2026, 1.9.0): il desktop vero dell'app (desktop-harness.cjs) a schermo intero,
-    // 1440x900 con scala 2, ridotto a 1728x1080. Uno stile ogni 2,5 s, il brano cambia a 1 s di ognuno.
+    // 1440x900 con scala 2, ridotto a 1728x1080. Uno stile ogni 2,5 s, da Blinding Lights a SICKO MODE a 1 s
+    // di ognuno, brani e copertine veri.
     // Le copertine (Polaroid, Jewel case, Wall, Tilt, Slices) sono in covers.mp4, sezione "looks".
     cues: [{ label: "Drift", at: 0 }, { label: "Bokeh", at: 2.5 }, { label: "Halo", at: 5 }, { label: "Silk", at: 7.5 },
       { label: "Ticker", at: 10 }, { label: "Spine", at: 12.5 }, { label: "Credits", at: 15 }, { label: "Collage", at: 17.5 }],
@@ -110,8 +112,8 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
     media: {
       kind: "screen",
       video: "media/styles.mp4",
-      alt: "The live desktop on a Mac, recorded from the app: a soft light behind the cover in four styles (Drift, Bokeh, Halo, Silk), then the song title large in four styles (Ticker, Spine, Credits, Collage), while the song changes.",
-      caption: "Recorded from the app's own desktop pages, with sample songs.",
+      alt: "The live desktop on a Mac, recorded from the app: a soft light behind the cover in four styles (Drift, Bokeh, Halo, Silk), then the song title large in four styles (Ticker, Spine, Credits, Collage), while Blinding Lights by The Weeknd changes to SICKO MODE by Travis Scott.",
+      caption: "Recorded from the app's own desktop pages, playing real songs.",
     },
   },
   {
@@ -121,12 +123,14 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
     halo: "eight looks.",
     line: "It plays the song's video on your desktop. Its menu switches the Source, picks where it plays, opens Search and the AI playlist tools.",
     chips: ["Glass", "Cinematic", "Minimal", "Compact", "Pill", "Receipt", "Tape", "Terminal"],
-    // widget.mp4 (28/11/2026, 1.9.0): gli otto temi di THEME_CHOICES (src/widget.jsx:933) che suonano,
-    // resi da site-takes.cjs (take wanim) a scala 2 su sfondo trasparente e posati al centro dello
-    // stesso fondale, 1888x1440, a grandezza vera. 1,8 s a tema, il brano cambia a 0,7 s di ognuno.
-    cues: [{ label: "Glass", at: 0 }, { label: "Cinematic", at: 1.8 }, { label: "Minimal", at: 3.6 },
-      { label: "Compact", at: 5.4 }, { label: "Pill", at: 7.2 }, { label: "Receipt", at: 9.0 },
-      { label: "Tape", at: 10.8 }, { label: "Terminal", at: 12.6 }],
+    // widget.mp4 (28/11/2026, 1.9.0): gli otto temi di THEME_CHOICES (src/widget.jsx:933) che suonano
+    // brani veri, resi da site-takes.cjs (take wanim) a scala 4 su sfondo trasparente e posati al centro
+    // dello stesso fondale 1888x1440. Scala uniforme chiesta dall'owner: ogni look ridotto o ingrandito
+    // finché la radice della sua area fa 700 px (sempre da scala 4, quindi mai ingrandito oltre i pixel
+    // resi); Terminal resta alla sua grandezza. 3 s a tema, il brano cambia a 1,2 s di ognuno.
+    cues: [{ label: "Glass", at: 0 }, { label: "Cinematic", at: 3 }, { label: "Minimal", at: 6 },
+      { label: "Compact", at: 9 }, { label: "Pill", at: 12 }, { label: "Receipt", at: 15 },
+      { label: "Tape", at: 18 }, { label: "Terminal", at: 21 }],
     from: ["widget", "terminal-theme", "ai-playlists", "widget-themes-1-9"],
     glow: ["#69c1ea", "#ff6b8b"],
     media: {
