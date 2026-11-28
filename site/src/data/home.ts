@@ -127,7 +127,9 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
     // brani veri, resi da site-takes.cjs (take wanim) a scala 4 su sfondo trasparente e posati al centro
     // dello stesso fondale 1888x1440. Scala uniforme chiesta dall'owner: ogni look ridotto o ingrandito
     // finché la radice della sua area fa 700 px (sempre da scala 4, quindi mai ingrandito oltre i pixel
-    // resi); Terminal resta alla sua grandezza. 3 s a tema, il brano cambia a 1,2 s di ognuno.
+    // resi); Terminal resta alla sua grandezza. 3 s a tema, il brano cambia a 1,2 s di ognuno. Cinematic
+    // (take wcine) mostra il canvas vero di Spotify: Righteous di Juice WRLD, poi Good Morning di Kanye West
+    // (url da /api/canvas della dev app il 28/11, video dal CDN canvaz.scdn.co).
     cues: [{ label: "Glass", at: 0 }, { label: "Cinematic", at: 3 }, { label: "Minimal", at: 6 },
       { label: "Compact", at: 9 }, { label: "Pill", at: 12 }, { label: "Receipt", at: 15 },
       { label: "Tape", at: 18 }, { label: "Terminal", at: 21 }],
@@ -136,7 +138,7 @@ export const FEATURE_SCREENS: FeatureScreenData[] = [
     media: {
       kind: "screen",
       video: "media/widget.mp4",
-      alt: "The LinerFM widget in its eight looks, each playing Lucid Dreams by Juice WRLD and then SICKO MODE by Travis Scott: Glass, Cinematic, Minimal, Compact, Pill, Receipt, Tape and Terminal.",
+      alt: "The LinerFM widget in its eight looks, playing Lucid Dreams by Juice WRLD and then SICKO MODE by Travis Scott: Glass, Cinematic, Minimal, Compact, Pill, Receipt, Tape and Terminal. Cinematic plays the Spotify Canvas video of Righteous by Juice WRLD, then Good Morning by Kanye West.",
       caption: SCREEN_CAPTION,
     },
   },
