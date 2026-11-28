@@ -72,14 +72,14 @@ describe("cachedJson", () => {
 });
 
 describe("orders", () => {
-  it("masks the email and keeps only what the owner needs", async () => {
+  it("keeps the full email for the private dashboard (owner, 28/11) and only what the owner needs", async () => {
     expect(maskEmail("mario.rossi@example.com")).toBe("m••••@example.com");
     const fetchImpl = (async () => Response.json({ data: [
       { attributes: { test_mode: false, status: "paid", refunded: false, total: 799, discount_total: 200, currency: "EUR", created_at: "2026-10-15T11:06:17Z", user_email: "a@b.it", user_name: "Ann", order_number: 7 } },
       { attributes: { test_mode: true, status: "paid", refunded: false, total: 999, discount_total: 0, currency: "EUR", created_at: "2026-10-14T11:06:17Z", user_email: "t@t.it", user_name: "T", order_number: 6 } },
     ], meta: { page: { lastPage: 1 } } })) as unknown as typeof fetch;
     const o = await readOrders(fetchImpl, "k", "1");
-    expect(o).toEqual([{ ts: Date.parse("2026-10-15T11:06:17Z"), number: 7, cents: 799, discount: 200, currency: "EUR", email: "a••••@b.it", state: "pagato" }]);
+    expect(o).toEqual([{ ts: Date.parse("2026-10-15T11:06:17Z"), number: 7, cents: 799, discount: 200, currency: "EUR", email: "a@b.it", state: "pagato" }]);
   });
 });
 

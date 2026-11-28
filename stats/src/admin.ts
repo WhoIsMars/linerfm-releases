@@ -160,7 +160,7 @@ export async function readOrders(fetchImpl: typeof fetch, apiKey: string | undef
       for (const { attributes: a } of body.data ?? []) {
         if (a.test_mode) continue;
         out.push({ ts: Date.parse(a.created_at), number: a.order_number, cents: a.total, discount: a.discount_total ?? 0, currency: a.currency,
-          email: maskEmail(a.user_email ?? ""), state: a.refunded ? "rimborsato" : a.total > 0 ? "pagato" : "regalato" });
+          email: a.user_email ?? "", state: a.refunded ? "rimborsato" : a.total > 0 ? "pagato" : "regalato" });  // email intera: chi la mostra sta dietro la password (owner, 28/11)
       }
     }
     return out.sort((a, b) => b.ts - a.ts);
