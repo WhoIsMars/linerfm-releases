@@ -2,7 +2,7 @@
 // src/dash/page.ts da scripts/copy-dash-page.mjs) servita a /dashboard, dietro lo stesso cancello della vecchia.
 //   /dashboard            la pagina (le vecchie schede restano a /dashboard?tab=...)
 //   /dashboard/api/*      le stesse risposte di review/server.py: dati del Mac da dash_snapshot, numeri calcolati qui
-//   /dashboard/f/<file>   video e copertine da R2 (binding MEDIA), mai pubblici, a pezzi per Safari
+//   /dashboard/f/<file>   anteprime dei video e copertine dal KV MEDIA_KV, mai pubbliche, a pezzi per Safari
 //   /dashboard/sync/*     solo per review/push.py, con DASH_SYNC_SECRET: spinta dei dati, righe nuove, video
 // Le scritture dal telefono (voti, decisioni, scelte) vanno in dash_actions già nel formato di feedback.jsonl;
 // push.py le copia in feedback.jsonl. Spostare date e mandare su Discord restano sulla pagina del Mac.
@@ -11,13 +11,16 @@ import { cachedJson, loadGithub, readDevices, readLedger, readOrders, type GhRel
 import { dashData } from "./dash-data";
 import { PAGE } from "./dash/page";
 
-export interface Env extends DashEnv { DASH_SYNC_SECRET?: string; MEDIA?: R2Bucket; DASH_MEDIA_CAP?: string; DASH_TEST_WRITES?: string }
+export interface Env extends DashEnv { DASH_SYNC_SECRET?: string; MEDIA_KV?: KVNamespace; DASH_MEDIA_CAP?: string; DASH_TEST_WRITES?: string }
 
 type J = Record<string, unknown>;
 const OPEN = ["pronto", "da creare", "bloccato", "da rifare"];
 const PIECES = ["ids", "items", "unlinked", "published", "decisions", "feedback", "local", "discord"] as const;
-const MEDIA_CAP = 2_000_000_000;                    // tetto di R2 (piano gratis 10 GB): push.py si ferma prima
-const MEDIA_MAX_FILE = 95_000_000;                   // il corpo di una richiesta al worker arriva a 100 MB
+// KV gratis: 1 GB, 25 MB per valore, 1.000 scritture e 1.000 list al giorno. Chiavi "f:<percorso>" più "manifest"
+// ({percorso: byte}), così l'elenco costa una lettura e non una list. push.py carica solo i file nuovi o cambiati.
+const MEDIA_CAP = 300_000_000;
+const MEDIA_MAX_FILE = 25_000_000;
+const MANIFEST = "manifest";
 const MEDIA_KEY = /^(queue|montaggio)\/(?:[^/]+\/)*[^/]+\.(mp4|jpg|jpeg|png)$/;
 const TYPES: Record<string, string> = { mp4: "video/mp4", jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png" };
 
@@ -114,35 +117,21 @@ async function numbers(env: Env, now: number, force: boolean, fetchImpl: typeof 
   return { data: data && { ...data, discord }, at, err: error, loading: false };
 }
 
-// ── video su R2 ──────────────────────────────────────────────────────────────
+// ── video nel KV ─────────────────────────────────────────────────────────────
+const manifest = async (env: Env) => ((await env.MEDIA_KV!.get(MANIFEST, "json")) ?? {}) as Record<string, number>;
 async function serveMedia(req: Request, env: Env, key: string): Promise<Response> {
-  if (!env.MEDIA || !MEDIA_KEY.test(key) || key.split("/").includes("..")) return err("not found", 404);
-  const head = await env.MEDIA.head(key);
-  if (!head) return err("not found", 404);
-  const size = head.size, type = TYPES[key.split(".").pop()!.toLowerCase()];
-  const base = { "Content-Type": type, "Accept-Ranges": "bytes", "Cache-Control": "private, max-age=3600", ETag: head.httpEtag };
+  if (!env.MEDIA_KV || !MEDIA_KEY.test(key) || key.split("/").includes("..")) return err("not found", 404);
+  const buf = await env.MEDIA_KV.get("f:" + key, "arrayBuffer");
+  if (!buf) return err("not found", 404);
+  const size = buf.byteLength, type = TYPES[key.split(".").pop()!.toLowerCase()];
+  const base = { "Content-Type": type, "Accept-Ranges": "bytes", "Cache-Control": "private, max-age=3600" };
   const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.get("Range") ?? "");
-  if (!m || (m[1] === "" && m[2] === "")) {
-    const obj = await env.MEDIA.get(key);
-    return new Response(obj!.body, { headers: { ...base, "Content-Length": String(size) } });
-  }
+  if (!m || (m[1] === "" && m[2] === "")) return new Response(buf, { headers: { ...base, "Content-Length": String(size) } });
   let start: number, end: number;
   if (m[1] === "") { start = Math.max(0, size - Number(m[2])); end = size - 1; }
   else { start = Number(m[1]); end = m[2] === "" ? size - 1 : Math.min(Number(m[2]), size - 1); }
   if (start >= size || start > end) return new Response(null, { status: 416, headers: { "Content-Range": `bytes */${size}` } });
-  const obj = await env.MEDIA.get(key, { range: { offset: start, length: end - start + 1 } });
-  return new Response(obj!.body, { status: 206, headers: { ...base, "Content-Length": String(end - start + 1), "Content-Range": `bytes ${start}-${end}/${size}` } });
-}
-async function mediaList(env: Env): Promise<{ key: string; size: number }[]> {
-  if (!env.MEDIA) return [];
-  const out: { key: string; size: number }[] = [];
-  let cursor: string | undefined;
-  do {
-    const r = await env.MEDIA.list({ cursor, limit: 1000 });
-    out.push(...r.objects.map((o) => ({ key: o.key, size: o.size })));
-    cursor = r.truncated ? r.cursor : undefined;
-  } while (cursor);
-  return out;
+  return new Response(buf.slice(start, end + 1), { status: 206, headers: { ...base, "Content-Length": String(end - start + 1), "Content-Range": `bytes ${start}-${end}/${size}` } });
 }
 
 // ── instradamento ────────────────────────────────────────────────────────────
@@ -255,19 +244,29 @@ async function sync(req: Request, env: Env, what: string): Promise<Response> {
     if (ok.length) await env.DB.batch(ok.map((f) => env.DB.prepare("UPDATE dash_actions SET synced = 1 WHERE fid = ?").bind(f)));
     return json({ ok: true, acked: ok.length });
   }
-  if (what === "media" && req.method === "GET") return json(await mediaList(env));
+  if (what === "media" && req.method === "GET") {
+    if (!env.MEDIA_KV) return err("KV not bound", 503);
+    return json(Object.entries(await manifest(env)).map(([key, size]) => ({ key, size })));
+  }
   if (what.startsWith("media/")) {
     const key = decodeURIComponent(what.slice("media/".length));
     if (!MEDIA_KEY.test(key) || key.split("/").includes("..")) return err("key must be a video or image under queue/ or montaggio/");
-    if (!env.MEDIA) return err("R2 not bound", 503);
-    if (req.method === "DELETE") { await env.MEDIA.delete(key); return json({ ok: true }); }
+    if (!env.MEDIA_KV) return err("KV not bound", 503);
+    const man = await manifest(env);
+    if (req.method === "DELETE") {
+      await env.MEDIA_KV.delete("f:" + key); delete man[key];
+      await env.MEDIA_KV.put(MANIFEST, JSON.stringify(man));
+      return json({ ok: true });
+    }
     if (req.method !== "PUT") return err("not found", 404);
     const body = await req.arrayBuffer();
-    if (body.byteLength > MEDIA_MAX_FILE) return err("file too large", 413);
+    if (body.byteLength > MEDIA_MAX_FILE) return err("file too large for one KV value (25 MB)", 413);
     const cap = Number(env.DASH_MEDIA_CAP) || MEDIA_CAP;
-    const used = (await mediaList(env)).filter((o) => o.key !== key).reduce((n, o) => n + o.size, 0);
-    if (used + body.byteLength > cap) return err(`R2 would go over ${cap} bytes`, 507);
-    await env.MEDIA.put(key, body, { httpMetadata: { contentType: TYPES[key.split(".").pop()!.toLowerCase()] } });
+    const used = Object.entries(man).filter(([k]) => k !== key).reduce((n, [, v]) => n + v, 0);
+    if (used + body.byteLength > cap) return err(`media would go over ${cap} bytes`, 507);
+    await env.MEDIA_KV.put("f:" + key, body);
+    man[key] = body.byteLength;
+    await env.MEDIA_KV.put(MANIFEST, JSON.stringify(man));
     return json({ ok: true, key, size: body.byteLength });
   }
   return err("not found", 404);

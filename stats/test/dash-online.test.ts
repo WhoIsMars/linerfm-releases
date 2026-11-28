@@ -5,34 +5,37 @@ import { sqliteD1, type SqliteD1 } from "./sqlite-d1";
 import { romeStamp } from "../src/dash-online";
 
 // Dashboard online (dal 28/11/2026): la pagina di casa dell'owner servita dal worker, stessa password e stesso link
-// della vecchia /dashboard. I dati del Mac arrivano da review/push.py con DASH_SYNC_SECRET, i video stanno su R2.
+// della vecchia /dashboard. I dati del Mac arrivano da review/push.py con DASH_SYNC_SECRET, i video (anteprime compresse) stanno in un KV.
 const ORIGIN = "https://stats.example";
 const SECRET = "s".repeat(40);
 const AUTH = { Authorization: "Basic " + btoa("owner:pw") };
 const SYNC = { Authorization: "Bearer " + SECRET };
 const NOW = Date.parse("2026-11-28T15:00:00+01:00");
 
-function fakeR2() {
-  const m = new Map<string, Uint8Array>();
-  const obj = (key: string, body: Uint8Array, range?: { offset: number; length: number }) => {
-    const part = range ? body.slice(range.offset, range.offset + range.length) : body;
-    return { key, size: body.length, range, httpEtag: '"e"', body: new Response(part).body, writeHttpMetadata: () => undefined };
-  };
-  const r2 = {
-    get: async (k: string, o?: { range?: { offset: number; length: number } }) => (m.has(k) ? obj(k, m.get(k)!, o?.range) : null),
-    head: async (k: string) => (m.has(k) ? obj(k, m.get(k)!) : null),
-    put: async (k: string, v: ArrayBuffer | ReadableStream) => { m.set(k, new Uint8Array(v instanceof ArrayBuffer ? v : await new Response(v).arrayBuffer())); return {}; },
+// KV finto: valori binari, e conta le list (il piano gratis ne dà 1.000 al giorno: il worker non deve usarle)
+function fakeKV() {
+  const m = new Map<string, Uint8Array | string>();
+  let lists = 0;
+  const kv = {
+    get: async (k: string, type?: string) => {
+      const v = m.get(k);
+      if (v === undefined) return null;
+      if (type === "arrayBuffer") return (v as Uint8Array).slice().buffer;
+      if (type === "json") return JSON.parse(v as string);
+      return v;
+    },
+    put: async (k: string, v: ArrayBuffer | string) => { m.set(k, typeof v === "string" ? v : new Uint8Array(v)); },
     delete: async (k: string) => { m.delete(k); },
-    list: async () => ({ objects: [...m].map(([key, v]) => ({ key, size: v.length })), truncated: false }),
-  } as unknown as R2Bucket;
-  return { r2, m };
+    list: async () => { lists++; return { keys: [...m.keys()].map((name) => ({ name })), list_complete: true }; },
+  } as unknown as KVNamespace;
+  return { kv, m, lists: () => lists, files: () => [...m.keys()].filter((k) => k.startsWith("f:")) };
 }
 
 let db: SqliteD1;
 async function setup(extra: Record<string, unknown> = {}) {
   db = await sqliteD1(SCHEMA);
-  const media = fakeR2();
-  const env = { DB: db.d1, DASH_PASSWORD: "pw", DASH_LINK_TOKEN: "t".repeat(40), DASH_SYNC_SECRET: SECRET, MEDIA: media.r2, ...extra };
+  const media = fakeKV();
+  const env = { DB: db.d1, DASH_PASSWORD: "pw", DASH_LINK_TOKEN: "t".repeat(40), DASH_SYNC_SECRET: SECRET, MEDIA_KV: media.kv, ...extra };
   return { env, media };
 }
 type Env = Awaited<ReturnType<typeof setup>>["env"];
@@ -180,12 +183,12 @@ describe("voti e decisioni dal telefono", () => {
     const { env } = await setup(); await push(env);
     for (const p of ["/dashboard/api/schedule", "/dashboard/api/discord"]) expect((await postJson(env, p, { id: "a-reel" })).status).toBe(409);
   });
-  it("sull'anteprima ogni scrittura è una prova (test: true)", async () => {
+  it("con DASH_TEST_WRITES ogni scrittura è una prova (test: true)", async () => {
     const { env } = await setup({ DASH_TEST_WRITES: "1" }); await push(env);
     const row = await (await postJson(env, "/dashboard/api/feedback", { item: "a-reel", vote: 2 })).json() as { test: boolean };
     expect(row.test).toBe(true);
   });
-  it("sull'anteprima una scelta di prova si vede come fatta: il badge scende, la scelta resta", async () => {
+  it("con DASH_TEST_WRITES una scelta di prova si vede come fatta: il badge scende, la scelta resta", async () => {
     const { env } = await setup({ DASH_TEST_WRITES: "1" }); await push(env);
     await postJson(env, "/dashboard/api/decision", { id: "fb", choice: "on" });
     const d = await (await call(env, "/dashboard/api/decisions", { headers: AUTH })).json() as { decided: { choice: string } | null }[];
@@ -218,7 +221,7 @@ describe("voti e decisioni dal telefono", () => {
   });
 });
 
-describe("video su R2", () => {
+describe("video nel KV", () => {
   const bytes = new Uint8Array(1000).map((_, i) => i % 251);
   const put = (env: Env, key: string, body: Uint8Array) =>
     call(env, "/dashboard/sync/media/" + key, { method: "PUT", headers: { ...SYNC, "Content-Length": String(body.length) }, body });
@@ -245,11 +248,11 @@ describe("video su R2", () => {
     expect((await put(env, "montaggio/../x.mp4", bytes)).status).toBe(400);
     expect((await put(env, "montaggio/a/notes.txt", bytes)).status).toBe(400);
   });
-  it("il worker rifiuta un caricamento che porterebbe R2 oltre il tetto", async () => {
+  it("il worker rifiuta un caricamento che porterebbe il KV oltre il tetto", async () => {
     const { env, media } = await setup({ DASH_MEDIA_CAP: "1500" });
     expect((await put(env, "montaggio/a/reel-v1.mp4", bytes)).status).toBe(200);
     expect((await put(env, "montaggio/a/reel-v2.mp4", bytes)).status).toBe(507);
-    expect([...media.m.keys()]).toEqual(["montaggio/a/reel-v1.mp4"]);
+    expect(media.files()).toEqual(["f:montaggio/a/reel-v1.mp4"]);
     // rimpiazzare lo stesso file non conta due volte
     expect((await put(env, "montaggio/a/reel-v1.mp4", bytes)).status).toBe(200);
   });
@@ -258,10 +261,16 @@ describe("video su R2", () => {
     await put(env, "queue/a-reel/video.mp4", bytes);
     expect(await (await call(env, "/dashboard/sync/media", { headers: SYNC })).json()).toEqual([{ key: "queue/a-reel/video.mp4", size: 1000 }]);
     expect((await call(env, "/dashboard/sync/media/queue/a-reel/video.mp4", { method: "DELETE", headers: SYNC })).status).toBe(200);
-    expect(media.m.size).toBe(0);
+    expect(media.files()).toEqual([]);
+    expect(await (await call(env, "/dashboard/sync/media", { headers: SYNC })).json()).toEqual([]);
+    expect(media.lists()).toBe(0);                                            // l'elenco viene dal manifest, mai da list
   });
-  it("senza R2 la pagina funziona e i video danno 404", async () => {
-    const { env } = await setup({ MEDIA: undefined });
+  it("un video oltre i 25 MB di un valore KV viene rifiutato", async () => {
+    const { env } = await setup();
+    expect((await put(env, "montaggio/a/big.mp4", new Uint8Array(25_000_001))).status).toBe(413);
+  });
+  it("senza KV la pagina funziona e i video danno 404", async () => {
+    const { env } = await setup({ MEDIA_KV: undefined });
     expect((await call(env, "/dashboard/f/montaggio/a/reel-v2.mp4", { headers: AUTH })).status).toBe(404);
   });
 });
