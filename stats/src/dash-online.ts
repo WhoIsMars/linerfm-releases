@@ -5,7 +5,8 @@
 //   /dashboard/f/<file>   anteprime dei video e copertine dal KV MEDIA_KV, mai pubbliche, a pezzi per Safari
 //   /dashboard/sync/*     solo per review/push.py, con DASH_SYNC_SECRET: spinta dei dati, righe nuove, video
 // Le scritture dal telefono (voti, decisioni, scelte) vanno in dash_actions già nel formato di feedback.jsonl;
-// push.py le copia in feedback.jsonl. Spostare date e mandare su Discord restano sulla pagina del Mac.
+// push.py le copia in feedback.jsonl. Spostare una data è una richiesta: push.py la applica a calendar.json (con
+// backup, come la pagina di casa) e intanto la pagina online la mostra già. Mandare su Discord resta sul Mac.
 import { dashAccess, passwordRequired, DAY, type Env as DashEnv, type AccessRow, type Row } from "./dashboard";
 import { cachedJson, loadGithub, readDevices, readLedger, readOrders, type GhRelease, type SocialRow } from "./admin";
 import { dashData } from "./dash-data";
@@ -15,7 +16,8 @@ export interface Env extends DashEnv { DASH_SYNC_SECRET?: string; MEDIA_KV?: KVN
 
 type J = Record<string, unknown>;
 const OPEN = ["pronto", "da creare", "bloccato", "da rifare"];
-const PIECES = ["ids", "items", "unlinked", "published", "decisions", "feedback", "local", "discord"] as const;
+const PIECES = ["ids", "items", "montaggio", "unlinked", "published", "decisions", "feedback", "local", "discord"] as const;
+const SETTABLE = ["pronto", "saltato", "da rifare", "pubblicato"];
 // KV gratis: 1 GB, 25 MB per valore, 1.000 scritture e 1.000 list al giorno. Chiavi "f:<percorso>" più "manifest"
 // ({percorso: byte}), così l'elenco costa una lettura e non una list. push.py carica solo i file nuovi o cambiati.
 const MEDIA_CAP = 300_000_000;
@@ -57,7 +59,8 @@ async function piece<T>(env: Env, name: string, fallback: T): Promise<T> {
 }
 async function pendingRows(env: Env): Promise<J[]> {
   try {
-    const { results } = await env.DB.prepare("SELECT row FROM dash_actions ORDER BY ts").all<{ row: string }>();
+    // solo le non confermate: una confermata è già in feedback.jsonl, o il Mac non l'ha scritta (data già così, o rifiutata)
+    const { results } = await env.DB.prepare("SELECT row FROM dash_actions WHERE synced = 0 ORDER BY ts").all<{ row: string }>();
     return (results ?? []).map((r) => JSON.parse(r.row) as J);
   } catch { return []; }
 }
@@ -79,6 +82,12 @@ function decisionsOf(list: J[], rows: J[], withTest = false): J[] {
   for (const r of rows) if (r.kind === "decision" && (withTest || !r.test)) last.set(r.decision, { fid: r.fid, ts: r.ts, choice: r.choice, note: r.note });
   return list.map((d) => ({ ...d, decided: last.get(d.id) ?? null }));
 }
+/** Le voci spinte dal Mac con sopra le date spostate online e non ancora applicate dal Mac. */
+async function itemsNow(env: Env): Promise<J[]> {
+  const moved = new Map<unknown, J>();
+  for (const r of await pendingRows(env)) if (r.kind === "schedule") moved.set(r.item, r.after as J);
+  return (await piece<J[]>(env, "items", [])).map((i) => (moved.has(i.id) ? { ...i, ...moved.get(i.id) } : i));
+}
 function itemsOf(all: J[], statuses: string[], now: number): J[] {
   const stamp = romeNow(now);
   return all.filter((i) => statuses.includes(String(i.status)))
@@ -86,8 +95,9 @@ function itemsOf(all: J[], statuses: string[], now: number): J[] {
     .sort((a, b) => Number(b.overdue) - Number(a.overdue) || String(a.date || "9999").localeCompare(String(b.date || "9999")) || String(a.time || "").localeCompare(String(b.time || "")));
 }
 /** File che si possono votare: quelli che la pagina mostra (video delle voci, varianti, montaggi nuovi). */
-function knownFiles(items: J[], unlinked: J[]): Set<string> {
+function knownFiles(items: J[], unlinked: J[], montaggio: J[]): Set<string> {
   const s = new Set<string>();
+  for (const g of montaggio) for (const v of (g.variants as string[]) ?? []) s.add(v);
   for (const i of items) { if (i.video) s.add(String(i.video)); for (const v of (i.variants as string[]) ?? []) s.add(v); }
   for (const g of unlinked) for (const v of (g.variants as string[]) ?? []) s.add(v);
   return s;
@@ -159,7 +169,7 @@ export async function handleDashOnline(req: Request, env: Env, now: number, fetc
     if (!(req.headers.get("Content-Type") ?? "").startsWith("application/json")) return err("Content-Type: application/json required", 415);
     const same = req.headers.get("Sec-Fetch-Site") === "same-origin" || req.headers.get("Origin") === url.origin;
     if (!same) return err("forbidden", 403);
-    if (api === "schedule" || api === "discord") return err("Changing dates and sending to Discord work only on the Mac page for now.", 409);
+    if (api === "discord") return err("Sending to Discord works only on the Mac page.", 409);
     let b: J;
     try { b = (await req.json()) as J; } catch { return err("bad JSON"); }
     return write(env, api, b ?? {}, now);
@@ -168,18 +178,19 @@ export async function handleDashOnline(req: Request, env: Env, now: number, fetc
   switch (api) {
     case "items": {
       const st = url.searchParams.get("status")?.split(",") ?? OPEN;
-      return json(itemsOf(await piece<J[]>(env, "items", []), st, now));
+      return json(itemsOf(await itemsNow(env), st, now));
     }
     case "unlinked": return json(await piece(env, "unlinked", []));
     case "published": return json(await piece(env, "published", []));
-    case "montaggio": case "variants": return json([]);      // Compare resta sulla pagina del Mac: online c'è solo l'ultima versione
+    case "montaggio": return json((await piece<J[]>(env, "montaggio", [])).map((g) => g.dir));
+    case "variants": return json((await piece<J[]>(env, "montaggio", [])).find((g) => g.dir === url.searchParams.get("dir"))?.variants ?? []);
     case "feedback": return json(feedbackList(await feedbackRows(env)));
     case "decisions": return json(decisionsOf(await piece<J[]>(env, "decisions", []), await feedbackRows(env), env.DASH_TEST_WRITES === "1"));
     case "overview": {
       const rows = await feedbackRows(env), list = feedbackList(rows), withTest = env.DASH_TEST_WRITES === "1";
       const local = {
         ...(await piece<J>(env, "local", {})),
-        overdue: itemsOf(await piece<J[]>(env, "items", []), OPEN, now).filter((i) => i.overdue).length,
+        overdue: itemsOf(await itemsNow(env), OPEN, now).filter((i) => i.overdue).length,
         unread: list.filter((r) => r.kind === "review" && !(r.acks as J[]).length && (withTest || !r.test)).length,
         decisions_open: decisionsOf(await piece<J[]>(env, "decisions", []), rows, withTest).filter((d) => !d.decided).length,
         synced: await env.DB.prepare("SELECT MAX(ts) AS ts FROM dash_snapshot").first<{ ts: number | null }>().then((r) => r?.ts ?? null).catch(() => null),
@@ -191,7 +202,7 @@ export async function handleDashOnline(req: Request, env: Env, now: number, fetc
   }
 }
 
-// come App.feedback / decide / pick di server.py, validati sui dati spinti dal Mac
+// come App.feedback / decide / pick / schedule di server.py, validati sui dati spinti dal Mac
 async function write(env: Env, api: string, b: J, now: number): Promise<Response> {
   let row: J;
   const test = env.DASH_TEST_WRITES === "1" || !!b.test;
@@ -199,7 +210,7 @@ async function write(env: Env, api: string, b: J, now: number): Promise<Response
     const items = await piece<J[]>(env, "items", []), ids = new Set(await piece<string[]>(env, "ids", []));
     const item = (b.item as string) || null, file = (b.file as string) || null;
     if (item !== null && !ids.has(item)) return err(`unknown item: ${item}`);
-    if (file !== null && !knownFiles(items, await piece<J[]>(env, "unlinked", [])).has(file)) return err(`file not on the page: ${file}`);
+    if (file !== null && !knownFiles(items, await piece<J[]>(env, "unlinked", []), await piece<J[]>(env, "montaggio", [])).has(file)) return err(`file not on the page: ${file}`);
     if (item === null && file === null) return err("an item or a file is required");
     const vote = b.vote ?? null;
     if (vote !== null && ![1, 2, 3, 4, 5].includes(vote as number)) return err("vote from 1 to 5");
@@ -214,14 +225,24 @@ async function write(env: Env, api: string, b: J, now: number): Promise<Response
   } else if (api === "pick") {
     const dir = String(b.dir ?? ""), items = await piece<J[]>(env, "items", []);
     const owner = items.find((i) => i.montaggio && (dir === String(i.montaggio).replace(/\/$/, "") || dir.startsWith(String(i.montaggio).replace(/\/$/, "") + "/")));
-    const v = new Set<string>([...((owner?.variants as string[]) ?? []), ...(((await piece<J[]>(env, "unlinked", [])).find((g) => g.dir === dir)?.variants as string[]) ?? [])]);
+    const v = new Set<string>(((await piece<J[]>(env, "montaggio", [])).find((g) => g.dir === dir)?.variants as string[]) ?? []);
     const winner = b.winner as string, out = (b.eliminated as string[]) ?? [];
     if (!v.size || !v.has(winner) || !out.length || out.includes(winner) || !out.every((x) => v.has(x))) return err("winner and eliminated must be different edits of the folder");
     row = { kind: "pick", dir, item: owner?.id ?? null, winner, eliminated: out, test };
+  } else if (api === "schedule") {
+    const date = String(b.date ?? ""), time = String(b.time ?? ""), status = b.status;
+    if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) return err("date YYYY-MM-DD");
+    if (time && !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) return err("time HH:MM");
+    const it = (await itemsNow(env)).find((i) => i.id === b.id);
+    if (!it) return err(`unknown item: ${String(b.id)}`);
+    if (!SETTABLE.includes(status as string) && status !== it.status) return err(`status among ${SETTABLE.join(", ")}`);
+    const before = { date: it.date ?? "", time: it.time ?? "", status: it.status }, after = { date, time, status };
+    if (JSON.stringify(before) === JSON.stringify(after)) return json({ changed: false });
+    row = { kind: "schedule", item: it.id, before, after, test };
   } else return err("not found", 404);
   const full = { ...romeStamp(now, hex4()), ...row };
   await env.DB.prepare("INSERT INTO dash_actions (fid, ts, row) VALUES (?, ?, ?)").bind(full.fid, now, JSON.stringify(full)).run();
-  return json(full);
+  return json(api === "schedule" ? { changed: true, pending: true, row: full } : full);
 }
 
 async function sync(req: Request, env: Env, what: string): Promise<Response> {

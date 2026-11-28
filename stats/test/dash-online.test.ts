@@ -51,6 +51,7 @@ const SNAPSHOT = {
     { id: "b-post", status: "da creare", date: "2026-12-01", time: "13:00", title: "B", texts: {}, video: null, cover: null, variants: [], judge: { verdict: null, scores: [] } },
     { id: "c-old", status: "saltato", date: "2026-11-01", time: "09:00", title: "C", texts: {}, video: null, cover: null, variants: [], judge: { verdict: null, scores: [] } },
   ],
+  montaggio: [{ dir: "montaggio/a", variants: ["montaggio/a/reel-v1.mp4", "montaggio/a/reel-v2.mp4", "montaggio/a/v7/reel-v3.mp4"] }],
   unlinked: [{ dir: "montaggio/new", variants: ["montaggio/new/reel-v1.mp4"], latest: "montaggio/new/reel-v1.mp4", mtime: NOW / 1000 }],
   published: [],
   decisions: [{ id: "fb", title: "Facebook Reels", options: ["on", "not now"] }],
@@ -66,7 +67,7 @@ const push = (env: Env) => call(env, "/dashboard/sync/snapshot", { method: "PUT"
 describe("dashboard online: un solo cancello per tutto", () => {
   const ROUTES: [string, string][] = [
     ["GET", "/dashboard"], ["GET", "/dashboard/api/items"], ["GET", "/dashboard/api/overview"], ["GET", "/dashboard/api/feedback"],
-    ["GET", "/dashboard/api/decisions"], ["GET", "/dashboard/api/unlinked"], ["GET", "/dashboard/api/published"],
+    ["GET", "/dashboard/api/decisions"], ["GET", "/dashboard/api/unlinked"], ["GET", "/dashboard/api/published"], ["GET", "/dashboard/api/montaggio"], ["GET", "/dashboard/api/variants?dir=montaggio/a"],
     ["POST", "/dashboard/api/feedback"], ["POST", "/dashboard/api/decision"], ["POST", "/dashboard/api/pick"],
     ["POST", "/dashboard/api/schedule"], ["POST", "/dashboard/api/discord"], ["GET", "/dashboard/f/queue/a-reel/video.mp4"],
     ["GET", "/dashboard/nope"], ["GET", "/dashboard/api/nope"],
@@ -179,9 +180,59 @@ describe("voti e decisioni dal telefono", () => {
     const ov = await (await call(env, "/dashboard/api/overview?lite=1", { headers: AUTH })).json() as { local: { decisions_open: number; unread: number } };
     expect(ov.local.decisions_open).toBe(0);
   });
-  it("spostare date e mandare su Discord restano sulla pagina del Mac", async () => {
+  it("mandare su Discord resta sulla pagina del Mac", async () => {
     const { env } = await setup(); await push(env);
-    for (const p of ["/dashboard/api/schedule", "/dashboard/api/discord"]) expect((await postJson(env, p, { id: "a-reel" })).status).toBe(409);
+    expect((await postJson(env, "/dashboard/api/discord", { id: "a-reel" })).status).toBe(409);
+  });
+  it("spostare una data è una richiesta in D1: la pagina la vede subito, il Mac la applica", async () => {
+    const { env } = await setup(); await push(env);
+    const res = await postJson(env, "/dashboard/api/schedule", { id: "a-reel", date: "2026-12-02", time: "18:00", status: "pronto" });
+    expect(res.status).toBe(200);
+    const r = await res.json() as { changed: boolean; pending: boolean; row: Record<string, unknown> };
+    expect(r).toMatchObject({ changed: true, pending: true });
+    expect(r.row).toMatchObject({ kind: "schedule", item: "a-reel", before: { date: "2026-11-28", time: "09:00", status: "pronto" }, after: { date: "2026-12-02", time: "18:00", status: "pronto" }, test: false });
+    const items = await (await call(env, "/dashboard/api/items", { headers: AUTH })).json() as { id: string; date: string; time: string; overdue: boolean }[];
+    expect(items.find((i) => i.id === "a-reel")).toMatchObject({ date: "2026-12-02", time: "18:00", overdue: false });
+    const got = await (await call(env, "/dashboard/sync/actions", { headers: SYNC })).json() as { row: { kind: string } }[];
+    expect(got.map((g) => g.row.kind)).toEqual(["schedule"]);
+  });
+  it("segnare come pubblicato toglie la voce dalle aperte finché il Mac non spinge", async () => {
+    const { env } = await setup(); await push(env);
+    await postJson(env, "/dashboard/api/schedule", { id: "a-reel", date: "2026-11-28", time: "09:00", status: "pubblicato" });
+    const open = await (await call(env, "/dashboard/api/items", { headers: AUTH })).json() as { id: string }[];
+    expect(open.map((i) => i.id)).not.toContain("a-reel");
+  });
+  it("rifiuta date, ore, stati e voci che la pagina di casa rifiuterebbe; niente riga se non cambia niente", async () => {
+    const { env } = await setup(); await push(env);
+    for (const b of [{ id: "nope", date: "2026-12-02", time: "09:00", status: "pronto" }, { id: "a-reel", date: "2/12", time: "09:00", status: "pronto" },
+      { id: "a-reel", date: "2026-12-02", time: "25:00", status: "pronto" }, { id: "b-post", date: "2026-12-02", time: "09:00", status: "bloccato" }])
+      expect((await postJson(env, "/dashboard/api/schedule", b)).status).toBe(400);
+    const same = await (await postJson(env, "/dashboard/api/schedule", { id: "a-reel", date: "2026-11-28", time: "09:00", status: "pronto" })).json();
+    expect(same).toEqual({ changed: false });
+    // tenere lo stato attuale va sempre bene, come in server.py
+    expect((await postJson(env, "/dashboard/api/schedule", { id: "b-post", date: "2026-12-03", time: "09:00", status: "da creare" })).status).toBe(200);
+    expect(db.all("SELECT * FROM dash_actions")).toHaveLength(1);
+  });
+  it("una richiesta confermata dal Mac non resta nel log se il Mac non l'ha scritta (già applicata o rifiutata)", async () => {
+    const { env } = await setup(); await push(env);
+    const r = await (await postJson(env, "/dashboard/api/schedule", { id: "a-reel", date: "2026-12-02", time: "18:00", status: "pronto" })).json() as { row: { fid: string } };
+    await call(env, "/dashboard/sync/ack", { method: "POST", headers: { ...SYNC, "Content-Type": "application/json" }, body: JSON.stringify({ fids: [r.row.fid] }) });
+    const list = await (await call(env, "/dashboard/api/feedback", { headers: AUTH })).json() as { fid: string }[];
+    expect(list.map((x) => x.fid)).not.toContain(r.row.fid);
+  });
+  it("Compare online: cartelle e montaggi dalla spinta, il vincitore va in D1 come pick", async () => {
+    const { env } = await setup(); await push(env);
+    expect(await (await call(env, "/dashboard/api/montaggio", { headers: AUTH })).json()).toEqual(["montaggio/a"]);
+    expect(await (await call(env, "/dashboard/api/variants?dir=montaggio/a", { headers: AUTH })).json()).toEqual(SNAPSHOT.montaggio[0].variants);
+    expect(await (await call(env, "/dashboard/api/variants?dir=montaggio/zzz", { headers: AUTH })).json()).toEqual([]);
+    const ok = await postJson(env, "/dashboard/api/pick", { dir: "montaggio/a", winner: "montaggio/a/v7/reel-v3.mp4", eliminated: ["montaggio/a/reel-v1.mp4", "montaggio/a/reel-v2.mp4"] });
+    expect(ok.status).toBe(200);
+    expect(await ok.json()).toMatchObject({ kind: "pick", dir: "montaggio/a", item: "a-reel", winner: "montaggio/a/v7/reel-v3.mp4" });
+    expect((await postJson(env, "/dashboard/api/pick", { dir: "montaggio/a", winner: "montaggio/a/reel-v1.mp4", eliminated: ["montaggio/x/reel.mp4"] })).status).toBe(400);
+  });
+  it("i montaggi di Compare si possono votare", async () => {
+    const { env } = await setup(); await push(env);
+    expect((await postJson(env, "/dashboard/api/feedback", { item: "a-reel", file: "montaggio/a/v7/reel-v3.mp4", vote: 4 })).status).toBe(200);
   });
   it("con DASH_TEST_WRITES ogni scrittura è una prova (test: true)", async () => {
     const { env } = await setup({ DASH_TEST_WRITES: "1" }); await push(env);
