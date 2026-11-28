@@ -25,3 +25,21 @@ name = "LEAD_LIMIT"
 type = "ratelimit"
 namespace_id = "1001"
 simple = { limit = 5, period = 60 }
+
+# Video e copertine della dashboard online (/dashboard/f/...): solo l'ultima versione di ogni contenuto da pubblicare,
+# caricati da ~/LinerFM-Social/review/push.py con DASH_SYNC_SECRET, tetto 2 GB (src/dash-online.ts). Mai pubblici.
+# Creato con: npx wrangler r2 bucket create linerfm-dash-media   (serve R2 attivo sull'account)
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "linerfm-dash-media"
+
+# Anteprima per l'owner: npx wrangler deploy --env preview  ->  linerfm-site-stats-preview.piccoletto.workers.dev
+# Stessi dati (D1, KV, R2) in sola lettura per i numeri; ogni voto o decisione fatto qui è una prova (test: true).
+# Niente cron: il riepilogo su Discord lo manda solo il worker vero. Secret propri: DASH_PASSWORD, DASH_SYNC_SECRET, LS_API_KEY.
+[env.preview]
+name = "linerfm-site-stats-preview"
+vars = { DASH_TEST_WRITES = "1" }
+triggers = { crons = [] }
+d1_databases = [{ binding = "DB", database_name = "linerfm-site-stats", database_id = "b2e57a63-66d7-4a32-b8e3-dcb701b3bc48" }]
+kv_namespaces = [{ binding = "TRIAL_LEDGER", id = "d2bf690b427c4c778eeba30c34691ee2" }]
+r2_buckets = [{ binding = "MEDIA", bucket_name = "linerfm-dash-media" }]
